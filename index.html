@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VokabelScanner - Vokabeln lernen</title>
+    <title>MemoryDeck - Vokabeln lernen</title>
     <style>
 /* ============================================================
-   VokabelScanner - Styles
+   MemoryDeck - Styles
    ============================================================ */
 
 :root {
@@ -1366,7 +1366,7 @@ header h1 {
     <!-- AUTH SCREEN -->
     <div id="auth-screen" class="auth-screen">
         <div class="auth-container">
-            <h1 class="auth-title">VokabelScanner</h1>
+            <h1 class="auth-title">MemoryDeck</h1>
             <p class="auth-subtitle">Vokabeln eingeben &middot; lernen &middot; meistern</p>
 
             <div id="auth-login" class="auth-form">
@@ -1409,7 +1409,7 @@ header h1 {
         <header>
             <div class="header-row">
                 <div>
-                    <h1>VokabelScanner</h1>
+                    <h1>MemoryDeck</h1>
                     <p class="subtitle">Vokabeln eingeben &middot; lernen &middot; meistern</p>
                 </div>
                 <div class="header-user">
@@ -1640,6 +1640,8 @@ header h1 {
                 <div class="lernset-manager-header">
                     <h3>Meine Lernsets</h3>
                     <div class="lernset-manager-actions">
+                        <label class="btn btn-secondary" for="csv-import-input" style="cursor:pointer;">CSV Import</label>
+                        <input type="file" id="csv-import-input" accept=".csv,.txt" style="display:none;">
                         <button id="btn-export-all" class="btn btn-secondary">CSV Export</button>
                         <button id="btn-create-lernset" class="btn btn-primary">+ Lernset</button>
                     </div>
@@ -1689,7 +1691,7 @@ header h1 {
 
     <script>
 // ============================================================
-// VokabelScanner - Main Application
+// MemoryDeck - Main Application
 // ============================================================
 
 const App = (() => {
@@ -2805,6 +2807,89 @@ const App = (() => {
             a.download = `vokabeln_${new Date().toISOString().slice(0, 10)}.csv`;
             a.click();
             URL.revokeObjectURL(url);
+        });
+
+        // CSV Import
+        $('#csv-import-input').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const text = ev.target.result;
+                const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+                if (lines.length < 2) {
+                    alert('Die Datei enthält keine Vokabeln.');
+                    return;
+                }
+
+                // Skip header line
+                const header = lines[0].toLowerCase();
+                const startIdx = (header.includes('vokabel') || header.includes('word')) ? 1 : 0;
+
+                // Group by Lernset + Kapitel
+                const groups = {};
+                let importCount = 0;
+
+                for (let i = startIdx; i < lines.length; i++) {
+                    const parts = lines[i].split(';').map(p => p.trim().replace(/^"|"$/g, ''));
+                    if (parts.length < 2 || !parts[0] || !parts[1]) continue;
+
+                    const word = parts[0];
+                    const translation = parts[1];
+                    const lernsetName = parts[2] || 'Import';
+                    const kapitelName = parts[3] || 'Kapitel 1';
+
+                    const key = `${lernsetName}|||${kapitelName}`;
+                    if (!groups[key]) groups[key] = { lernsetName, kapitelName, vocabs: [] };
+                    groups[key].vocabs.push({ word, translation });
+                }
+
+                for (const key in groups) {
+                    const g = groups[key];
+
+                    let ls = lernsets.find(l => l.name === g.lernsetName);
+                    if (!ls) {
+                        ls = { id: Date.now().toString() + Math.random().toString(36).substr(2, 4), name: g.lernsetName, sourceLang: 'Englisch', targetLang: 'Deutsch' };
+                        lernsets.push(ls);
+                    }
+
+                    let kap = vocabSets.find(s => s.lernsetId === ls.id && s.name === g.kapitelName);
+                    if (!kap) {
+                        kap = {
+                            id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+                            name: g.kapitelName,
+                            lernsetId: ls.id,
+                            sourceLang: ls.sourceLang,
+                            targetLang: ls.targetLang,
+                            date: new Date().toISOString()
+                        };
+                        vocabSets.push(kap);
+                    }
+
+                    g.vocabs.forEach(v => {
+                        allVocabs.push({
+                            id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+                            word: v.word,
+                            translation: v.translation,
+                            setId: kap.id,
+                            sourceLang: kap.sourceLang,
+                            targetLang: kap.targetLang,
+                            rating: 'new',
+                            correctCount: 0,
+                            wrongCount: 0,
+                            lastSeen: null
+                        });
+                        importCount++;
+                    });
+                }
+
+                save();
+                refreshList();
+                refreshAddDropdowns();
+                alert(`${importCount} Vokabeln importiert!`);
+            };
+            reader.readAsText(file, 'UTF-8');
+            e.target.value = '';
         });
     }
 
