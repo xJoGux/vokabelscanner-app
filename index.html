@@ -1664,6 +1664,7 @@ header h1 {
                 <div class="setting-group danger-zone">
                     <h4>Gefahrenzone</h4>
                     <button id="btn-clear-all" class="btn btn-danger">Alle Vokabeln löschen</button>
+                    <button id="btn-delete-account" class="btn btn-danger" style="margin-top: 10px;">Account komplett löschen</button>
                 </div>
             </div>
         </section>
@@ -3241,6 +3242,46 @@ const App = (() => {
                 alert('Alle Vokabeln gelöscht.');
                 refreshAddDropdowns();
             }
+        });
+
+        $('#btn-delete-account').addEventListener('click', async () => {
+            const confirmText = prompt('Um deinen Account unwiderruflich zu löschen, gib deinen Benutzernamen ein:');
+            if (!confirmText || confirmText.toLowerCase() !== currentUser) {
+                if (confirmText !== null) alert('Benutzername stimmt nicht überein. Löschung abgebrochen.');
+                return;
+            }
+
+            if (!confirm('LETZTE WARNUNG: Dein Account und ALLE Vokabeln werden unwiderruflich gelöscht. Fortfahren?')) {
+                return;
+            }
+
+            const deletedUser = currentUser;
+
+            localStorage.removeItem(userKey('lernsets'));
+            localStorage.removeItem(userKey('vocabSets'));
+            localStorage.removeItem(userKey('allVocabs'));
+
+            const localAccounts = getAccounts();
+            delete localAccounts[deletedUser];
+            saveAccounts(localAccounts);
+
+            if (cloudAvailable) {
+                try {
+                    await db.collection('userData').doc(deletedUser).delete();
+                    await db.collection('accounts').doc(deletedUser).delete();
+                } catch (e) {
+                    console.warn('Cloud-Löschung fehlgeschlagen:', e);
+                }
+            }
+
+            currentUser = null;
+            localStorage.removeItem('vokabel_currentUser');
+            lernsets = [];
+            vocabSets = [];
+            allVocabs = [];
+
+            alert('Dein Account wurde vollständig gelöscht.');
+            location.reload();
         });
     }
 
