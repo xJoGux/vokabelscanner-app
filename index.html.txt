@@ -1,0 +1,2680 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VokabelScanner - Vokabeln lernen</title>
+    <style>
+/* ============================================================
+   VokabelScanner - Styles
+   ============================================================ */
+
+:root {
+    --primary: #4f46e5;
+    --primary-light: #818cf8;
+    --primary-dark: #3730a3;
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --text: #1e293b;
+    --text-secondary: #64748b;
+    --border: #e2e8f0;
+    --radius: 12px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+}
+
+[data-theme="dark"] {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --text: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --border: #334155;
+    --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.3), 0 4px 6px -2px rgba(0,0,0,0.2);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+#app {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+/* --- Header --- */
+header {
+    text-align: center;
+    padding: 1.5rem 0 1rem;
+}
+
+header h1 {
+    font-size: 1.8rem;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* --- Navigation --- */
+#main-nav {
+    display: flex;
+    gap: 0.25rem;
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 0.25rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 1.5rem;
+    overflow-x: auto;
+}
+
+.nav-btn {
+    flex: 1;
+    padding: 0.6rem 0.5rem;
+    border: none;
+    background: transparent;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.nav-btn:hover {
+    color: var(--text);
+    background: var(--bg);
+}
+
+.nav-btn.active {
+    background: var(--primary);
+    color: white;
+}
+
+/* --- Views --- */
+.view {
+    display: none;
+}
+
+.view.active {
+    display: block;
+}
+
+/* --- Buttons --- */
+.btn {
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+}
+
+.btn-secondary {
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+    background: var(--border);
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: white;
+}
+
+.btn-danger:hover {
+    opacity: 0.9;
+}
+
+/* --- Folder Select (Lernset / Kapitel) --- */
+.folder-select {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: var(--bg);
+    border-radius: 8px;
+}
+
+.folder-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.folder-row label {
+    flex: 1;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.folder-row select {
+    flex: 1;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.btn-sm {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+/* --- Filter Bar (shared across views) --- */
+.filter-bar {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.filter-bar select {
+    flex: 1;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.85rem;
+    background: var(--surface);
+    color: var(--text);
+}
+
+.cards-filters {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.cards-filters select {
+    padding: 0.35rem 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.85rem;
+}
+
+/* --- Manual Add --- */
+.manual-add-area {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    box-shadow: var(--shadow);
+}
+
+.manual-vocab-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.manual-vocab-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.manual-vocab-row .vocab-word,
+.manual-vocab-row .vocab-translation {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-family: inherit;
+}
+
+.manual-vocab-row .vocab-word:focus,
+.manual-vocab-row .vocab-translation:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.15);
+}
+
+.btn-remove-row {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 1.3rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    line-height: 1;
+}
+
+.btn-remove-row:hover {
+    color: var(--danger);
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.manual-add-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    justify-content: flex-end;
+}
+
+.language-select {
+    display: flex;
+    gap: 1rem;
+    margin: 1rem 0;
+    flex-wrap: wrap;
+}
+
+.language-select label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.language-select select {
+    margin-left: 0.5rem;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+/* --- Status / Spinner --- */
+.status {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    margin-top: 1rem;
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    color: var(--text-secondary);
+}
+
+.spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* --- Extracted Vocab Preview --- */
+.extracted-vocab {
+    margin-top: 1rem;
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    box-shadow: var(--shadow);
+}
+
+.extracted-vocab h3 {
+    margin-bottom: 0.75rem;
+}
+
+.vocab-preview-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid var(--bg);
+}
+
+.vocab-preview-row:last-child {
+    border-bottom: none;
+}
+
+.vocab-check input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary);
+}
+
+.vocab-word,
+.vocab-translation {
+    flex: 1;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.vocab-arrow {
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+}
+
+.extract-actions {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* --- Flashcards --- */
+.cards-container {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.cards-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+
+.flashcard {
+    perspective: 1000px;
+    cursor: pointer;
+    height: 260px;
+    margin-bottom: 1rem;
+    outline: none;
+}
+
+.flashcard-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.5s;
+    transform-style: preserve-3d;
+}
+
+.flashcard.flipped .flashcard-inner {
+    transform: rotateY(180deg);
+}
+
+.flashcard-front,
+.flashcard-back {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    padding: 2rem;
+}
+
+.flashcard-back {
+    transform: rotateY(180deg);
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: white;
+}
+
+.card-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0.6;
+    margin-bottom: 0.5rem;
+}
+
+.card-word {
+    font-size: 1.8rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.card-controls {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.card-rating {
+    text-align: center;
+    padding: 1rem;
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+.card-rating > span {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    display: block;
+    margin-bottom: 0.75rem;
+}
+
+.rating-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.rating-btn {
+    padding: 0.5rem 1.25rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: transform 0.1s;
+}
+
+.rating-btn:active {
+    transform: scale(0.95);
+}
+
+.rating-hard {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger);
+}
+
+.rating-ok {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--warning);
+}
+
+.rating-easy {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+}
+
+/* --- Quiz --- */
+.quiz-setup {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.quiz-setup h3 {
+    margin-bottom: 1rem;
+}
+
+.quiz-setup label {
+    display: block;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.quiz-setup input,
+.quiz-setup select {
+    display: block;
+    width: 100%;
+    margin-top: 0.35rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+.quiz-active {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.quiz-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.quiz-question {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+}
+
+.quiz-prompt {
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: var(--bg);
+    border-radius: 8px;
+}
+
+.quiz-choices {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+}
+
+.quiz-choice-btn {
+    padding: 0.75rem;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+}
+
+.quiz-choice-btn:hover:not(:disabled) {
+    border-color: var(--primary);
+    background: rgba(79, 70, 229, 0.03);
+}
+
+.quiz-choice-btn.correct {
+    border-color: var(--success);
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.quiz-choice-btn.wrong {
+    border-color: var(--danger);
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.quiz-typing {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.quiz-typing input {
+    flex: 1;
+    padding: 0.65rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.quiz-feedback {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 500;
+}
+
+.quiz-feedback.correct {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+}
+
+.quiz-feedback.wrong {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger);
+}
+
+#btn-next-question {
+    display: block;
+    margin: 1rem auto 0;
+}
+
+/* --- Quiz Results --- */
+.quiz-results {
+    max-width: 500px;
+    margin: 0 auto;
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+}
+
+.quiz-results h3 {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.score-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+}
+
+.score-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: white;
+}
+
+.result-score {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.score-message {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.result-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.result-row.correct {
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.result-row.wrong {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.result-icon {
+    font-size: 1.1rem;
+    width: 24px;
+    text-align: center;
+}
+
+.result-row.correct .result-icon {
+    color: var(--success);
+}
+
+.result-row.wrong .result-icon {
+    color: var(--danger);
+}
+
+#btn-restart-quiz {
+    display: block;
+    margin: 1.5rem auto 0;
+}
+
+/* --- Lernset Manager --- */
+.lernset-manager {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.lernset-manager-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.lernset-manager-header h3 {
+    margin: 0;
+    color: var(--text);
+}
+
+.lernset-manager-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.lernset-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.lernset-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.lernset-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.lernset-card-header:hover {
+    background: var(--bg);
+}
+
+.lernset-card-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.lernset-card-expand {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    transition: transform 0.2s;
+    display: inline-block;
+}
+
+.lernset-card-expand.expanded {
+    transform: rotate(90deg);
+}
+
+.lernset-card-name {
+    margin: 0;
+    font-size: 1.05rem;
+    color: var(--text);
+}
+
+.lernset-card-count {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.lernset-card-actions {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.lernset-card-body {
+    border-top: 1px solid var(--border);
+    padding: 1rem 1.25rem;
+}
+
+.kapitel-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.kapitel-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--bg);
+    border-radius: 8px;
+}
+
+.kapitel-name {
+    font-weight: 500;
+    color: var(--text);
+    flex: 1;
+}
+
+.kapitel-count {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.kapitel-actions {
+    display: flex;
+    gap: 0.3rem;
+}
+
+.btn-xs {
+    padding: 0.2rem 0.5rem !important;
+    font-size: 0.8rem !important;
+    min-width: auto !important;
+}
+
+/* --- Move/Copy Modal --- */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-overlay.hidden {
+    display: none;
+}
+
+.modal-dialog {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    padding: 1.5rem;
+    width: 90%;
+    max-width: 420px;
+}
+
+.modal-dialog h3 {
+    margin: 0 0 0.5rem;
+    color: var(--text);
+}
+
+.modal-dialog p {
+    margin: 0 0 1rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.modal-field {
+    margin-bottom: 1rem;
+}
+
+.modal-field label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 0.3rem;
+}
+
+.modal-field select {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background: var(--bg);
+    color: var(--text);
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 1.25rem;
+}
+
+/* --- Settings --- */
+.settings-form {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+}
+
+.settings-form h3 {
+    margin-bottom: 1.25rem;
+}
+
+.setting-group {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.setting-group:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.setting-group label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 0.35rem;
+}
+
+.setting-group input,
+.setting-group select {
+    display: block;
+    width: 100%;
+    margin-top: 0.35rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+.setting-hint {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 0.35rem;
+    margin-bottom: 0.5rem;
+}
+
+.danger-zone {
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: var(--radius);
+    padding: 1rem;
+    background: rgba(239, 68, 68, 0.05);
+}
+
+.danger-zone h4 {
+    color: var(--danger);
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+}
+
+/* --- Empty State --- */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-secondary);
+}
+
+.empty-state p {
+    margin-bottom: 0.5rem;
+}
+
+/* --- Dark mode inputs --- */
+[data-theme="dark"] input,
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+    background: var(--surface);
+    color: var(--text);
+    border-color: var(--border);
+}
+
+[data-theme="dark"] .quiz-choice-btn {
+    background: var(--surface);
+    color: var(--text);
+}
+
+/* --- Theme Toggle --- */
+.theme-toggle {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.theme-toggle-btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text-secondary);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.theme-toggle-btn.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+/* --- Schreibmodus (Writing Mode) --- */
+.write-container {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.write-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 2rem;
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.write-prompt-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.write-prompt-word {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: var(--text);
+}
+
+.write-input-area {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.write-input-area input {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-family: inherit;
+    text-align: center;
+    transition: border-color 0.2s;
+}
+
+.write-input-area input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.write-input-area input.input-correct {
+    border-color: var(--success);
+}
+
+.write-input-area input.input-wrong {
+    border-color: var(--danger);
+}
+
+.write-feedback {
+    min-height: 3rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.write-feedback-text {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.write-feedback-text.correct {
+    color: var(--success);
+}
+
+.write-feedback-text.wrong {
+    color: var(--danger);
+}
+
+.write-diff {
+    font-size: 1.2rem;
+    font-family: monospace;
+    letter-spacing: 0.05em;
+    padding: 0.5rem 1rem;
+    background: var(--bg);
+    border-radius: 6px;
+}
+
+.write-diff .char-correct {
+    color: var(--success);
+}
+
+.write-diff .char-wrong {
+    color: var(--danger);
+    font-weight: 700;
+    text-decoration: underline;
+}
+
+.write-diff .char-missing {
+    color: var(--danger);
+    opacity: 0.5;
+    font-weight: 700;
+}
+
+.write-progress {
+    display: flex;
+    justify-content: space-between;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+/* --- Utility --- */
+.hidden {
+    display: none !important;
+}
+
+/* --- Responsive --- */
+@media (max-width: 600px) {
+    #app {
+        padding: 0.5rem;
+    }
+
+    header h1 {
+        font-size: 1.4rem;
+    }
+
+    .nav-btn {
+        font-size: 0.75rem;
+        padding: 0.5rem 0.25rem;
+    }
+
+    .card-word {
+        font-size: 1.4rem;
+    }
+
+    .flashcard {
+        height: 220px;
+    }
+
+    .quiz-choices {
+        grid-template-columns: 1fr;
+    }
+
+    .language-select {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .filter-bar,
+    .cards-filters {
+        flex-direction: column;
+    }
+
+    .list-header {
+        flex-wrap: wrap;
+    }
+
+    .folder-row {
+        flex-wrap: wrap;
+    }
+
+    .vocab-table th:nth-child(3),
+    .vocab-table td:nth-child(3) {
+        display: none;
+    }
+}
+
+/* --- Notice Banner --- */
+.app-notice {
+    position: fixed;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--primary);
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    max-width: 90vw;
+    font-size: 0.9rem;
+    z-index: 1000;
+    animation: slideUp 0.3s ease;
+}
+
+.app-notice .notice-close {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 0 0.25rem;
+    flex-shrink: 0;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateX(-50%) translateY(1rem); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+    </style>
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>VokabelScanner</h1>
+            <p class="subtitle">Vokabeln eingeben &middot; lernen &middot; meistern</p>
+        </header>
+
+        <nav id="main-nav">
+            <button class="nav-btn active" data-view="add">Hinzufügen</button>
+            <button class="nav-btn" data-view="cards">Karteikarten</button>
+            <button class="nav-btn" data-view="write">Schreiben</button>
+            <button class="nav-btn" data-view="quiz">Quiz</button>
+            <button class="nav-btn" data-view="list">Lernsets</button>
+            <button class="nav-btn" data-view="settings">Einstellungen</button>
+        </nav>
+
+        <!-- ADD VOCAB VIEW -->
+        <section id="view-add" class="view active">
+            <div class="manual-add-area">
+                <div class="language-select">
+                    <label>Quellsprache:
+                        <select id="source-lang">
+                            <option value="Französisch">Französisch</option>
+                            <option value="Englisch">Englisch</option>
+                            <option value="Spanisch">Spanisch</option>
+                            <option value="Latein">Latein</option>
+                            <option value="Italienisch">Italienisch</option>
+                        </select>
+                    </label>
+                    <label>Zielsprache:
+                        <select id="target-lang">
+                            <option value="Deutsch">Deutsch</option>
+                            <option value="Englisch">Englisch</option>
+                        </select>
+                    </label>
+                </div>
+
+                <div class="folder-select">
+                    <div class="folder-row">
+                        <label>Lernset:
+                            <select id="add-lernset">
+                                <option value="">Lernset wählen...</option>
+                            </select>
+                        </label>
+                        <button id="btn-new-lernset" class="btn btn-secondary btn-sm">+ Neu</button>
+                    </div>
+                    <div class="folder-row">
+                        <label>Kapitel:
+                            <select id="add-kapitel" disabled>
+                                <option value="">Kapitel wählen...</option>
+                            </select>
+                        </label>
+                        <button id="btn-new-kapitel" class="btn btn-secondary btn-sm" disabled>+ Neu</button>
+                    </div>
+                </div>
+
+                <div id="manual-vocab-list" class="manual-vocab-list">
+                    <div class="manual-vocab-row">
+                        <input type="text" class="vocab-word" placeholder="Vokabel">
+                        <span class="vocab-arrow">&rarr;</span>
+                        <input type="text" class="vocab-translation" placeholder="Übersetzung">
+                        <button class="btn-remove-row" title="Entfernen">&times;</button>
+                    </div>
+                </div>
+
+                <div class="manual-add-actions">
+                    <button id="btn-add-row" class="btn btn-secondary">+ Zeile</button>
+                    <button id="btn-save-manual" class="btn btn-primary">Speichern & lernen</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- FLASHCARD VIEW -->
+        <section id="view-cards" class="view">
+            <div id="cards-empty" class="empty-state">
+                <p>Noch keine Vokabeln vorhanden.</p>
+                <p>Gib zuerst Vokabeln ein!</p>
+            </div>
+            <div id="cards-container" class="cards-container hidden">
+                <div class="cards-header">
+                    <span id="cards-progress">1 / 10</span>
+                    <div class="cards-filters">
+                        <select id="cards-lernset-filter">
+                            <option value="all">Alle Lernsets</option>
+                        </select>
+                        <select id="cards-kapitel-filter" disabled>
+                            <option value="all">Alle Kapitel</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="flashcard" class="flashcard" tabindex="0">
+                    <div class="flashcard-inner">
+                        <div class="flashcard-front">
+                            <span class="card-label">Vokabel</span>
+                            <span id="card-word" class="card-word"></span>
+                        </div>
+                        <div class="flashcard-back">
+                            <span class="card-label">Bedeutung</span>
+                            <span id="card-translation" class="card-word"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-controls">
+                    <button id="btn-card-prev" class="btn btn-secondary">Zurück</button>
+                    <button id="btn-card-flip" class="btn btn-primary">Umdrehen</button>
+                    <button id="btn-card-next" class="btn btn-secondary">Weiter</button>
+                </div>
+                <div class="card-rating">
+                    <span>Wie gut konntest du es?</span>
+                    <div class="rating-buttons">
+                        <button class="rating-btn rating-hard" data-rating="hard">Schwer</button>
+                        <button class="rating-btn rating-ok" data-rating="ok">OK</button>
+                        <button class="rating-btn rating-easy" data-rating="easy">Leicht</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- WRITE MODE VIEW -->
+        <section id="view-write" class="view">
+            <div id="write-empty" class="empty-state">
+                <p>Noch keine Vokabeln vorhanden.</p>
+                <p>Gib zuerst Vokabeln ein!</p>
+            </div>
+            <div id="write-container" class="write-container hidden">
+                <div class="filter-bar">
+                    <select id="write-lernset-filter">
+                        <option value="all">Alle Lernsets</option>
+                    </select>
+                    <select id="write-kapitel-filter" disabled>
+                        <option value="all">Alle Kapitel</option>
+                    </select>
+                    <select id="write-direction">
+                        <option value="foreign-to-native">Fremdsprache → Deutsch</option>
+                        <option value="native-to-foreign">Deutsch → Fremdsprache</option>
+                    </select>
+                </div>
+                <div class="write-progress">
+                    <span id="write-progress">1 / 10</span>
+                    <span id="write-score">0 richtig</span>
+                </div>
+                <div class="write-card">
+                    <div class="write-prompt-label">Übersetze:</div>
+                    <div id="write-prompt-word" class="write-prompt-word"></div>
+                    <div class="write-input-area">
+                        <input type="text" id="write-input" placeholder="Übersetzung eintippen..." autocomplete="off">
+                        <button id="btn-write-check" class="btn btn-primary">Prüfen</button>
+                    </div>
+                    <div id="write-feedback" class="write-feedback"></div>
+                </div>
+                <div id="write-results" class="quiz-results hidden">
+                    <h3>Ergebnis</h3>
+                    <div id="write-result-score" class="result-score"></div>
+                    <div id="write-result-details"></div>
+                    <button id="btn-restart-write" class="btn btn-primary">Nochmal</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- QUIZ VIEW -->
+        <section id="view-quiz" class="view">
+            <div id="quiz-empty" class="empty-state">
+                <p>Noch keine Vokabeln zum Testen.</p>
+                <p>Gib zuerst mindestens 4 Vokabeln ein!</p>
+            </div>
+            <div id="quiz-setup" class="quiz-setup hidden">
+                <h3>Quiz starten</h3>
+                <div class="filter-bar">
+                    <select id="quiz-lernset-filter">
+                        <option value="all">Alle Lernsets</option>
+                    </select>
+                    <select id="quiz-kapitel-filter" disabled>
+                        <option value="all">Alle Kapitel</option>
+                    </select>
+                </div>
+                <label>Anzahl Fragen:
+                    <input type="number" id="quiz-count" value="10" min="1" max="50">
+                </label>
+                <label>Richtung:
+                    <select id="quiz-direction">
+                        <option value="foreign-to-native">Fremdsprache → Deutsch</option>
+                        <option value="native-to-foreign">Deutsch → Fremdsprache</option>
+                        <option value="mixed">Gemischt</option>
+                    </select>
+                </label>
+                <label>Modus:
+                    <select id="quiz-mode">
+                        <option value="multiple-choice">Multiple Choice</option>
+                        <option value="typing">Eintippen</option>
+                    </select>
+                </label>
+                <button id="btn-start-quiz" class="btn btn-primary">Quiz starten</button>
+            </div>
+            <div id="quiz-active" class="quiz-active hidden">
+                <div class="quiz-header">
+                    <span id="quiz-progress">Frage 1/10</span>
+                    <span id="quiz-score">0 richtig</span>
+                </div>
+                <div class="quiz-question">
+                    <p id="quiz-prompt" class="quiz-prompt"></p>
+                    <div id="quiz-choices" class="quiz-choices"></div>
+                    <div id="quiz-typing" class="quiz-typing hidden">
+                        <input type="text" id="quiz-answer-input" placeholder="Übersetzung eingeben..." autocomplete="off">
+                        <button id="btn-check-answer" class="btn btn-primary">Prüfen</button>
+                    </div>
+                    <div id="quiz-feedback" class="quiz-feedback hidden"></div>
+                    <button id="btn-next-question" class="btn btn-secondary hidden">Nächste Frage</button>
+                </div>
+            </div>
+            <div id="quiz-results" class="quiz-results hidden">
+                <h3>Quiz Ergebnis</h3>
+                <div id="quiz-result-score" class="result-score"></div>
+                <div id="quiz-result-details"></div>
+                <button id="btn-restart-quiz" class="btn btn-primary">Neues Quiz</button>
+            </div>
+        </section>
+
+        <!-- LERNSET MANAGEMENT VIEW -->
+        <section id="view-list" class="view">
+            <div id="lernset-empty" class="empty-state">
+                <p>Noch keine Lernsets vorhanden.</p>
+                <p>Erstelle dein erstes Lernset!</p>
+            </div>
+            <div id="lernset-manager" class="lernset-manager hidden">
+                <div class="lernset-manager-header">
+                    <h3>Meine Lernsets</h3>
+                    <div class="lernset-manager-actions">
+                        <button id="btn-export-all" class="btn btn-secondary">CSV Export</button>
+                        <button id="btn-create-lernset" class="btn btn-primary">+ Lernset</button>
+                    </div>
+                </div>
+                <div id="lernset-list" class="lernset-list"></div>
+            </div>
+        </section>
+
+        <!-- SETTINGS VIEW -->
+        <section id="view-settings" class="view">
+            <div class="settings-form">
+                <h3>Einstellungen</h3>
+                <div class="setting-group">
+                    <label>Design:</label>
+                    <div class="theme-toggle">
+                        <button class="theme-toggle-btn active" data-theme="light">Hell</button>
+                        <button class="theme-toggle-btn" data-theme="dark">Dunkel</button>
+                    </div>
+                </div>
+                <div class="setting-group danger-zone">
+                    <h4>Gefahrenzone</h4>
+                    <button id="btn-clear-all" class="btn btn-danger">Alle Vokabeln löschen</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Move/Copy Modal -->
+    <div id="move-copy-modal" class="modal-overlay hidden">
+        <div class="modal-dialog">
+            <h3 id="modal-title">Vokabeln verschieben</h3>
+            <p id="modal-description"></p>
+            <div class="modal-field">
+                <label>Ziel-Lernset:</label>
+                <select id="modal-target-lernset"></select>
+            </div>
+            <div class="modal-field">
+                <label>Ziel-Kapitel:</label>
+                <select id="modal-target-kapitel"></select>
+            </div>
+            <div class="modal-actions">
+                <button id="btn-modal-cancel" class="btn btn-secondary">Abbrechen</button>
+                <button id="btn-modal-confirm" class="btn btn-primary">Bestätigen</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+// ============================================================
+// VokabelScanner - Main Application
+// ============================================================
+
+const App = (() => {
+    // --- State ---
+    let lernsets = JSON.parse(localStorage.getItem('lernsets') || '[]');
+    let vocabSets = JSON.parse(localStorage.getItem('vocabSets') || '[]');
+    let allVocabs = JSON.parse(localStorage.getItem('allVocabs') || '[]');
+    let currentCardIndex = 0;
+    let currentCards = [];
+    let isFlipped = false;
+    let quizState = null;
+
+    // --- DOM Cache ---
+    const $ = (sel) => document.querySelector(sel);
+    const $$ = (sel) => document.querySelectorAll(sel);
+
+    // --- Migration: ensure old data gets a default lernset ---
+    function migrateData() {
+        if (vocabSets.length > 0 && lernsets.length === 0) {
+            // Old data without lernsets — create a default one
+            const defaultLernset = { id: 'default', name: 'Allgemein', sourceLang: 'Englisch', targetLang: 'Deutsch' };
+            lernsets.push(defaultLernset);
+            vocabSets.forEach(s => {
+                if (!s.lernsetId) s.lernsetId = 'default';
+            });
+            save();
+        }
+    }
+
+    // --- Navigation ---
+    function initNav() {
+        $$('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const view = btn.dataset.view;
+                $$('.nav-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                $$('.view').forEach(v => v.classList.remove('active'));
+                $(`#view-${view}`).classList.add('active');
+
+                if (view === 'cards') refreshCards();
+                if (view === 'write') refreshWrite();
+                if (view === 'quiz') refreshQuiz();
+                if (view === 'list') refreshList();
+            });
+        });
+    }
+
+    // --- Storage ---
+    function save() {
+        localStorage.setItem('lernsets', JSON.stringify(lernsets));
+        localStorage.setItem('vocabSets', JSON.stringify(vocabSets));
+        localStorage.setItem('allVocabs', JSON.stringify(allVocabs));
+    }
+
+    // --- Helper: get vocabs filtered by lernset/kapitel ---
+    function getFilteredVocabs(lernsetId, kapitelId) {
+        if (!lernsetId || lernsetId === 'all') return [...allVocabs];
+        const setIds = vocabSets
+            .filter(s => s.lernsetId === lernsetId && (!kapitelId || kapitelId === 'all' || s.id === kapitelId))
+            .map(s => s.id);
+        return allVocabs.filter(v => setIds.includes(v.setId));
+    }
+
+    // --- Helper: render lernset > kapitel filter dropdowns ---
+    function renderFilterDropdowns(lernsetSelect, kapitelSelect, selectedLernset, selectedKapitel) {
+        lernsetSelect.innerHTML = '<option value="all">Alle Lernsets</option>';
+        lernsets.forEach(ls => {
+            lernsetSelect.innerHTML += `<option value="${ls.id}" ${ls.id === selectedLernset ? 'selected' : ''}>${escapeHtml(ls.name)}</option>`;
+        });
+
+        kapitelSelect.innerHTML = '<option value="all">Alle Kapitel</option>';
+        if (selectedLernset && selectedLernset !== 'all') {
+            vocabSets.filter(s => s.lernsetId === selectedLernset).forEach(s => {
+                kapitelSelect.innerHTML += `<option value="${s.id}" ${s.id === selectedKapitel ? 'selected' : ''}>${escapeHtml(s.name)}</option>`;
+            });
+            kapitelSelect.disabled = false;
+        } else {
+            kapitelSelect.disabled = true;
+        }
+    }
+
+    // --- Manual Vocab Input ---
+    function initManualAdd() {
+        $('#btn-add-row').addEventListener('click', addManualRow);
+        $('#btn-save-manual').addEventListener('click', saveManualVocabs);
+        $('#btn-new-lernset').addEventListener('click', createNewLernset);
+        $('#btn-new-kapitel').addEventListener('click', createNewKapitel);
+
+        // Update kapitel dropdown when lernset changes
+        $('#add-lernset').addEventListener('change', () => {
+            updateKapitelDropdown();
+        });
+
+        setupRemoveButtons();
+        refreshAddDropdowns();
+
+        // Allow Enter in last input to add new row
+        $('#manual-vocab-list').addEventListener('keydown', e => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const rows = $$('#manual-vocab-list .manual-vocab-row');
+                const lastRow = rows[rows.length - 1];
+                const lastTranslation = lastRow.querySelector('.vocab-translation');
+                if (e.target === lastTranslation && lastTranslation.value.trim()) {
+                    addManualRow();
+                } else {
+                    const inputs = [...$$('#manual-vocab-list input')];
+                    const idx = inputs.indexOf(e.target);
+                    if (idx >= 0 && idx < inputs.length - 1) {
+                        inputs[idx + 1].focus();
+                    }
+                }
+            }
+        });
+    }
+
+    function refreshAddDropdowns() {
+        const lsSelect = $('#add-lernset');
+        lsSelect.innerHTML = '<option value="">Lernset wählen...</option>';
+        lernsets.forEach(ls => {
+            lsSelect.innerHTML += `<option value="${ls.id}">${escapeHtml(ls.name)}</option>`;
+        });
+        updateKapitelDropdown();
+    }
+
+    function updateKapitelDropdown() {
+        const lernsetId = $('#add-lernset').value;
+        const kapSelect = $('#add-kapitel');
+        kapSelect.innerHTML = '<option value="">Kapitel wählen...</option>';
+        if (lernsetId) {
+            vocabSets.filter(s => s.lernsetId === lernsetId).forEach(s => {
+                kapSelect.innerHTML += `<option value="${s.id}">${escapeHtml(s.name)}</option>`;
+            });
+            kapSelect.disabled = false;
+            $('#btn-new-kapitel').disabled = false;
+        } else {
+            kapSelect.disabled = true;
+            $('#btn-new-kapitel').disabled = true;
+        }
+    }
+
+    function createNewLernset() {
+        const name = prompt('Name des neuen Lernsets (z.B. "Englisch", "Französisch"):');
+        if (!name || !name.trim()) return;
+
+        const sourceLang = $('#source-lang').value;
+        const targetLang = $('#target-lang').value;
+        const id = Date.now().toString();
+        lernsets.push({ id, name: name.trim(), sourceLang, targetLang });
+        save();
+        refreshAddDropdowns();
+        $('#add-lernset').value = id;
+        updateKapitelDropdown();
+    }
+
+    function createNewKapitel() {
+        const lernsetId = $('#add-lernset').value;
+        if (!lernsetId) {
+            alert('Bitte zuerst ein Lernset wählen.');
+            return;
+        }
+
+        const name = prompt('Name des neuen Kapitels (z.B. "Unit 1", "Lektion 3"):');
+        if (!name || !name.trim()) return;
+
+        const ls = lernsets.find(l => l.id === lernsetId);
+        const id = Date.now().toString();
+        vocabSets.push({
+            id,
+            name: name.trim(),
+            lernsetId,
+            sourceLang: ls?.sourceLang || 'Englisch',
+            targetLang: ls?.targetLang || 'Deutsch',
+            date: new Date().toISOString()
+        });
+        save();
+        updateKapitelDropdown();
+        $('#add-kapitel').value = id;
+    }
+
+    function addManualRow() {
+        const list = $('#manual-vocab-list');
+        const row = document.createElement('div');
+        row.className = 'manual-vocab-row';
+        row.innerHTML = `
+            <input type="text" class="vocab-word" placeholder="Vokabel">
+            <span class="vocab-arrow">&rarr;</span>
+            <input type="text" class="vocab-translation" placeholder="Übersetzung">
+            <button class="btn-remove-row" title="Entfernen">&times;</button>
+        `;
+        list.appendChild(row);
+        setupRemoveButtons();
+        row.querySelector('.vocab-word').focus();
+    }
+
+    function setupRemoveButtons() {
+        $$('.btn-remove-row').forEach(btn => {
+            btn.onclick = () => {
+                const rows = $$('#manual-vocab-list .manual-vocab-row');
+                if (rows.length > 1) {
+                    btn.closest('.manual-vocab-row').remove();
+                } else {
+                    const row = btn.closest('.manual-vocab-row');
+                    row.querySelector('.vocab-word').value = '';
+                    row.querySelector('.vocab-translation').value = '';
+                }
+            };
+        });
+    }
+
+    function saveManualVocabs() {
+        const rows = $$('#manual-vocab-list .manual-vocab-row');
+        const vocabs = [];
+
+        rows.forEach(row => {
+            const word = row.querySelector('.vocab-word').value.trim();
+            const translation = row.querySelector('.vocab-translation').value.trim();
+            if (word && translation) {
+                vocabs.push({ word, translation });
+            }
+        });
+
+        if (vocabs.length === 0) {
+            alert('Bitte mindestens eine Vokabel mit Übersetzung eingeben.');
+            return;
+        }
+
+        let lernsetId = $('#add-lernset').value;
+        let kapitelId = $('#add-kapitel').value;
+        const sourceLang = $('#source-lang').value;
+        const targetLang = $('#target-lang').value;
+
+        // Auto-create lernset if none selected
+        if (!lernsetId) {
+            lernsetId = Date.now().toString();
+            lernsets.push({ id: lernsetId, name: sourceLang, sourceLang, targetLang });
+        }
+
+        // Auto-create kapitel if none selected
+        if (!kapitelId) {
+            kapitelId = Date.now().toString() + '_k';
+            const kapitelName = `Kapitel ${vocabSets.filter(s => s.lernsetId === lernsetId).length + 1}`;
+            vocabSets.push({
+                id: kapitelId,
+                name: kapitelName,
+                lernsetId,
+                sourceLang,
+                targetLang,
+                date: new Date().toISOString()
+            });
+        }
+
+        vocabs.forEach(v => {
+            allVocabs.push({
+                id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+                word: v.word,
+                translation: v.translation,
+                setId: kapitelId,
+                sourceLang,
+                targetLang,
+                rating: 'new',
+                correctCount: 0,
+                wrongCount: 0,
+                lastSeen: null
+            });
+        });
+
+        save();
+        alert(`${vocabs.length} Vokabeln gespeichert!`);
+
+        // Clear inputs
+        $('#manual-vocab-list').innerHTML = `
+            <div class="manual-vocab-row">
+                <input type="text" class="vocab-word" placeholder="Vokabel">
+                <span class="vocab-arrow">&rarr;</span>
+                <input type="text" class="vocab-translation" placeholder="Übersetzung">
+                <button class="btn-remove-row" title="Entfernen">&times;</button>
+            </div>
+        `;
+        setupRemoveButtons();
+        refreshAddDropdowns();
+
+        // Switch to flashcards
+        $$('.nav-btn').forEach(b => b.classList.remove('active'));
+        $$('.nav-btn')[1].classList.add('active');
+        $$('.view').forEach(v => v.classList.remove('active'));
+        $('#view-cards').classList.add('active');
+        refreshCards();
+    }
+
+
+    // --- Flashcards ---
+    function refreshCards() {
+        const lernsetId = $('#cards-lernset-filter')?.value || 'all';
+        const kapitelId = $('#cards-kapitel-filter')?.value || 'all';
+
+        renderFilterDropdowns(
+            $('#cards-lernset-filter'),
+            $('#cards-kapitel-filter'),
+            lernsetId,
+            kapitelId
+        );
+
+        currentCards = getFilteredVocabs(lernsetId, kapitelId);
+
+        // Shuffle
+        for (let i = currentCards.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [currentCards[i], currentCards[j]] = [currentCards[j], currentCards[i]];
+        }
+
+        currentCardIndex = 0;
+        isFlipped = false;
+
+        if (currentCards.length === 0) {
+            $('#cards-empty').classList.remove('hidden');
+            $('#cards-container').classList.add('hidden');
+        } else {
+            $('#cards-empty').classList.add('hidden');
+            $('#cards-container').classList.remove('hidden');
+            showCard();
+        }
+    }
+
+    function showCard() {
+        if (currentCards.length === 0) return;
+        const card = currentCards[currentCardIndex];
+        $('#card-word').textContent = card.word;
+        $('#card-translation').textContent = card.translation;
+        $('#cards-progress').textContent = `${currentCardIndex + 1} / ${currentCards.length}`;
+        isFlipped = false;
+        $('#flashcard').classList.remove('flipped');
+    }
+
+    function initCards() {
+        const flashcard = $('#flashcard');
+        flashcard.addEventListener('click', flipCard);
+
+        $('#btn-card-flip').addEventListener('click', flipCard);
+        $('#btn-card-prev').addEventListener('click', () => {
+            if (currentCardIndex > 0) {
+                currentCardIndex--;
+                showCard();
+            }
+        });
+        $('#btn-card-next').addEventListener('click', () => {
+            if (currentCardIndex < currentCards.length - 1) {
+                currentCardIndex++;
+                showCard();
+            }
+        });
+
+        $$('.rating-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const rating = btn.dataset.rating;
+                const card = currentCards[currentCardIndex];
+                const vocab = allVocabs.find(v => v.id === card.id);
+                if (vocab) {
+                    vocab.rating = rating;
+                    vocab.lastSeen = new Date().toISOString();
+                    save();
+                }
+                if (currentCardIndex < currentCards.length - 1) {
+                    currentCardIndex++;
+                    showCard();
+                }
+            });
+        });
+
+        $('#cards-lernset-filter').addEventListener('change', () => {
+            $('#cards-kapitel-filter').value = 'all';
+            refreshCards();
+        });
+        $('#cards-kapitel-filter').addEventListener('change', () => refreshCards());
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', e => {
+            if (!$('#view-cards').classList.contains('active')) return;
+            if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flipCard(); }
+            if (e.key === 'ArrowLeft') { e.preventDefault(); $('#btn-card-prev').click(); }
+            if (e.key === 'ArrowRight') { e.preventDefault(); $('#btn-card-next').click(); }
+            if (e.key === '1') $$('.rating-btn')[0]?.click();
+            if (e.key === '2') $$('.rating-btn')[1]?.click();
+            if (e.key === '3') $$('.rating-btn')[2]?.click();
+        });
+    }
+
+    function flipCard() {
+        isFlipped = !isFlipped;
+        $('#flashcard').classList.toggle('flipped', isFlipped);
+    }
+
+    // --- Quiz ---
+    function refreshQuiz() {
+        const lernsetId = $('#quiz-lernset-filter')?.value || 'all';
+        const kapitelId = $('#quiz-kapitel-filter')?.value || 'all';
+
+        renderFilterDropdowns(
+            $('#quiz-lernset-filter'),
+            $('#quiz-kapitel-filter'),
+            lernsetId,
+            kapitelId
+        );
+
+        const available = getFilteredVocabs(lernsetId, kapitelId);
+
+        if (available.length < 4) {
+            $('#quiz-empty').classList.remove('hidden');
+            $('#quiz-setup').classList.add('hidden');
+            $('#quiz-active').classList.add('hidden');
+            $('#quiz-results').classList.add('hidden');
+        } else {
+            $('#quiz-empty').classList.add('hidden');
+            $('#quiz-setup').classList.remove('hidden');
+            $('#quiz-active').classList.add('hidden');
+            $('#quiz-results').classList.add('hidden');
+            $('#quiz-count').max = available.length;
+        }
+    }
+
+    function initQuiz() {
+        $('#btn-start-quiz').addEventListener('click', startQuiz);
+        $('#btn-check-answer').addEventListener('click', checkTypedAnswer);
+        $('#btn-next-question').addEventListener('click', nextQuestion);
+        $('#btn-restart-quiz').addEventListener('click', () => refreshQuiz());
+
+        $('#quiz-answer-input').addEventListener('keydown', e => {
+            if (e.key === 'Enter') checkTypedAnswer();
+        });
+
+        $('#quiz-lernset-filter').addEventListener('change', () => {
+            $('#quiz-kapitel-filter').value = 'all';
+            refreshQuiz();
+        });
+        $('#quiz-kapitel-filter').addEventListener('change', () => refreshQuiz());
+    }
+
+    function startQuiz() {
+        const lernsetId = $('#quiz-lernset-filter')?.value || 'all';
+        const kapitelId = $('#quiz-kapitel-filter')?.value || 'all';
+        const available = getFilteredVocabs(lernsetId, kapitelId);
+
+        const count = Math.min(parseInt($('#quiz-count').value) || 10, available.length);
+        const direction = $('#quiz-direction').value;
+        const mode = $('#quiz-mode').value;
+
+        const shuffled = [...available].sort(() => Math.random() - 0.5).slice(0, count);
+
+        quizState = {
+            questions: shuffled,
+            direction,
+            mode,
+            current: 0,
+            correct: 0,
+            results: []
+        };
+
+        $('#quiz-setup').classList.add('hidden');
+        $('#quiz-active').classList.remove('hidden');
+        showQuestion();
+    }
+
+    function showQuestion() {
+        const q = quizState.questions[quizState.current];
+        const isReverse = quizState.direction === 'native-to-foreign' ||
+            (quizState.direction === 'mixed' && Math.random() > 0.5);
+
+        quizState.currentReverse = isReverse;
+        const prompt = isReverse ? q.translation : q.word;
+        const answer = isReverse ? q.word : q.translation;
+        quizState.currentAnswer = answer;
+
+        $('#quiz-progress').textContent = `Frage ${quizState.current + 1}/${quizState.questions.length}`;
+        $('#quiz-score').textContent = `${quizState.correct} richtig`;
+        $('#quiz-prompt').textContent = prompt;
+        $('#quiz-feedback').classList.add('hidden');
+        $('#btn-next-question').classList.add('hidden');
+
+        if (quizState.mode === 'multiple-choice') {
+            $('#quiz-choices').classList.remove('hidden');
+            $('#quiz-typing').classList.add('hidden');
+            showChoices(q, isReverse);
+        } else {
+            $('#quiz-choices').classList.add('hidden');
+            $('#quiz-typing').classList.remove('hidden');
+            const input = $('#quiz-answer-input');
+            input.value = '';
+            input.disabled = false;
+            $('#btn-check-answer').disabled = false;
+            input.focus();
+        }
+    }
+
+    function showChoices(correct, isReverse) {
+        const container = $('#quiz-choices');
+        container.innerHTML = '';
+
+        const correctAnswer = isReverse ? correct.word : correct.translation;
+
+        const others = allVocabs
+            .filter(v => v.id !== correct.id)
+            .sort(() => Math.random() - 0.5)
+            .slice(0, 3)
+            .map(v => isReverse ? v.word : v.translation);
+
+        const choices = [correctAnswer, ...others].sort(() => Math.random() - 0.5);
+
+        choices.forEach(choice => {
+            const btn = document.createElement('button');
+            btn.className = 'quiz-choice-btn';
+            btn.textContent = choice;
+            btn.addEventListener('click', () => handleChoice(btn, choice, correctAnswer));
+            container.appendChild(btn);
+        });
+    }
+
+    function handleChoice(btn, chosen, correct) {
+        const isCorrect = chosen === correct;
+        const buttons = $$('.quiz-choice-btn');
+        buttons.forEach(b => {
+            b.disabled = true;
+            if (b.textContent === correct) b.classList.add('correct');
+            if (b === btn && !isCorrect) b.classList.add('wrong');
+        });
+
+        recordAnswer(isCorrect, correct);
+    }
+
+    function checkTypedAnswer() {
+        const input = $('#quiz-answer-input');
+        const typed = input.value.trim().toLowerCase();
+        const correct = quizState.currentAnswer;
+        const isCorrect = typed === correct.toLowerCase();
+
+        input.disabled = true;
+        $('#btn-check-answer').disabled = true;
+
+        recordAnswer(isCorrect, correct);
+    }
+
+    function recordAnswer(isCorrect, correctAnswer) {
+        if (isCorrect) quizState.correct++;
+
+        const q = quizState.questions[quizState.current];
+        quizState.results.push({
+            word: q.word,
+            translation: q.translation,
+            correct: isCorrect
+        });
+
+        const vocab = allVocabs.find(v => v.id === q.id);
+        if (vocab) {
+            if (isCorrect) vocab.correctCount++;
+            else vocab.wrongCount++;
+            vocab.lastSeen = new Date().toISOString();
+            save();
+        }
+
+        const feedback = $('#quiz-feedback');
+        feedback.classList.remove('hidden');
+        if (isCorrect) {
+            feedback.className = 'quiz-feedback correct';
+            feedback.textContent = 'Richtig!';
+        } else {
+            feedback.className = 'quiz-feedback wrong';
+            feedback.textContent = `Falsch! Richtig: ${correctAnswer}`;
+        }
+
+        $('#btn-next-question').classList.remove('hidden');
+    }
+
+    function nextQuestion() {
+        quizState.current++;
+        if (quizState.current >= quizState.questions.length) {
+            showResults();
+        } else {
+            showQuestion();
+        }
+    }
+
+    function showResults() {
+        $('#quiz-active').classList.add('hidden');
+        $('#quiz-results').classList.remove('hidden');
+
+        const pct = Math.round((quizState.correct / quizState.questions.length) * 100);
+        let emoji = pct >= 90 ? 'Ausgezeichnet!' : pct >= 70 ? 'Gut gemacht!' : pct >= 50 ? 'Weiter üben!' : 'Nicht aufgeben!';
+
+        $('#quiz-result-score').innerHTML = `
+            <div class="score-circle">
+                <span class="score-number">${pct}%</span>
+            </div>
+            <p>${quizState.correct} von ${quizState.questions.length} richtig</p>
+            <p class="score-message">${emoji}</p>
+        `;
+
+        const details = $('#quiz-result-details');
+        details.innerHTML = '';
+        quizState.results.forEach(r => {
+            const row = document.createElement('div');
+            row.className = `result-row ${r.correct ? 'correct' : 'wrong'}`;
+            row.innerHTML = `
+                <span class="result-icon">${r.correct ? '&#10003;' : '&#10007;'}</span>
+                <span>${escapeHtml(r.word)}</span>
+                <span>&rarr;</span>
+                <span>${escapeHtml(r.translation)}</span>
+            `;
+            details.appendChild(row);
+        });
+    }
+
+    // --- Lernset Manager ---
+    function refreshList() {
+        if (lernsets.length === 0) {
+            $('#lernset-empty').classList.remove('hidden');
+            $('#lernset-manager').classList.add('hidden');
+            return;
+        }
+
+        $('#lernset-empty').classList.add('hidden');
+        $('#lernset-manager').classList.remove('hidden');
+        renderLernsetList();
+    }
+
+    function renderLernsetList() {
+        const container = $('#lernset-list');
+        container.innerHTML = '';
+
+        lernsets.forEach(ls => {
+            const kapitel = vocabSets.filter(s => s.lernsetId === ls.id);
+            const vocabCount = allVocabs.filter(v => kapitel.some(k => k.id === v.setId)).length;
+
+            const card = document.createElement('div');
+            card.className = 'lernset-card';
+            card.innerHTML = `
+                <div class="lernset-card-header" data-lernset-id="${ls.id}">
+                    <div class="lernset-card-info">
+                        <span class="lernset-card-expand">&#9654;</span>
+                        <h4 class="lernset-card-name">${escapeHtml(ls.name)}</h4>
+                        <span class="lernset-card-count">${vocabCount} Vokabeln &middot; ${kapitel.length} Kapitel</span>
+                    </div>
+                    <div class="lernset-card-actions">
+                        <button class="btn btn-secondary btn-sm btn-rename-lernset" data-id="${ls.id}" title="Umbenennen">&#9998;</button>
+                        <button class="btn btn-secondary btn-sm btn-delete-lernset" data-id="${ls.id}" title="Löschen">&times;</button>
+                    </div>
+                </div>
+                <div class="lernset-card-body hidden" id="lernset-body-${ls.id}">
+                    <div class="kapitel-list">
+                        ${kapitel.map(k => {
+                            const kCount = allVocabs.filter(v => v.setId === k.id).length;
+                            return `
+                                <div class="kapitel-row">
+                                    <span class="kapitel-name">${escapeHtml(k.name)}</span>
+                                    <span class="kapitel-count">${kCount} Vokabeln</span>
+                                    <div class="kapitel-actions">
+                                        <button class="btn btn-secondary btn-xs btn-move-kapitel" data-id="${k.id}" title="Verschieben">&#8644;</button>
+                                        <button class="btn btn-secondary btn-xs btn-copy-kapitel" data-id="${k.id}" title="Kopieren">&#9112;</button>
+                                        <button class="btn btn-secondary btn-xs btn-rename-kapitel" data-id="${k.id}" title="Umbenennen">&#9998;</button>
+                                        <button class="btn btn-secondary btn-xs btn-delete-kapitel" data-id="${k.id}" title="Löschen">&times;</button>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                    <button class="btn btn-secondary btn-sm btn-add-kapitel" data-lernset-id="${ls.id}">+ Kapitel</button>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+
+        // Toggle expand
+        container.querySelectorAll('.lernset-card-header').forEach(header => {
+            header.addEventListener('click', e => {
+                if (e.target.closest('.lernset-card-actions')) return;
+                const id = header.dataset.lernsetId;
+                const body = $(`#lernset-body-${id}`);
+                const arrow = header.querySelector('.lernset-card-expand');
+                body.classList.toggle('hidden');
+                arrow.classList.toggle('expanded');
+            });
+        });
+
+        // Rename lernset
+        container.querySelectorAll('.btn-rename-lernset').forEach(btn => {
+            btn.addEventListener('click', e => {
+                e.stopPropagation();
+                const ls = lernsets.find(l => l.id === btn.dataset.id);
+                if (!ls) return;
+                const name = prompt('Neuer Name:', ls.name);
+                if (name && name.trim()) {
+                    ls.name = name.trim();
+                    save();
+                    renderLernsetList();
+                    refreshAddDropdowns();
+                }
+            });
+        });
+
+        // Delete lernset
+        container.querySelectorAll('.btn-delete-lernset').forEach(btn => {
+            btn.addEventListener('click', e => {
+                e.stopPropagation();
+                const ls = lernsets.find(l => l.id === btn.dataset.id);
+                if (!ls) return;
+                const kapitel = vocabSets.filter(s => s.lernsetId === ls.id);
+                const vocabCount = allVocabs.filter(v => kapitel.some(k => k.id === v.setId)).length;
+                if (!confirm(`"${ls.name}" mit ${kapitel.length} Kapiteln und ${vocabCount} Vokabeln wirklich löschen?`)) return;
+                const kapIds = kapitel.map(k => k.id);
+                allVocabs = allVocabs.filter(v => !kapIds.includes(v.setId));
+                vocabSets = vocabSets.filter(s => s.lernsetId !== ls.id);
+                lernsets = lernsets.filter(l => l.id !== ls.id);
+                save();
+                refreshList();
+                refreshAddDropdowns();
+            });
+        });
+
+        // Rename kapitel
+        container.querySelectorAll('.btn-rename-kapitel').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const kap = vocabSets.find(s => s.id === btn.dataset.id);
+                if (!kap) return;
+                const name = prompt('Neuer Name:', kap.name);
+                if (name && name.trim()) {
+                    kap.name = name.trim();
+                    save();
+                    renderLernsetList();
+                }
+            });
+        });
+
+        // Delete kapitel
+        container.querySelectorAll('.btn-delete-kapitel').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const kap = vocabSets.find(s => s.id === btn.dataset.id);
+                if (!kap) return;
+                const vocabCount = allVocabs.filter(v => v.setId === kap.id).length;
+                if (!confirm(`"${kap.name}" mit ${vocabCount} Vokabeln wirklich löschen?`)) return;
+                allVocabs = allVocabs.filter(v => v.setId !== kap.id);
+                vocabSets = vocabSets.filter(s => s.id !== kap.id);
+                save();
+                renderLernsetList();
+            });
+        });
+
+        // Add kapitel
+        container.querySelectorAll('.btn-add-kapitel').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const lernsetId = btn.dataset.lernsetId;
+                const name = prompt('Name des neuen Kapitels:');
+                if (!name || !name.trim()) return;
+                const ls = lernsets.find(l => l.id === lernsetId);
+                vocabSets.push({
+                    id: Date.now().toString(),
+                    name: name.trim(),
+                    lernsetId,
+                    sourceLang: ls?.sourceLang || 'Englisch',
+                    targetLang: ls?.targetLang || 'Deutsch',
+                    date: new Date().toISOString()
+                });
+                save();
+                renderLernsetList();
+            });
+        });
+
+        // Move kapitel vocabs
+        container.querySelectorAll('.btn-move-kapitel').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const kapId = btn.dataset.id;
+                const kap = vocabSets.find(s => s.id === kapId);
+                if (!kap) return;
+                const vocabCount = allVocabs.filter(v => v.setId === kapId).length;
+                if (vocabCount === 0) { alert('Keine Vokabeln zum Verschieben.'); return; }
+                openMoveCopyModal('move', kapId, kap.name, vocabCount);
+            });
+        });
+
+        // Copy kapitel vocabs
+        container.querySelectorAll('.btn-copy-kapitel').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const kapId = btn.dataset.id;
+                const kap = vocabSets.find(s => s.id === kapId);
+                if (!kap) return;
+                const vocabCount = allVocabs.filter(v => v.setId === kapId).length;
+                if (vocabCount === 0) { alert('Keine Vokabeln zum Kopieren.'); return; }
+                openMoveCopyModal('copy', kapId, kap.name, vocabCount);
+            });
+        });
+    }
+
+    function openMoveCopyModal(mode, sourceKapitelId, kapitelName, vocabCount) {
+        const modal = $('#move-copy-modal');
+        const sourceKap = vocabSets.find(s => s.id === sourceKapitelId);
+        const sourceLsId = sourceKap?.lernsetId;
+
+        $('#modal-title').textContent = mode === 'move'
+            ? `Vokabeln verschieben`
+            : `Vokabeln kopieren`;
+        $('#modal-description').textContent = `${vocabCount} Vokabeln aus "${kapitelName}" ${mode === 'move' ? 'verschieben' : 'kopieren'} nach:`;
+
+        // Populate lernset dropdown
+        const lsSelect = $('#modal-target-lernset');
+        lsSelect.innerHTML = '';
+        lernsets.forEach(ls => {
+            lsSelect.innerHTML += `<option value="${ls.id}">${escapeHtml(ls.name)}</option>`;
+        });
+
+        function updateTargetKapitel() {
+            const targetLsId = lsSelect.value;
+            const kapSelect = $('#modal-target-kapitel');
+            kapSelect.innerHTML = '';
+            vocabSets.filter(s => s.lernsetId === targetLsId).forEach(s => {
+                if (mode === 'move' && s.id === sourceKapitelId) return;
+                kapSelect.innerHTML += `<option value="${s.id}">${escapeHtml(s.name)}</option>`;
+            });
+            if (kapSelect.options.length === 0) {
+                kapSelect.innerHTML = '<option value="">— Kein Kapitel vorhanden —</option>';
+            }
+        }
+
+        lsSelect.onchange = updateTargetKapitel;
+        updateTargetKapitel();
+
+        modal.classList.remove('hidden');
+
+        $('#btn-modal-cancel').onclick = () => modal.classList.add('hidden');
+
+        $('#btn-modal-confirm').onclick = () => {
+            const targetKapitelId = $('#modal-target-kapitel').value;
+            if (!targetKapitelId) {
+                alert('Bitte ein Ziel-Kapitel wählen.');
+                return;
+            }
+
+            const vocabs = allVocabs.filter(v => v.setId === sourceKapitelId);
+
+            if (mode === 'move') {
+                vocabs.forEach(v => { v.setId = targetKapitelId; });
+            } else {
+                vocabs.forEach(v => {
+                    allVocabs.push({
+                        ...v,
+                        id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+                        setId: targetKapitelId
+                    });
+                });
+            }
+
+            save();
+            modal.classList.add('hidden');
+            renderLernsetList();
+            const targetKap = vocabSets.find(s => s.id === targetKapitelId);
+            const actionText = mode === 'move' ? 'verschoben' : 'kopiert';
+            showNotice(`${vocabs.length} Vokabeln nach "${targetKap?.name}" ${actionText}.`);
+        };
+    }
+
+    function initList() {
+        $('#btn-create-lernset').addEventListener('click', () => {
+            const name = prompt('Name des neuen Lernsets (z.B. "Englisch", "Französisch"):');
+            if (!name || !name.trim()) return;
+            const id = Date.now().toString();
+            lernsets.push({ id, name: name.trim(), sourceLang: 'Englisch', targetLang: 'Deutsch' });
+            save();
+            refreshList();
+            refreshAddDropdowns();
+        });
+
+        $('#btn-export-all').addEventListener('click', () => {
+            const csv = 'Vokabel;Übersetzung;Lernset;Kapitel;Status\n' +
+                allVocabs.map(v => {
+                    const set = vocabSets.find(s => s.id === v.setId);
+                    const ls = set ? lernsets.find(l => l.id === set.lernsetId) : null;
+                    return `"${v.word}";"${v.translation}";"${ls?.name || ''}";"${set?.name || ''}";"${v.rating}"`;
+                }).join('\n');
+
+            const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `vokabeln_${new Date().toISOString().slice(0, 10)}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+    }
+
+    // --- Write Mode (Schreibmodus) ---
+    let writeState = null;
+
+    function refreshWrite() {
+        const lernsetId = $('#write-lernset-filter')?.value || 'all';
+        const kapitelId = $('#write-kapitel-filter')?.value || 'all';
+
+        renderFilterDropdowns(
+            $('#write-lernset-filter'),
+            $('#write-kapitel-filter'),
+            lernsetId,
+            kapitelId
+        );
+
+        const available = getFilteredVocabs(lernsetId, kapitelId);
+
+        if (available.length === 0) {
+            $('#write-empty').classList.remove('hidden');
+            $('#write-container').classList.add('hidden');
+            return;
+        }
+        $('#write-empty').classList.add('hidden');
+        $('#write-container').classList.remove('hidden');
+        $('#write-results').classList.add('hidden');
+        $('.write-card').classList.remove('hidden');
+        $('.write-progress').classList.remove('hidden');
+        startWriteMode(available);
+    }
+
+    function startWriteMode(available) {
+        const vocabs = available || getFilteredVocabs(
+            $('#write-lernset-filter')?.value || 'all',
+            $('#write-kapitel-filter')?.value || 'all'
+        );
+        const shuffled = [...vocabs].sort(() => Math.random() - 0.5).slice(0, Math.min(10, vocabs.length));
+        writeState = {
+            questions: shuffled,
+            current: 0,
+            correct: 0,
+            results: []
+        };
+        showWriteQuestion();
+    }
+
+    function getWriteDirection() {
+        return $('#write-direction')?.value || 'foreign-to-native';
+    }
+
+    function showWriteQuestion() {
+        const q = writeState.questions[writeState.current];
+        const direction = getWriteDirection();
+        const prompt = direction === 'native-to-foreign' ? q.translation : q.word;
+        $('#write-progress').textContent = `${writeState.current + 1} / ${writeState.questions.length}`;
+        $('#write-score').textContent = `${writeState.correct} richtig`;
+        $('#write-prompt-word').textContent = prompt;
+        $('#write-input').value = '';
+        $('#write-input').disabled = false;
+        $('#write-input').classList.remove('input-correct', 'input-wrong');
+        $('#btn-write-check').textContent = 'Prüfen';
+        $('#btn-write-check').disabled = false;
+        $('#write-feedback').innerHTML = '';
+        $('#write-input').focus();
+    }
+
+    function checkWriteAnswer() {
+        const input = $('#write-input');
+        const typed = input.value.trim();
+        if (!typed) return;
+
+        const q = writeState.questions[writeState.current];
+        const direction = getWriteDirection();
+        const correct = direction === 'native-to-foreign' ? q.word : q.translation;
+        const isCorrect = typed.toLowerCase() === correct.toLowerCase();
+
+        const feedback = $('#write-feedback');
+
+        if (isCorrect) {
+            input.classList.remove('input-wrong');
+            input.classList.add('input-correct');
+            input.disabled = true;
+            feedback.innerHTML = `
+                <div class="write-feedback-text correct">Richtig!</div>
+                <div class="write-diff">${escapeHtml(correct).split('').map(c => `<span class="char-correct">${c}</span>`).join('')}</div>
+            `;
+
+            const firstTryCorrect = !writeState.hadWrongAttempt;
+            if (firstTryCorrect) writeState.correct++;
+            writeState.results.push({ word: q.word, translation: q.translation, correct: firstTryCorrect });
+            writeState.hadWrongAttempt = false;
+
+            const vocab = allVocabs.find(v => v.id === q.id);
+            if (vocab) {
+                if (firstTryCorrect) vocab.correctCount++;
+                else vocab.wrongCount++;
+                vocab.lastSeen = new Date().toISOString();
+                save();
+            }
+
+            $('#btn-write-check').textContent = 'Weiter';
+            $('#btn-write-check').onclick = () => {
+                $('#btn-write-check').onclick = null;
+                nextWriteQuestion();
+            };
+        } else {
+            writeState.hadWrongAttempt = true;
+            input.classList.remove('input-correct');
+            input.classList.add('input-wrong');
+
+            const diffHtml = buildCharDiff(typed, correct);
+            feedback.innerHTML = `
+                <div class="write-feedback-text wrong">Nicht ganz richtig — versuch es nochmal!</div>
+                <div class="write-diff">${diffHtml}</div>
+            `;
+            input.value = '';
+            input.focus();
+        }
+    }
+
+    function buildCharDiff(typed, correct) {
+        let html = '';
+        const maxLen = Math.max(typed.length, correct.length);
+        for (let i = 0; i < maxLen; i++) {
+            const correctChar = correct[i] || '';
+            const typedChar = typed[i] || '';
+
+            if (i >= correct.length) {
+                break;
+            } else if (i >= typed.length) {
+                html += `<span class="char-missing">${escapeHtml(correctChar)}</span>`;
+            } else if (typedChar.toLowerCase() === correctChar.toLowerCase()) {
+                html += `<span class="char-correct">${escapeHtml(correctChar)}</span>`;
+            } else {
+                html += `<span class="char-wrong">${escapeHtml(correctChar)}</span>`;
+            }
+        }
+        return html;
+    }
+
+    function nextWriteQuestion() {
+        writeState.current++;
+        if (writeState.current >= writeState.questions.length) {
+            showWriteResults();
+        } else {
+            showWriteQuestion();
+        }
+    }
+
+    function showWriteResults() {
+        $('.write-card').classList.add('hidden');
+        $('.write-progress').classList.add('hidden');
+        $('#write-results').classList.remove('hidden');
+
+        const pct = Math.round((writeState.correct / writeState.questions.length) * 100);
+        let msg = pct >= 90 ? 'Ausgezeichnet!' : pct >= 70 ? 'Gut gemacht!' : pct >= 50 ? 'Weiter üben!' : 'Nicht aufgeben!';
+
+        $('#write-result-score').innerHTML = `
+            <div class="score-circle">
+                <span class="score-number">${pct}%</span>
+            </div>
+            <p>${writeState.correct} von ${writeState.questions.length} richtig</p>
+            <p class="score-message">${msg}</p>
+        `;
+
+        const details = $('#write-result-details');
+        details.innerHTML = '';
+        writeState.results.forEach(r => {
+            const row = document.createElement('div');
+            row.className = `result-row ${r.correct ? 'correct' : 'wrong'}`;
+            row.innerHTML = `
+                <span class="result-icon">${r.correct ? '&#10003;' : '&#10007;'}</span>
+                <span>${escapeHtml(r.word)}</span>
+                <span>&rarr;</span>
+                <span>${escapeHtml(r.translation)}</span>
+            `;
+            details.appendChild(row);
+        });
+    }
+
+    function initWrite() {
+        $('#btn-write-check').addEventListener('click', () => {
+            if ($('#btn-write-check').textContent === 'Weiter') return;
+            checkWriteAnswer();
+        });
+        $('#write-input').addEventListener('keydown', e => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if ($('#btn-write-check').textContent === 'Weiter') {
+                    nextWriteQuestion();
+                } else {
+                    checkWriteAnswer();
+                }
+            }
+        });
+        $('#btn-restart-write').addEventListener('click', () => {
+            $('.write-card').classList.remove('hidden');
+            $('.write-progress').classList.remove('hidden');
+            $('#write-results').classList.add('hidden');
+            startWriteMode();
+        });
+
+        $('#write-lernset-filter').addEventListener('change', () => {
+            $('#write-kapitel-filter').value = 'all';
+            refreshWrite();
+        });
+        $('#write-kapitel-filter').addEventListener('change', () => refreshWrite());
+        $('#write-direction').addEventListener('change', () => refreshWrite());
+    }
+
+    // --- Settings ---
+    function initSettings() {
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        applyTheme(savedTheme);
+
+        $$('.theme-toggle-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const theme = btn.dataset.theme;
+                applyTheme(theme);
+                localStorage.setItem('theme', theme);
+            });
+        });
+
+        $('#btn-clear-all').addEventListener('click', () => {
+            if (confirm('Wirklich ALLE Vokabeln löschen? Das kann nicht rückgängig gemacht werden!')) {
+                allVocabs = [];
+                vocabSets = [];
+                lernsets = [];
+                save();
+                alert('Alle Vokabeln gelöscht.');
+                refreshAddDropdowns();
+            }
+        });
+    }
+
+    function applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        $$('.theme-toggle-btn').forEach(b => {
+            b.classList.toggle('active', b.dataset.theme === theme);
+        });
+    }
+
+    // --- Utils ---
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    function showNotice(message) {
+        const existing = document.querySelector('.app-notice');
+        if (existing) existing.remove();
+
+        const notice = document.createElement('div');
+        notice.className = 'app-notice';
+        notice.innerHTML = `
+            <span>${escapeHtml(message)}</span>
+            <button class="notice-close" aria-label="Schließen">&times;</button>
+        `;
+        notice.querySelector('.notice-close').addEventListener('click', () => notice.remove());
+        document.getElementById('app').appendChild(notice);
+        setTimeout(() => notice.remove(), 8000);
+    }
+
+    // --- Init ---
+    function init() {
+        migrateData();
+        initNav();
+        initManualAdd();
+        initCards();
+        initWrite();
+        initQuiz();
+        initList();
+        initSettings();
+
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        applyTheme(savedTheme);
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+})();
+
+    </script>
+</body>
+</html>
