@@ -1689,6 +1689,8 @@ header h1 {
         </div>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <script>
 // ============================================================
 // MemoryDeck - Main Application
@@ -1698,6 +1700,29 @@ const App = (() => {
     // --- DOM Cache ---
     const $ = (sel) => document.querySelector(sel);
     const $$ = (sel) => document.querySelectorAll(sel);
+
+    // --- Firebase Setup ---
+    const firebaseConfig = {
+        apiKey: "DEIN_API_KEY",
+        authDomain: "DEIN_PROJEKT.firebaseapp.com",
+        projectId: "DEIN_PROJEKT",
+        storageBucket: "DEIN_PROJEKT.appspot.com",
+        messagingSenderId: "123456789",
+        appId: "DEINE_APP_ID"
+    };
+
+    let db = null;
+    let cloudAvailable = false;
+
+    try {
+        if (typeof firebase !== 'undefined' && firebaseConfig.apiKey !== 'DEIN_API_KEY') {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            cloudAvailable = true;
+        }
+    } catch (e) {
+        console.warn('Firebase nicht verfügbar, nur lokaler Modus:', e);
+    }
 
     // --- Auth State ---
     let currentUser = null;
@@ -1720,6 +1745,62 @@ const App = (() => {
         return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
+    // --- Cloud: Account-Funktionen ---
+    async function getAccountFromCloud(username) {
+        if (!cloudAvailable) return null;
+        try {
+            const doc = await db.collection('accounts').doc(username).get();
+            return doc.exists ? doc.data() : null;
+        } catch (e) {
+            console.warn('Cloud-Abfrage fehlgeschlagen:', e);
+            return null;
+        }
+    }
+
+    async function saveAccountToCloud(username, accountData) {
+        if (!cloudAvailable) return;
+        try {
+            await db.collection('accounts').doc(username).set(accountData);
+        } catch (e) {
+            console.warn('Cloud-Speicherung fehlgeschlagen:', e);
+        }
+    }
+
+    async function saveToCloud() {
+        if (!cloudAvailable || !currentUser) return;
+        try {
+            await db.collection('userData').doc(currentUser).set({
+                lernsets,
+                vocabSets,
+                allVocabs,
+                lastUpdated: new Date().toISOString()
+            });
+        } catch (e) {
+            console.warn('Cloud-Sync fehlgeschlagen:', e);
+        }
+    }
+
+    async function loadFromCloud() {
+        if (!cloudAvailable || !currentUser) return false;
+        try {
+            const doc = await db.collection('userData').doc(currentUser).get();
+            if (doc.exists) {
+                const data = doc.data();
+                lernsets = data.lernsets || [];
+                vocabSets = data.vocabSets || [];
+                allVocabs = data.allVocabs || [];
+                localStorage.setItem(userKey('lernsets'), JSON.stringify(lernsets));
+                localStorage.setItem(userKey('vocabSets'), JSON.stringify(vocabSets));
+                localStorage.setItem(userKey('allVocabs'), JSON.stringify(allVocabs));
+                return true;
+            }
+            return false;
+        } catch (e) {
+            console.warn('Cloud-Laden fehlgeschlagen:', e);
+            return false;
+        }
+    }
+
     function getAccounts() {
         return JSON.parse(localStorage.getItem('vokabel_accounts') || '{}');
     }
@@ -1733,31 +1814,37 @@ const App = (() => {
         return `user_${currentUser}_${key}`;
     }
 
-    function loadUserData() {
-        lernsets = JSON.parse(localStorage.getItem(userKey('lernsets')) || '[]');
-        vocabSets = JSON.parse(localStorage.getItem(userKey('vocabSets')) || '[]');
-        allVocabs = JSON.parse(localStorage.getItem(userKey('allVocabs')) || '[]');
+    async function loadUserData() {
+        const loadedFromCloud = await loadFromCloud();
 
-        // Migrate old unscoped data to first user who logs in
-        if (lernsets.length === 0 && vocabSets.length === 0 && allVocabs.length === 0) {
-            const oldLernsets = JSON.parse(localStorage.getItem('lernsets') || '[]');
-            const oldVocabSets = JSON.parse(localStorage.getItem('vocabSets') || '[]');
-            const oldAllVocabs = JSON.parse(localStorage.getItem('allVocabs') || '[]');
-            if (oldLernsets.length > 0 || oldVocabSets.length > 0 || oldAllVocabs.length > 0) {
-                lernsets = oldLernsets;
-                vocabSets = oldVocabSets;
-                allVocabs = oldAllVocabs;
-                save();
-                // Remove old unscoped data
-                localStorage.removeItem('lernsets');
-                localStorage.removeItem('vocabSets');
-                localStorage.removeItem('allVocabs');
+        if (!loadedFromCloud) {
+            lernsets = JSON.parse(localStorage.getItem(userKey('lernsets')) || '[]');
+            vocabSets = JSON.parse(localStorage.getItem(userKey('vocabSets')) || '[]');
+            allVocabs = JSON.parse(localStorage.getItem(userKey('allVocabs')) || '[]');
+
+            if (lernsets.length === 0 && vocabSets.length === 0 && allVocabs.length === 0) {
+                const oldLernsets = JSON.parse(localStorage.getItem('lernsets') || '[]');
+                const oldVocabSets = JSON.parse(localStorage.getItem('vocabSets') || '[]');
+                const oldAllVocabs = JSON.parse(localStorage.getItem('allVocabs') || '[]');
+                if (oldLernsets.length > 0 || oldVocabSets.length > 0 || oldAllVocabs.length > 0) {
+                    lernsets = oldLernsets;
+                    vocabSets = oldVocabSets;
+                    allVocabs = oldAllVocabs;
+                    save();
+                    localStorage.removeItem('lernsets');
+                    localStorage.removeItem('vocabSets');
+                    localStorage.removeItem('allVocabs');
+                }
+            }
+
+            if (cloudAvailable && (lernsets.length > 0 || vocabSets.length > 0 || allVocabs.length > 0)) {
+                saveToCloud();
             }
         }
     }
 
     // --- Auth: UI ---
-    function initAuth() {
+    async function initAuth() {
         $('#show-register').addEventListener('click', e => {
             e.preventDefault();
             $('#auth-login').classList.add('hidden');
@@ -1790,8 +1877,19 @@ const App = (() => {
         // Check if already logged in
         const savedUser = localStorage.getItem('vokabel_currentUser');
         if (savedUser) {
-            const accounts = getAccounts();
-            if (accounts[savedUser]) {
+            const localAccounts = getAccounts();
+            let accountExists = !!localAccounts[savedUser];
+
+            if (!accountExists && cloudAvailable) {
+                const cloudAccount = await getAccountFromCloud(savedUser);
+                accountExists = !!cloudAccount;
+                if (cloudAccount) {
+                    localAccounts[savedUser] = cloudAccount;
+                    saveAccounts(localAccounts);
+                }
+            }
+
+            if (accountExists) {
                 currentUser = savedUser;
                 showApp();
                 return;
@@ -1811,8 +1909,13 @@ const App = (() => {
             return;
         }
 
-        const accounts = getAccounts();
-        const account = accounts[username.toLowerCase()];
+        const userKey = username.toLowerCase();
+
+        let account = await getAccountFromCloud(userKey);
+        if (!account) {
+            const localAccounts = getAccounts();
+            account = localAccounts[userKey];
+        }
 
         if (!account) {
             errorEl.textContent = 'Benutzername nicht gefunden.';
@@ -1827,7 +1930,11 @@ const App = (() => {
             return;
         }
 
-        currentUser = username.toLowerCase();
+        const localAccounts = getAccounts();
+        localAccounts[userKey] = account;
+        saveAccounts(localAccounts);
+
+        currentUser = userKey;
         localStorage.setItem('vokabel_currentUser', currentUser);
         showApp();
     }
@@ -1862,22 +1969,29 @@ const App = (() => {
             return;
         }
 
-        const accounts = getAccounts();
-        if (accounts[username.toLowerCase()]) {
+        const userKeyName = username.toLowerCase();
+
+        const cloudAccount = await getAccountFromCloud(userKeyName);
+        const localAccounts = getAccounts();
+
+        if (cloudAccount || localAccounts[userKeyName]) {
             errorEl.textContent = 'Benutzername ist bereits vergeben.';
             errorEl.classList.remove('hidden');
             return;
         }
 
         const hash = await hashPassword(password);
-        accounts[username.toLowerCase()] = {
+        const accountData = {
             username: username,
             passwordHash: hash,
             created: new Date().toISOString()
         };
-        saveAccounts(accounts);
 
-        currentUser = username.toLowerCase();
+        await saveAccountToCloud(userKeyName, accountData);
+        localAccounts[userKeyName] = accountData;
+        saveAccounts(localAccounts);
+
+        currentUser = userKeyName;
         localStorage.setItem('vokabel_currentUser', currentUser);
         showApp();
     }
@@ -1906,15 +2020,18 @@ const App = (() => {
         $('#auth-register').classList.add('hidden');
     }
 
-    function showApp() {
+    async function showApp() {
         $('#auth-screen').classList.add('hidden');
         $('#app').classList.remove('hidden');
 
-        const accounts = getAccounts();
-        const account = accounts[currentUser];
+        let account = await getAccountFromCloud(currentUser);
+        if (!account) {
+            const localAccounts = getAccounts();
+            account = localAccounts[currentUser];
+        }
         $('#current-user').textContent = account?.username || currentUser;
 
-        loadUserData();
+        await loadUserData();
         initAppModules();
     }
 
@@ -1975,6 +2092,7 @@ const App = (() => {
         localStorage.setItem(userKey('lernsets'), JSON.stringify(lernsets));
         localStorage.setItem(userKey('vocabSets'), JSON.stringify(vocabSets));
         localStorage.setItem(userKey('allVocabs'), JSON.stringify(allVocabs));
+        saveToCloud();
     }
 
     // --- Helper: get vocabs filtered by lernset/kapitel ---
