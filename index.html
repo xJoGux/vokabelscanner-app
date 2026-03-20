@@ -1634,6 +1634,7 @@ header h1 {
             <div id="lernset-empty" class="empty-state">
                 <p>Noch keine Lernsets vorhanden.</p>
                 <p>Erstelle dein erstes Lernset!</p>
+                <button id="btn-create-lernset-empty" class="btn btn-primary" style="margin-top:1rem;">+ Lernset erstellen</button>
             </div>
             <div id="lernset-manager" class="lernset-manager hidden">
                 <div class="lernset-manager-header">
@@ -2777,7 +2778,7 @@ const App = (() => {
     }
 
     function initList() {
-        $('#btn-create-lernset').addEventListener('click', () => {
+        function createNewLernset() {
             const name = prompt('Name des neuen Lernsets (z.B. "Englisch", "Französisch"):');
             if (!name || !name.trim()) return;
             const id = Date.now().toString();
@@ -2785,7 +2786,9 @@ const App = (() => {
             save();
             refreshList();
             refreshAddDropdowns();
-        });
+        }
+        $('#btn-create-lernset').addEventListener('click', createNewLernset);
+        $('#btn-create-lernset-empty').addEventListener('click', createNewLernset);
 
         $('#btn-export-all').addEventListener('click', () => {
             const csv = 'Vokabel;Übersetzung;Lernset;Kapitel;Status\n' +
