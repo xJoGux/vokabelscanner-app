@@ -1689,6 +1689,7 @@ header h1 {
             </div>
         </div>
     </div>
+
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <script>
@@ -1778,8 +1779,7 @@ const App = (() => {
                 lastUpdated: new Date().toISOString()
             });
         } catch (e) {
-            console.error('Cloud-Sync fehlgeschlagen:', e);
-            showNotice('Cloud-Sync fehlgeschlagen: ' + (e.code || e.message));
+            console.warn('Cloud-Sync fehlgeschlagen:', e);
         }
     }
 
@@ -1922,34 +1922,14 @@ const App = (() => {
         const userKey = username.toLowerCase();
 
         // Zuerst Cloud prüfen, dann lokal
-        let account = null;
-        let cloudError = null;
-
-        if (cloudAvailable) {
-            try {
-                const doc = await db.collection('accounts').doc(userKey).get();
-                if (doc.exists) {
-                    account = doc.data();
-                }
-            } catch (e) {
-                cloudError = e;
-                console.error('Cloud-Login fehlgeschlagen:', e);
-            }
-        }
-
+        let account = await getAccountFromCloud(userKey);
         if (!account) {
             const localAccounts = getAccounts();
             account = localAccounts[userKey];
         }
 
         if (!account) {
-            let msg = 'Benutzername nicht gefunden.';
-            if (!cloudAvailable) {
-                msg += ' (Cloud nicht verfügbar — nur lokale Accounts möglich)';
-            } else if (cloudError) {
-                msg += ` (Cloud-Fehler: ${cloudError.code || cloudError.message}. Prüfe die Firestore-Sicherheitsregeln!)`;
-            }
-            errorEl.textContent = msg;
+            errorEl.textContent = 'Benutzername nicht gefunden.';
             errorEl.classList.remove('hidden');
             return;
         }
@@ -1961,24 +1941,10 @@ const App = (() => {
             return;
         }
 
-        // Account lokal cachen
+        // Account auch lokal cachen
         const localAccounts = getAccounts();
         localAccounts[userKey] = account;
         saveAccounts(localAccounts);
-
-        // Account in Cloud synchronisieren (falls noch nicht dort)
-        if (cloudAvailable) {
-            try {
-                const cloudDoc = await db.collection('accounts').doc(userKey).get();
-                if (!cloudDoc.exists) {
-                    await db.collection('accounts').doc(userKey).set(account);
-                    console.log('Account erfolgreich in Cloud synchronisiert');
-                }
-            } catch (e) {
-                console.error('Account-Cloud-Sync fehlgeschlagen:', e);
-                alert('Hinweis: Account konnte nicht in die Cloud synchronisiert werden: ' + (e.code || e.message));
-            }
-        }
 
         currentUser = userKey;
         localStorage.setItem('vokabel_currentUser', currentUser);
@@ -2035,17 +2001,9 @@ const App = (() => {
         };
 
         // In Cloud UND lokal speichern
+        await saveAccountToCloud(userKeyName, accountData);
         localAccounts[userKeyName] = accountData;
         saveAccounts(localAccounts);
-
-        if (cloudAvailable) {
-            try {
-                await db.collection('accounts').doc(userKeyName).set(accountData);
-            } catch (e) {
-                console.error('Cloud-Registrierung fehlgeschlagen:', e);
-                alert('Achtung: Account wurde nur lokal gespeichert! Cloud-Sync fehlgeschlagen: ' + (e.code || e.message) + '\n\nPrüfe die Firestore-Sicherheitsregeln in der Firebase Console.');
-            }
-        }
 
         currentUser = userKeyName;
         localStorage.setItem('vokabel_currentUser', currentUser);
