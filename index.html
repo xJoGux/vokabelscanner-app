@@ -528,10 +528,13 @@ header h1 {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     color: var(--text-secondary);
     font-size: 0.9rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
 }
+
 
 
 .flashcard {
@@ -1500,6 +1503,10 @@ header h1 {
                         <select id="cards-kapitel-filter" disabled>
                             <option value="all">Alle Kapitel</option>
                         </select>
+                        <select id="cards-direction">
+                            <option value="foreign-to-native">Fremdsprache → Deutsch</option>
+                            <option value="native-to-foreign">Deutsch → Fremdsprache</option>
+                        </select>
                     </div>
                 </div>
                 <div id="flashcard" class="flashcard" tabindex="0">
@@ -1689,7 +1696,6 @@ header h1 {
             </div>
         </div>
     </div>
-
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <script>
@@ -1779,7 +1785,8 @@ const App = (() => {
                 lastUpdated: new Date().toISOString()
             });
         } catch (e) {
-            console.warn('Cloud-Sync fehlgeschlagen:', e);
+            console.error('Cloud-Sync fehlgeschlagen:', e);
+            showNotice('Cloud-Sync fehlgeschlagen: ' + (e.code || e.message));
         }
     }
 
@@ -1922,14 +1929,34 @@ const App = (() => {
         const userKey = username.toLowerCase();
 
         // Zuerst Cloud prüfen, dann lokal
-        let account = await getAccountFromCloud(userKey);
+        let account = null;
+        let cloudError = null;
+
+        if (cloudAvailable) {
+            try {
+                const doc = await db.collection('accounts').doc(userKey).get();
+                if (doc.exists) {
+                    account = doc.data();
+                }
+            } catch (e) {
+                cloudError = e;
+                console.error('Cloud-Login fehlgeschlagen:', e);
+            }
+        }
+
         if (!account) {
             const localAccounts = getAccounts();
             account = localAccounts[userKey];
         }
 
         if (!account) {
-            errorEl.textContent = 'Benutzername nicht gefunden.';
+            let msg = 'Benutzername nicht gefunden.';
+            if (!cloudAvailable) {
+                msg += ' (Cloud nicht verfügbar — nur lokale Accounts möglich)';
+            } else if (cloudError) {
+                msg += ` (Cloud-Fehler: ${cloudError.code || cloudError.message}. Prüfe die Firestore-Sicherheitsregeln!)`;
+            }
+            errorEl.textContent = msg;
             errorEl.classList.remove('hidden');
             return;
         }
@@ -1941,10 +1968,24 @@ const App = (() => {
             return;
         }
 
-        // Account auch lokal cachen
+        // Account lokal cachen
         const localAccounts = getAccounts();
         localAccounts[userKey] = account;
         saveAccounts(localAccounts);
+
+        // Account in Cloud synchronisieren (falls noch nicht dort)
+        if (cloudAvailable) {
+            try {
+                const cloudDoc = await db.collection('accounts').doc(userKey).get();
+                if (!cloudDoc.exists) {
+                    await db.collection('accounts').doc(userKey).set(account);
+                    console.log('Account erfolgreich in Cloud synchronisiert');
+                }
+            } catch (e) {
+                console.error('Account-Cloud-Sync fehlgeschlagen:', e);
+                alert('Hinweis: Account konnte nicht in die Cloud synchronisiert werden: ' + (e.code || e.message));
+            }
+        }
 
         currentUser = userKey;
         localStorage.setItem('vokabel_currentUser', currentUser);
@@ -2001,9 +2042,17 @@ const App = (() => {
         };
 
         // In Cloud UND lokal speichern
-        await saveAccountToCloud(userKeyName, accountData);
         localAccounts[userKeyName] = accountData;
         saveAccounts(localAccounts);
+
+        if (cloudAvailable) {
+            try {
+                await db.collection('accounts').doc(userKeyName).set(accountData);
+            } catch (e) {
+                console.error('Cloud-Registrierung fehlgeschlagen:', e);
+                alert('Achtung: Account wurde nur lokal gespeichert! Cloud-Sync fehlgeschlagen: ' + (e.code || e.message) + '\n\nPrüfe die Firestore-Sicherheitsregeln in der Firebase Console.');
+            }
+        }
 
         currentUser = userKeyName;
         localStorage.setItem('vokabel_currentUser', currentUser);
@@ -2384,8 +2433,18 @@ const App = (() => {
     function showCard() {
         if (currentCards.length === 0) return;
         const card = currentCards[currentCardIndex];
-        $('#card-word').textContent = card.word;
-        $('#card-translation').textContent = card.translation;
+        const reversed = $('#cards-direction').value === 'native-to-foreign';
+        if (reversed) {
+            $('#card-word').textContent = card.translation;
+            $('#card-translation').textContent = card.word;
+            $('.flashcard-front .card-label').textContent = 'Bedeutung';
+            $('.flashcard-back .card-label').textContent = 'Vokabel';
+        } else {
+            $('#card-word').textContent = card.word;
+            $('#card-translation').textContent = card.translation;
+            $('.flashcard-front .card-label').textContent = 'Vokabel';
+            $('.flashcard-back .card-label').textContent = 'Bedeutung';
+        }
         $('#cards-progress').textContent = `${currentCardIndex + 1} / ${currentCards.length}`;
         isFlipped = false;
         $('#flashcard').classList.remove('flipped');
@@ -2425,6 +2484,8 @@ const App = (() => {
                 }
             });
         });
+
+        $('#cards-direction').addEventListener('change', () => showCard());
 
         $('#cards-lernset-filter').addEventListener('change', () => {
             $('#cards-kapitel-filter').value = 'all';
