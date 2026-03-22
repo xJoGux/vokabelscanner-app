@@ -56,6 +56,7 @@ body {
     padding: 1rem;
 }
 
+/* --- Auth Screen --- */
 .auth-screen {
     min-height: 100vh;
     display: flex;
@@ -162,11 +163,14 @@ body {
     text-decoration: underline;
 }
 
+/* --- Header --- */
 .header-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 1.5rem 0 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
 }
 
 .header-row > div:first-child {
@@ -202,6 +206,7 @@ header h1 {
     font-size: 0.9rem;
 }
 
+/* --- Navigation --- */
 #main-nav {
     display: flex;
     gap: 0.25rem;
@@ -237,6 +242,7 @@ header h1 {
     color: white;
 }
 
+/* --- Views --- */
 .view {
     display: none;
 }
@@ -245,6 +251,7 @@ header h1 {
     display: block;
 }
 
+/* --- Buttons --- */
 .btn {
     padding: 0.6rem 1.2rem;
     border: none;
@@ -286,6 +293,7 @@ header h1 {
     opacity: 0.9;
 }
 
+/* --- Folder Select (Lernset / Kapitel) --- */
 .folder-select {
     display: flex;
     flex-direction: column;
@@ -325,6 +333,7 @@ header h1 {
     white-space: nowrap;
 }
 
+/* --- Filter Bar (shared across views) --- */
 .filter-bar {
     display: flex;
     gap: 0.5rem;
@@ -353,6 +362,7 @@ header h1 {
     font-size: 0.85rem;
 }
 
+/* --- Manual Add --- */
 .manual-add-area {
     background: var(--surface);
     border-radius: var(--radius);
@@ -433,6 +443,7 @@ header h1 {
     font-size: 0.9rem;
 }
 
+/* --- Status / Spinner --- */
 .status {
     display: flex;
     align-items: center;
@@ -458,6 +469,7 @@ header h1 {
     to { transform: rotate(360deg); }
 }
 
+/* --- Extracted Vocab Preview --- */
 .extracted-vocab {
     margin-top: 1rem;
     background: var(--surface);
@@ -486,6 +498,7 @@ header h1 {
     width: 18px;
     height: 18px;
     accent-color: var(--primary);
+    accent-color: var(--primary);
 }
 
 .vocab-word,
@@ -508,6 +521,7 @@ header h1 {
     justify-content: flex-end;
 }
 
+/* --- Flashcards --- */
 .cards-container {
     max-width: 500px;
     margin: 0 auto;
@@ -521,6 +535,7 @@ header h1 {
     color: var(--text-secondary);
     font-size: 0.9rem;
 }
+
 
 .flashcard {
     perspective: 1000px;
@@ -634,6 +649,7 @@ header h1 {
     color: var(--success);
 }
 
+/* --- Quiz --- */
 .quiz-setup {
     background: var(--surface);
     border-radius: var(--radius);
@@ -762,6 +778,7 @@ header h1 {
     margin: 1rem auto 0;
 }
 
+/* --- Quiz Results --- */
 .quiz-results {
     max-width: 500px;
     margin: 0 auto;
@@ -840,6 +857,7 @@ header h1 {
     margin: 1.5rem auto 0;
 }
 
+/* --- Lernset Manager --- */
 .lernset-manager {
     max-width: 700px;
     margin: 0 auto;
@@ -964,6 +982,7 @@ header h1 {
     min-width: auto !important;
 }
 
+/* --- Move/Copy Modal --- */
 .modal-overlay {
     position: fixed;
     inset: 0;
@@ -1027,6 +1046,7 @@ header h1 {
     margin-top: 1.25rem;
 }
 
+/* --- Settings --- */
 .settings-form {
     background: var(--surface);
     border-radius: var(--radius);
@@ -1179,6 +1199,7 @@ header h1 {
     font-size: 0.9rem;
 }
 
+/* --- Empty State --- */
 .empty-state {
     text-align: center;
     padding: 3rem 1rem;
@@ -1189,6 +1210,7 @@ header h1 {
     margin-bottom: 0.5rem;
 }
 
+/* --- Dark mode inputs --- */
 [data-theme="dark"] input,
 [data-theme="dark"] textarea,
 [data-theme="dark"] select {
@@ -1202,6 +1224,7 @@ header h1 {
     color: var(--text);
 }
 
+/* --- Theme Toggle --- */
 .theme-toggle {
     display: flex;
     gap: 0.5rem;
@@ -1225,6 +1248,7 @@ header h1 {
     border-color: var(--primary);
 }
 
+/* --- Schreibmodus (Writing Mode) --- */
 .write-container {
     max-width: 500px;
     margin: 0 auto;
@@ -1338,24 +1362,150 @@ header h1 {
     margin-bottom: 1rem;
 }
 
+/* --- Streaks --- */
+.header-streaks {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.streak-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.35rem 0.65rem;
+    border-radius: 20px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    transition: all 0.3s;
+}
+
+.streak-badge.streak-active {
+    border-color: transparent;
+}
+
+.streak-badge.streak-daily.streak-active {
+    background: linear-gradient(135deg, #ff6b35, #f7931e);
+    color: white;
+    box-shadow: 0 2px 8px rgba(255, 107, 53, 0.35);
+}
+
+.streak-badge.streak-answer.streak-active {
+    background: linear-gradient(135deg, #4f46e5, #818cf8);
+    color: white;
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.35);
+}
+
+.streak-icon {
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.streak-count {
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.streak-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.streak-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 12px;
+    background: rgba(79, 70, 229, 0.1);
+    color: var(--primary);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+@keyframes streakPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+}
+
+.streak-badge.streak-active .streak-icon {
+    animation: streakPulse 1.5s ease-in-out infinite;
+}
+
+/* --- Utility --- */
 .hidden {
     display: none !important;
 }
 
+/* --- Responsive --- */
 @media (max-width: 600px) {
-    #app { padding: 0.5rem; }
-    header h1 { font-size: 1.4rem; }
-    .nav-btn { font-size: 0.75rem; padding: 0.5rem 0.25rem; }
-    .card-word { font-size: 1.4rem; }
-    .flashcard { height: 220px; }
-    .quiz-choices { grid-template-columns: 1fr; }
-    .language-select { flex-direction: column; gap: 0.5rem; }
-    .filter-bar, .cards-filters { flex-direction: column; }
-    .list-header { flex-wrap: wrap; }
-    .folder-row { flex-wrap: wrap; }
-    .vocab-table th:nth-child(3), .vocab-table td:nth-child(3) { display: none; }
+    #app {
+        padding: 0.5rem;
+    }
+
+    header h1 {
+        font-size: 1.4rem;
+    }
+
+    .nav-btn {
+        font-size: 0.75rem;
+        padding: 0.5rem 0.25rem;
+    }
+
+    .card-word {
+        font-size: 1.4rem;
+    }
+
+    .flashcard {
+        height: 220px;
+    }
+
+    .quiz-choices {
+        grid-template-columns: 1fr;
+    }
+
+    .header-streaks {
+        gap: 0.3rem;
+    }
+
+    .streak-badge {
+        padding: 0.25rem 0.45rem;
+        font-size: 0.7rem;
+    }
+
+    .streak-label {
+        display: none;
+    }
+
+    .language-select {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .filter-bar,
+    .cards-filters {
+        flex-direction: column;
+    }
+
+    .list-header {
+        flex-wrap: wrap;
+    }
+
+    .folder-row {
+        flex-wrap: wrap;
+    }
+
+    .vocab-table th:nth-child(3),
+    .vocab-table td:nth-child(3) {
+        display: none;
+    }
 }
 
+/* --- Notice Banner --- */
 .app-notice {
     position: fixed;
     bottom: 1rem;
@@ -1441,6 +1591,18 @@ header h1 {
                 <div>
                     <h1>MemoryDeck</h1>
                     <p class="subtitle">Vokabeln eingeben &middot; lernen &middot; meistern</p>
+                </div>
+                <div class="header-streaks">
+                    <div class="streak-badge streak-daily" id="daily-streak-badge" title="Tage hintereinander gelernt">
+                        <span class="streak-icon">&#128293;</span>
+                        <span class="streak-count" id="daily-streak-count">0</span>
+                        <span class="streak-label">Tage</span>
+                    </div>
+                    <div class="streak-badge streak-answer" id="answer-streak-badge" title="Richtige Antworten hintereinander">
+                        <span class="streak-icon">&#9889;</span>
+                        <span class="streak-count" id="answer-streak-count">0</span>
+                        <span class="streak-label">Serie</span>
+                    </div>
                 </div>
                 <div class="header-user">
                     <span id="current-user" class="current-user-name"></span>
@@ -1582,6 +1744,7 @@ header h1 {
                 <div class="write-progress">
                     <span id="write-progress">1 / 10</span>
                     <span id="write-score">0 richtig</span>
+                    <span class="streak-inline" id="write-answer-streak" title="Richtige Antworten hintereinander">&#9889; <span id="write-streak-num">0</span> Serie</span>
                 </div>
                 <div class="write-card">
                     <div class="write-prompt-label">Übersetze:</div>
@@ -1639,6 +1802,7 @@ header h1 {
                 <div class="quiz-header">
                     <span id="quiz-progress">Frage 1/10</span>
                     <span id="quiz-score">0 richtig</span>
+                    <span class="streak-inline" id="quiz-answer-streak" title="Richtige Antworten hintereinander">&#9889; <span id="quiz-streak-num">0</span> Serie</span>
                 </div>
                 <div class="quiz-question">
                     <p id="quiz-prompt" class="quiz-prompt"></p>
@@ -1752,9 +1916,13 @@ header h1 {
 // ============================================================
 
 const App = (() => {
+    // --- DOM Cache ---
     const $ = (sel) => document.querySelector(sel);
     const $$ = (sel) => document.querySelectorAll(sel);
 
+    // --- Firebase Setup ---
+    // WICHTIG: Ersetze diese Werte mit deinen eigenen Firebase-Projektdaten!
+    // Anleitung: https://console.firebase.google.com → Projekt erstellen → Projekteinstellungen → Web-App hinzufügen
     const firebaseConfig = {
         apiKey: "AIzaSyBqYqgPi_qeSxhmVpeDZcLd8Hl6OotdA_I",
         authDomain: "memorydeck-af728.firebaseapp.com",
@@ -1777,7 +1945,10 @@ const App = (() => {
         console.warn('Firebase nicht verfügbar, nur lokaler Modus:', e);
     }
 
+    // --- Auth State ---
     let currentUser = null;
+
+    // --- State ---
     let lernsets = [];
     let vocabSets = [];
     let allVocabs = [];
@@ -1786,6 +1957,13 @@ const App = (() => {
     let isFlipped = false;
     let quizState = null;
 
+    // --- Streak State ---
+    let dailyStreak = 0;
+    let lastStudyDate = null;
+    let answerStreak = 0;
+    let bestAnswerStreak = 0;
+
+    // --- Auth: Password Hashing ---
     async function hashPassword(password) {
         const encoder = new TextEncoder();
         const data = encoder.encode(password);
@@ -1794,6 +1972,7 @@ const App = (() => {
         return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
+    // --- Cloud: Account-Funktionen ---
     async function getAccountFromCloud(username) {
         if (!cloudAvailable) return null;
         try {
@@ -1818,7 +1997,9 @@ const App = (() => {
         if (!cloudAvailable || !currentUser) return;
         try {
             await db.collection('userData').doc(currentUser).set({
-                lernsets, vocabSets, allVocabs,
+                lernsets,
+                vocabSets,
+                allVocabs,
                 lastUpdated: new Date().toISOString()
             });
         } catch (e) {
@@ -1836,6 +2017,7 @@ const App = (() => {
                 lernsets = data.lernsets || [];
                 vocabSets = data.vocabSets || [];
                 allVocabs = data.allVocabs || [];
+                // Cache lokal
                 localStorage.setItem(userKey('lernsets'), JSON.stringify(lernsets));
                 localStorage.setItem(userKey('vocabSets'), JSON.stringify(vocabSets));
                 localStorage.setItem(userKey('allVocabs'), JSON.stringify(allVocabs));
@@ -1848,6 +2030,7 @@ const App = (() => {
         }
     }
 
+    // --- Local Account-Funktionen (Fallback) ---
     function getAccounts() {
         return JSON.parse(localStorage.getItem('vokabel_accounts') || '{}');
     }
@@ -1856,32 +2039,45 @@ const App = (() => {
         localStorage.setItem('vokabel_accounts', JSON.stringify(accounts));
     }
 
+    // --- Auth: User-scoped storage keys ---
     function userKey(key) {
         return `user_${currentUser}_${key}`;
     }
 
     async function loadUserData() {
+        // Versuche zuerst aus der Cloud zu laden
         const loadedFromCloud = await loadFromCloud();
+
         if (!loadedFromCloud) {
+            // Fallback: localStorage
             lernsets = JSON.parse(localStorage.getItem(userKey('lernsets')) || '[]');
             vocabSets = JSON.parse(localStorage.getItem(userKey('vocabSets')) || '[]');
             allVocabs = JSON.parse(localStorage.getItem(userKey('allVocabs')) || '[]');
+
+            // Migrate old unscoped data to first user who logs in
             if (lernsets.length === 0 && vocabSets.length === 0 && allVocabs.length === 0) {
                 const oldLernsets = JSON.parse(localStorage.getItem('lernsets') || '[]');
                 const oldVocabSets = JSON.parse(localStorage.getItem('vocabSets') || '[]');
                 const oldAllVocabs = JSON.parse(localStorage.getItem('allVocabs') || '[]');
                 if (oldLernsets.length > 0 || oldVocabSets.length > 0 || oldAllVocabs.length > 0) {
-                    lernsets = oldLernsets; vocabSets = oldVocabSets; allVocabs = oldAllVocabs;
+                    lernsets = oldLernsets;
+                    vocabSets = oldVocabSets;
+                    allVocabs = oldAllVocabs;
                     save();
-                    localStorage.removeItem('lernsets'); localStorage.removeItem('vocabSets'); localStorage.removeItem('allVocabs');
+                    localStorage.removeItem('lernsets');
+                    localStorage.removeItem('vocabSets');
+                    localStorage.removeItem('allVocabs');
                 }
             }
+
+            // Lokale Daten in die Cloud hochladen falls vorhanden
             if (cloudAvailable && (lernsets.length > 0 || vocabSets.length > 0 || allVocabs.length > 0)) {
                 saveToCloud();
             }
         }
     }
 
+    // --- Auth: UI ---
     async function initAuth() {
         $('#show-register').addEventListener('click', e => {
             e.preventDefault();
@@ -1889,29 +2085,50 @@ const App = (() => {
             $('#auth-register').classList.remove('hidden');
             $('#register-error').classList.add('hidden');
         });
+
         $('#show-login').addEventListener('click', e => {
             e.preventDefault();
             $('#auth-register').classList.add('hidden');
             $('#auth-login').classList.remove('hidden');
             $('#login-error').classList.add('hidden');
         });
+
         $('#btn-login').addEventListener('click', handleLogin);
-        $('#login-password').addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
-        $('#login-username').addEventListener('keydown', e => { if (e.key === 'Enter') $('#login-password').focus(); });
+        $('#login-password').addEventListener('keydown', e => {
+            if (e.key === 'Enter') handleLogin();
+        });
+        $('#login-username').addEventListener('keydown', e => {
+            if (e.key === 'Enter') $('#login-password').focus();
+        });
+
         $('#btn-register').addEventListener('click', handleRegister);
-        $('#register-password-confirm').addEventListener('keydown', e => { if (e.key === 'Enter') handleRegister(); });
+        $('#register-password-confirm').addEventListener('keydown', e => {
+            if (e.key === 'Enter') handleRegister();
+        });
+
         $('#btn-logout').addEventListener('click', handleLogout);
 
+        // Check if already logged in
         const savedUser = localStorage.getItem('vokabel_currentUser');
         if (savedUser) {
+            // Prüfe lokal UND in der Cloud
             const localAccounts = getAccounts();
             let accountExists = !!localAccounts[savedUser];
+
             if (!accountExists && cloudAvailable) {
                 const cloudAccount = await getAccountFromCloud(savedUser);
                 accountExists = !!cloudAccount;
-                if (cloudAccount) { localAccounts[savedUser] = cloudAccount; saveAccounts(localAccounts); }
+                if (cloudAccount) {
+                    localAccounts[savedUser] = cloudAccount;
+                    saveAccounts(localAccounts);
+                }
             }
-            if (accountExists) { currentUser = savedUser; showApp(); return; }
+
+            if (accountExists) {
+                currentUser = savedUser;
+                showApp();
+                return;
+            }
         }
         showAuth();
     }
@@ -1920,27 +2137,74 @@ const App = (() => {
         const username = $('#login-username').value.trim();
         const password = $('#login-password').value;
         const errorEl = $('#login-error');
-        if (!username || !password) { errorEl.textContent = 'Bitte Benutzername und Passwort eingeben.'; errorEl.classList.remove('hidden'); return; }
-        const userKey = username.toLowerCase();
-        let account = null; let cloudError = null;
-        if (cloudAvailable) {
-            try { const doc = await db.collection('accounts').doc(userKey).get(); if (doc.exists) account = doc.data(); }
-            catch (e) { cloudError = e; console.error('Cloud-Login fehlgeschlagen:', e); }
+
+        if (!username || !password) {
+            errorEl.textContent = 'Bitte Benutzername und Passwort eingeben.';
+            errorEl.classList.remove('hidden');
+            return;
         }
-        if (!account) { const localAccounts = getAccounts(); account = localAccounts[userKey]; }
+
+        const userKey = username.toLowerCase();
+
+        // Zuerst Cloud prüfen, dann lokal
+        let account = null;
+        let cloudError = null;
+
+        if (cloudAvailable) {
+            try {
+                const doc = await db.collection('accounts').doc(userKey).get();
+                if (doc.exists) {
+                    account = doc.data();
+                }
+            } catch (e) {
+                cloudError = e;
+                console.error('Cloud-Login fehlgeschlagen:', e);
+            }
+        }
+
+        if (!account) {
+            const localAccounts = getAccounts();
+            account = localAccounts[userKey];
+        }
+
         if (!account) {
             let msg = 'Benutzername nicht gefunden.';
-            if (!cloudAvailable) msg += ' (Cloud nicht verfügbar — nur lokale Accounts möglich)';
-            else if (cloudError) msg += ` (Cloud-Fehler: ${cloudError.code || cloudError.message}. Prüfe die Firestore-Sicherheitsregeln!)`;
-            errorEl.textContent = msg; errorEl.classList.remove('hidden'); return;
+            if (!cloudAvailable) {
+                msg += ' (Cloud nicht verfügbar — nur lokale Accounts möglich)';
+            } else if (cloudError) {
+                msg += ` (Cloud-Fehler: ${cloudError.code || cloudError.message}. Prüfe die Firestore-Sicherheitsregeln!)`;
+            }
+            errorEl.textContent = msg;
+            errorEl.classList.remove('hidden');
+            return;
         }
+
         const hash = await hashPassword(password);
-        if (hash !== account.passwordHash) { errorEl.textContent = 'Falsches Passwort.'; errorEl.classList.remove('hidden'); return; }
-        const localAccounts = getAccounts(); localAccounts[userKey] = account; saveAccounts(localAccounts);
-        if (cloudAvailable) {
-            try { const cloudDoc = await db.collection('accounts').doc(userKey).get(); if (!cloudDoc.exists) { await db.collection('accounts').doc(userKey).set(account); } }
-            catch (e) { console.error('Account-Cloud-Sync fehlgeschlagen:', e); alert('Hinweis: Account konnte nicht in die Cloud synchronisiert werden: ' + (e.code || e.message)); }
+        if (hash !== account.passwordHash) {
+            errorEl.textContent = 'Falsches Passwort.';
+            errorEl.classList.remove('hidden');
+            return;
         }
+
+        // Account lokal cachen
+        const localAccounts = getAccounts();
+        localAccounts[userKey] = account;
+        saveAccounts(localAccounts);
+
+        // Account in Cloud synchronisieren (falls noch nicht dort)
+        if (cloudAvailable) {
+            try {
+                const cloudDoc = await db.collection('accounts').doc(userKey).get();
+                if (!cloudDoc.exists) {
+                    await db.collection('accounts').doc(userKey).set(account);
+                    console.log('Account erfolgreich in Cloud synchronisiert');
+                }
+            } catch (e) {
+                console.error('Account-Cloud-Sync fehlgeschlagen:', e);
+                alert('Hinweis: Account konnte nicht in die Cloud synchronisiert werden: ' + (e.code || e.message));
+            }
+        }
+
         currentUser = userKey;
         localStorage.setItem('vokabel_currentUser', currentUser);
         localStorage.setItem('vokabel_currentPassword', password);
@@ -1952,21 +2216,63 @@ const App = (() => {
         const password = $('#register-password').value;
         const passwordConfirm = $('#register-password-confirm').value;
         const errorEl = $('#register-error');
-        if (!username || !password) { errorEl.textContent = 'Bitte alle Felder ausfüllen.'; errorEl.classList.remove('hidden'); return; }
-        if (username.length < 3) { errorEl.textContent = 'Benutzername muss mindestens 3 Zeichen lang sein.'; errorEl.classList.remove('hidden'); return; }
-        if (password.length < 4) { errorEl.textContent = 'Passwort muss mindestens 4 Zeichen lang sein.'; errorEl.classList.remove('hidden'); return; }
-        if (password !== passwordConfirm) { errorEl.textContent = 'Passwörter stimmen nicht überein.'; errorEl.classList.remove('hidden'); return; }
+
+        if (!username || !password) {
+            errorEl.textContent = 'Bitte alle Felder ausfüllen.';
+            errorEl.classList.remove('hidden');
+            return;
+        }
+
+        if (username.length < 3) {
+            errorEl.textContent = 'Benutzername muss mindestens 3 Zeichen lang sein.';
+            errorEl.classList.remove('hidden');
+            return;
+        }
+
+        if (password.length < 4) {
+            errorEl.textContent = 'Passwort muss mindestens 4 Zeichen lang sein.';
+            errorEl.classList.remove('hidden');
+            return;
+        }
+
+        if (password !== passwordConfirm) {
+            errorEl.textContent = 'Passwörter stimmen nicht überein.';
+            errorEl.classList.remove('hidden');
+            return;
+        }
+
         const userKeyName = username.toLowerCase();
+
+        // Prüfe in Cloud UND lokal ob Username schon existiert
         const cloudAccount = await getAccountFromCloud(userKeyName);
         const localAccounts = getAccounts();
-        if (cloudAccount || localAccounts[userKeyName]) { errorEl.textContent = 'Benutzername ist bereits vergeben.'; errorEl.classList.remove('hidden'); return; }
-        const hash = await hashPassword(password);
-        const accountData = { username, passwordHash: hash, created: new Date().toISOString() };
-        localAccounts[userKeyName] = accountData; saveAccounts(localAccounts);
-        if (cloudAvailable) {
-            try { await db.collection('accounts').doc(userKeyName).set(accountData); }
-            catch (e) { console.error('Cloud-Registrierung fehlgeschlagen:', e); alert('Achtung: Account wurde nur lokal gespeichert! Cloud-Sync fehlgeschlagen: ' + (e.code || e.message)); }
+
+        if (cloudAccount || localAccounts[userKeyName]) {
+            errorEl.textContent = 'Benutzername ist bereits vergeben.';
+            errorEl.classList.remove('hidden');
+            return;
         }
+
+        const hash = await hashPassword(password);
+        const accountData = {
+            username: username,
+            passwordHash: hash,
+            created: new Date().toISOString()
+        };
+
+        // In Cloud UND lokal speichern
+        localAccounts[userKeyName] = accountData;
+        saveAccounts(localAccounts);
+
+        if (cloudAvailable) {
+            try {
+                await db.collection('accounts').doc(userKeyName).set(accountData);
+            } catch (e) {
+                console.error('Cloud-Registrierung fehlgeschlagen:', e);
+                alert('Achtung: Account wurde nur lokal gespeichert! Cloud-Sync fehlgeschlagen: ' + (e.code || e.message) + '\n\nPrüfe die Firestore-Sicherheitsregeln in der Firebase Console.');
+            }
+        }
+
         currentUser = userKeyName;
         localStorage.setItem('vokabel_currentUser', currentUser);
         localStorage.setItem('vokabel_currentPassword', password);
@@ -1975,56 +2281,98 @@ const App = (() => {
 
     function handleLogout() {
         currentUser = null;
-        localStorage.removeItem('vokabel_currentUser'); localStorage.removeItem('vokabel_currentPassword');
-        lernsets = []; vocabSets = []; allVocabs = [];
-        $('#login-username').value = ''; $('#login-password').value = '';
-        $('#register-username').value = ''; $('#register-password').value = ''; $('#register-password-confirm').value = '';
-        $('#login-error').classList.add('hidden'); $('#register-error').classList.add('hidden');
+        localStorage.removeItem('vokabel_currentUser');
+        localStorage.removeItem('vokabel_currentPassword');
+        lernsets = [];
+        vocabSets = [];
+        allVocabs = [];
+        // Reset form fields
+        $('#login-username').value = '';
+        $('#login-password').value = '';
+        $('#register-username').value = '';
+        $('#register-password').value = '';
+        $('#register-password-confirm').value = '';
+        $('#login-error').classList.add('hidden');
+        $('#register-error').classList.add('hidden');
         showAuth();
     }
 
     function showAuth() {
-        $('#auth-screen').classList.remove('hidden'); $('#app').classList.add('hidden');
-        $('#auth-login').classList.remove('hidden'); $('#auth-register').classList.add('hidden');
+        $('#auth-screen').classList.remove('hidden');
+        $('#app').classList.add('hidden');
+        $('#auth-login').classList.remove('hidden');
+        $('#auth-register').classList.add('hidden');
     }
 
     async function showApp() {
-        $('#auth-screen').classList.add('hidden'); $('#app').classList.remove('hidden');
+        $('#auth-screen').classList.add('hidden');
+        $('#app').classList.remove('hidden');
+
+        // Username anzeigen - Cloud oder lokal
         let account = await getAccountFromCloud(currentUser);
-        if (!account) { const localAccounts = getAccounts(); account = localAccounts[currentUser]; }
+        if (!account) {
+            const localAccounts = getAccounts();
+            account = localAccounts[currentUser];
+        }
         $('#current-user').textContent = account?.username || currentUser;
-        await loadUserData(); initAppModules();
+
+        await loadUserData();
+        loadStreakData();
+        initAppModules();
     }
 
     let appInitialized = false;
     function initAppModules() {
         if (!appInitialized) {
-            migrateData(); initNav(); initManualAdd(); initCards(); initWrite(); initQuiz(); initList(); initSettings();
+            migrateData();
+            initNav();
+            initManualAdd();
+            initCards();
+            initWrite();
+            initQuiz();
+            initList();
+            initSettings();
             appInitialized = true;
-        } else { migrateData(); refreshAddDropdowns(); refreshCards(); }
-        const savedTheme = localStorage.getItem('theme') || 'light'; applyTheme(savedTheme);
+        } else {
+            migrateData();
+            refreshAddDropdowns();
+            refreshCards();
+        }
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        applyTheme(savedTheme);
     }
 
+    // --- Migration: ensure old data gets a default lernset ---
     function migrateData() {
         if (vocabSets.length > 0 && lernsets.length === 0) {
-            lernsets.push({ id: 'default', name: 'Allgemein', sourceLang: 'Englisch', targetLang: 'Deutsch' });
-            vocabSets.forEach(s => { if (!s.lernsetId) s.lernsetId = 'default'; });
+            const defaultLernset = { id: 'default', name: 'Allgemein', sourceLang: 'Englisch', targetLang: 'Deutsch' };
+            lernsets.push(defaultLernset);
+            vocabSets.forEach(s => {
+                if (!s.lernsetId) s.lernsetId = 'default';
+            });
             save();
         }
     }
 
+    // --- Navigation ---
     function initNav() {
         $$('.nav-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const view = btn.dataset.view;
-                $$('.nav-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active');
-                $$('.view').forEach(v => v.classList.remove('active')); $(`#view-${view}`).classList.add('active');
-                if (view === 'cards') refreshCards(); if (view === 'write') refreshWrite();
-                if (view === 'quiz') refreshQuiz(); if (view === 'list') refreshList();
+                $$('.nav-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                $$('.view').forEach(v => v.classList.remove('active'));
+                $(`#view-${view}`).classList.add('active');
+
+                if (view === 'cards') refreshCards();
+                if (view === 'write') refreshWrite();
+                if (view === 'quiz') refreshQuiz();
+                if (view === 'list') refreshList();
             });
         });
     }
 
+    // --- Storage ---
     function save() {
         localStorage.setItem(userKey('lernsets'), JSON.stringify(lernsets));
         localStorage.setItem(userKey('vocabSets'), JSON.stringify(vocabSets));
@@ -2032,37 +2380,182 @@ const App = (() => {
         saveToCloud();
     }
 
+    // --- Streak Functions ---
+    async function loadStreakData() {
+        if (cloudAvailable && currentUser) {
+            try {
+                const doc = await db.collection('userData').doc(currentUser).get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    if (data.dailyStreak !== undefined) {
+                        dailyStreak = data.dailyStreak || 0;
+                        lastStudyDate = data.lastStudyDate || null;
+                        answerStreak = data.answerStreak || 0;
+                        bestAnswerStreak = data.bestAnswerStreak || 0;
+                        localStorage.setItem(userKey('dailyStreak'), dailyStreak.toString());
+                        localStorage.setItem(userKey('lastStudyDate'), lastStudyDate || '');
+                        localStorage.setItem(userKey('answerStreak'), answerStreak.toString());
+                        localStorage.setItem(userKey('bestAnswerStreak'), bestAnswerStreak.toString());
+                        checkDailyStreak();
+                        updateStreakUI();
+                        return;
+                    }
+                }
+            } catch (e) {
+                console.warn('Streak cloud load failed:', e);
+            }
+        }
+        dailyStreak = parseInt(localStorage.getItem(userKey('dailyStreak')) || '0');
+        lastStudyDate = localStorage.getItem(userKey('lastStudyDate')) || null;
+        answerStreak = parseInt(localStorage.getItem(userKey('answerStreak')) || '0');
+        bestAnswerStreak = parseInt(localStorage.getItem(userKey('bestAnswerStreak')) || '0');
+        checkDailyStreak();
+        updateStreakUI();
+    }
+
+    function saveStreakData() {
+        localStorage.setItem(userKey('dailyStreak'), dailyStreak.toString());
+        localStorage.setItem(userKey('lastStudyDate'), lastStudyDate || '');
+        localStorage.setItem(userKey('answerStreak'), answerStreak.toString());
+        localStorage.setItem(userKey('bestAnswerStreak'), bestAnswerStreak.toString());
+        if (cloudAvailable && currentUser) {
+            db.collection('userData').doc(currentUser).set({
+                dailyStreak,
+                lastStudyDate,
+                answerStreak,
+                bestAnswerStreak
+            }, { merge: true }).catch(e => console.warn('Streak cloud sync failed:', e));
+        }
+    }
+
+    function getTodayString() {
+        return new Date().toISOString().slice(0, 10);
+    }
+
+    function checkDailyStreak() {
+        const today = getTodayString();
+        if (!lastStudyDate) return;
+        const last = new Date(lastStudyDate);
+        const now = new Date(today);
+        const diffDays = Math.floor((now - last) / (1000 * 60 * 60 * 24));
+        if (diffDays > 1) {
+            dailyStreak = 0;
+            saveStreakData();
+        }
+    }
+
+    function recordStudyActivity() {
+        const today = getTodayString();
+        if (lastStudyDate === today) return;
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().slice(0, 10);
+        if (lastStudyDate === yesterdayStr) {
+            dailyStreak++;
+        } else {
+            dailyStreak = 1;
+        }
+        lastStudyDate = today;
+        saveStreakData();
+        updateStreakUI();
+    }
+
+    function recordCorrectAnswer() {
+        answerStreak++;
+        if (answerStreak > bestAnswerStreak) {
+            bestAnswerStreak = answerStreak;
+        }
+        saveStreakData();
+        updateStreakUI();
+        recordStudyActivity();
+    }
+
+    function recordWrongAnswer() {
+        answerStreak = 0;
+        saveStreakData();
+        updateStreakUI();
+        recordStudyActivity();
+    }
+
+    function updateStreakUI() {
+        const dailyCountEl = $('#daily-streak-count');
+        const answerCountEl = $('#answer-streak-count');
+        const dailyBadge = $('#daily-streak-badge');
+        const answerBadge = $('#answer-streak-badge');
+
+        if (dailyCountEl) dailyCountEl.textContent = dailyStreak;
+        if (answerCountEl) answerCountEl.textContent = answerStreak;
+
+        if (dailyBadge) {
+            dailyBadge.classList.toggle('streak-active', dailyStreak >= 2);
+        }
+        if (answerBadge) {
+            answerBadge.classList.toggle('streak-active', answerStreak >= 3);
+        }
+
+        const quizStreakNum = $('#quiz-streak-num');
+        if (quizStreakNum) quizStreakNum.textContent = answerStreak;
+
+        const writeStreakNum = $('#write-streak-num');
+        if (writeStreakNum) writeStreakNum.textContent = answerStreak;
+    }
+
+    // --- Helper: get vocabs filtered by lernset/kapitel ---
     function getFilteredVocabs(lernsetId, kapitelId) {
         if (!lernsetId || lernsetId === 'all') return [...allVocabs];
-        const setIds = vocabSets.filter(s => s.lernsetId === lernsetId && (!kapitelId || kapitelId === 'all' || s.id === kapitelId)).map(s => s.id);
+        const setIds = vocabSets
+            .filter(s => s.lernsetId === lernsetId && (!kapitelId || kapitelId === 'all' || s.id === kapitelId))
+            .map(s => s.id);
         return allVocabs.filter(v => setIds.includes(v.setId));
     }
 
+    // --- Helper: render lernset > kapitel filter dropdowns ---
     function renderFilterDropdowns(lernsetSelect, kapitelSelect, selectedLernset, selectedKapitel) {
         lernsetSelect.innerHTML = '<option value="all">Alle Lernsets</option>';
-        lernsets.forEach(ls => { lernsetSelect.innerHTML += `<option value="${ls.id}" ${ls.id === selectedLernset ? 'selected' : ''}>${escapeHtml(ls.name)}</option>`; });
+        lernsets.forEach(ls => {
+            lernsetSelect.innerHTML += `<option value="${ls.id}" ${ls.id === selectedLernset ? 'selected' : ''}>${escapeHtml(ls.name)}</option>`;
+        });
+
         kapitelSelect.innerHTML = '<option value="all">Alle Kapitel</option>';
         if (selectedLernset && selectedLernset !== 'all') {
-            vocabSets.filter(s => s.lernsetId === selectedLernset).forEach(s => { kapitelSelect.innerHTML += `<option value="${s.id}" ${s.id === selectedKapitel ? 'selected' : ''}>${escapeHtml(s.name)}</option>`; });
+            vocabSets.filter(s => s.lernsetId === selectedLernset).forEach(s => {
+                kapitelSelect.innerHTML += `<option value="${s.id}" ${s.id === selectedKapitel ? 'selected' : ''}>${escapeHtml(s.name)}</option>`;
+            });
             kapitelSelect.disabled = false;
-        } else { kapitelSelect.disabled = true; }
+        } else {
+            kapitelSelect.disabled = true;
+        }
     }
 
+    // --- Manual Vocab Input ---
     function initManualAdd() {
         $('#btn-add-row').addEventListener('click', addManualRow);
         $('#btn-save-manual').addEventListener('click', saveManualVocabs);
         $('#btn-new-lernset').addEventListener('click', createNewLernset);
         $('#btn-new-kapitel').addEventListener('click', createNewKapitel);
-        $('#add-lernset').addEventListener('change', () => { updateKapitelDropdown(); });
-        setupRemoveButtons(); refreshAddDropdowns();
+
+        $('#add-lernset').addEventListener('change', () => {
+            updateKapitelDropdown();
+        });
+
+        setupRemoveButtons();
+        refreshAddDropdowns();
+
         $('#manual-vocab-list').addEventListener('keydown', e => {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 const rows = $$('#manual-vocab-list .manual-vocab-row');
                 const lastRow = rows[rows.length - 1];
                 const lastTranslation = lastRow.querySelector('.vocab-translation');
-                if (e.target === lastTranslation && lastTranslation.value.trim()) { addManualRow(); }
-                else { const inputs = [...$$('#manual-vocab-list input')]; const idx = inputs.indexOf(e.target); if (idx >= 0 && idx < inputs.length - 1) inputs[idx + 1].focus(); }
+                if (e.target === lastTranslation && lastTranslation.value.trim()) {
+                    addManualRow();
+                } else {
+                    const inputs = [...$$('#manual-vocab-list input')];
+                    const idx = inputs.indexOf(e.target);
+                    if (idx >= 0 && idx < inputs.length - 1) {
+                        inputs[idx + 1].focus();
+                    }
+                }
             }
         });
     }
@@ -2070,7 +2563,9 @@ const App = (() => {
     function refreshAddDropdowns() {
         const lsSelect = $('#add-lernset');
         lsSelect.innerHTML = '<option value="">Lernset wählen...</option>';
-        lernsets.forEach(ls => { lsSelect.innerHTML += `<option value="${ls.id}">${escapeHtml(ls.name)}</option>`; });
+        lernsets.forEach(ls => {
+            lsSelect.innerHTML += `<option value="${ls.id}">${escapeHtml(ls.name)}</option>`;
+        });
         updateKapitelDropdown();
     }
 
@@ -2079,125 +2574,288 @@ const App = (() => {
         const kapSelect = $('#add-kapitel');
         kapSelect.innerHTML = '<option value="">Kapitel wählen...</option>';
         if (lernsetId) {
-            vocabSets.filter(s => s.lernsetId === lernsetId).forEach(s => { kapSelect.innerHTML += `<option value="${s.id}">${escapeHtml(s.name)}</option>`; });
-            kapSelect.disabled = false; $('#btn-new-kapitel').disabled = false;
-        } else { kapSelect.disabled = true; $('#btn-new-kapitel').disabled = true; }
+            vocabSets.filter(s => s.lernsetId === lernsetId).forEach(s => {
+                kapSelect.innerHTML += `<option value="${s.id}">${escapeHtml(s.name)}</option>`;
+            });
+            kapSelect.disabled = false;
+            $('#btn-new-kapitel').disabled = false;
+        } else {
+            kapSelect.disabled = true;
+            $('#btn-new-kapitel').disabled = true;
+        }
     }
 
     function createNewLernset() {
         const name = prompt('Name des neuen Lernsets (z.B. "Englisch", "Französisch"):');
         if (!name || !name.trim()) return;
-        const sourceLang = $('#source-lang').value; const targetLang = $('#target-lang').value;
+
+        const sourceLang = $('#source-lang').value;
+        const targetLang = $('#target-lang').value;
         const id = Date.now().toString();
         lernsets.push({ id, name: name.trim(), sourceLang, targetLang });
-        save(); refreshAddDropdowns(); $('#add-lernset').value = id; updateKapitelDropdown();
+        save();
+        refreshAddDropdowns();
+        $('#add-lernset').value = id;
+        updateKapitelDropdown();
     }
 
     function createNewKapitel() {
         const lernsetId = $('#add-lernset').value;
-        if (!lernsetId) { alert('Bitte zuerst ein Lernset wählen.'); return; }
+        if (!lernsetId) {
+            alert('Bitte zuerst ein Lernset wählen.');
+            return;
+        }
+
         const name = prompt('Name des neuen Kapitels (z.B. "Unit 1", "Lektion 3"):');
         if (!name || !name.trim()) return;
-        const ls = lernsets.find(l => l.id === lernsetId); const id = Date.now().toString();
-        vocabSets.push({ id, name: name.trim(), lernsetId, sourceLang: ls?.sourceLang || 'Englisch', targetLang: ls?.targetLang || 'Deutsch', date: new Date().toISOString() });
-        save(); updateKapitelDropdown(); $('#add-kapitel').value = id;
+
+        const ls = lernsets.find(l => l.id === lernsetId);
+        const id = Date.now().toString();
+        vocabSets.push({
+            id,
+            name: name.trim(),
+            lernsetId,
+            sourceLang: ls?.sourceLang || 'Englisch',
+            targetLang: ls?.targetLang || 'Deutsch',
+            date: new Date().toISOString()
+        });
+        save();
+        updateKapitelDropdown();
+        $('#add-kapitel').value = id;
     }
 
     function addManualRow() {
-        const list = $('#manual-vocab-list'); const row = document.createElement('div');
+        const list = $('#manual-vocab-list');
+        const row = document.createElement('div');
         row.className = 'manual-vocab-row';
-        row.innerHTML = `<input type="text" class="vocab-word" placeholder="Vokabel"><span class="vocab-arrow">&rarr;</span><input type="text" class="vocab-translation" placeholder="Übersetzung"><button class="btn-remove-row" title="Entfernen">&times;</button>`;
-        list.appendChild(row); setupRemoveButtons(); row.querySelector('.vocab-word').focus();
+        row.innerHTML = `
+            <input type="text" class="vocab-word" placeholder="Vokabel">
+            <span class="vocab-arrow">&rarr;</span>
+            <input type="text" class="vocab-translation" placeholder="Übersetzung">
+            <button class="btn-remove-row" title="Entfernen">&times;</button>
+        `;
+        list.appendChild(row);
+        setupRemoveButtons();
+        row.querySelector('.vocab-word').focus();
     }
 
     function setupRemoveButtons() {
         $$('.btn-remove-row').forEach(btn => {
             btn.onclick = () => {
                 const rows = $$('#manual-vocab-list .manual-vocab-row');
-                if (rows.length > 1) btn.closest('.manual-vocab-row').remove();
-                else { const row = btn.closest('.manual-vocab-row'); row.querySelector('.vocab-word').value = ''; row.querySelector('.vocab-translation').value = ''; }
+                if (rows.length > 1) {
+                    btn.closest('.manual-vocab-row').remove();
+                } else {
+                    const row = btn.closest('.manual-vocab-row');
+                    row.querySelector('.vocab-word').value = '';
+                    row.querySelector('.vocab-translation').value = '';
+                }
             };
         });
     }
 
     function saveManualVocabs() {
-        const rows = $$('#manual-vocab-list .manual-vocab-row'); const vocabs = [];
+        const rows = $$('#manual-vocab-list .manual-vocab-row');
+        const vocabs = [];
+
         rows.forEach(row => {
             const word = row.querySelector('.vocab-word').value.trim();
             const translation = row.querySelector('.vocab-translation').value.trim();
-            if (word && translation) vocabs.push({ word, translation });
+            if (word && translation) {
+                vocabs.push({ word, translation });
+            }
         });
-        if (vocabs.length === 0) { alert('Bitte mindestens eine Vokabel mit Übersetzung eingeben.'); return; }
-        let lernsetId = $('#add-lernset').value; let kapitelId = $('#add-kapitel').value;
-        const sourceLang = $('#source-lang').value; const targetLang = $('#target-lang').value;
-        if (!lernsetId) { lernsetId = Date.now().toString(); lernsets.push({ id: lernsetId, name: sourceLang, sourceLang, targetLang }); }
+
+        if (vocabs.length === 0) {
+            alert('Bitte mindestens eine Vokabel mit Übersetzung eingeben.');
+            return;
+        }
+
+        let lernsetId = $('#add-lernset').value;
+        let kapitelId = $('#add-kapitel').value;
+        const sourceLang = $('#source-lang').value;
+        const targetLang = $('#target-lang').value;
+
+        if (!lernsetId) {
+            lernsetId = Date.now().toString();
+            lernsets.push({ id: lernsetId, name: sourceLang, sourceLang, targetLang });
+        }
+
         if (!kapitelId) {
             kapitelId = Date.now().toString() + '_k';
             const kapitelName = `Kapitel ${vocabSets.filter(s => s.lernsetId === lernsetId).length + 1}`;
-            vocabSets.push({ id: kapitelId, name: kapitelName, lernsetId, sourceLang, targetLang, date: new Date().toISOString() });
+            vocabSets.push({
+                id: kapitelId,
+                name: kapitelName,
+                lernsetId,
+                sourceLang,
+                targetLang,
+                date: new Date().toISOString()
+            });
         }
+
         vocabs.forEach(v => {
-            allVocabs.push({ id: Date.now().toString() + Math.random().toString(36).substr(2, 5), word: v.word, translation: v.translation, setId: kapitelId, sourceLang, targetLang, rating: 'new', correctCount: 0, wrongCount: 0, lastSeen: null });
+            allVocabs.push({
+                id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+                word: v.word,
+                translation: v.translation,
+                setId: kapitelId,
+                sourceLang,
+                targetLang,
+                rating: 'new',
+                correctCount: 0,
+                wrongCount: 0,
+                lastSeen: null
+            });
         });
-        save(); alert(`${vocabs.length} Vokabeln gespeichert!`);
-        $('#manual-vocab-list').innerHTML = `<div class="manual-vocab-row"><input type="text" class="vocab-word" placeholder="Vokabel"><span class="vocab-arrow">&rarr;</span><input type="text" class="vocab-translation" placeholder="Übersetzung"><button class="btn-remove-row" title="Entfernen">&times;</button></div>`;
-        setupRemoveButtons(); refreshAddDropdowns();
-        $$('.nav-btn').forEach(b => b.classList.remove('active')); $$('.nav-btn')[1].classList.add('active');
-        $$('.view').forEach(v => v.classList.remove('active')); $('#view-cards').classList.add('active'); refreshCards();
+
+        save();
+        alert(`${vocabs.length} Vokabeln gespeichert!`);
+
+        $('#manual-vocab-list').innerHTML = `
+            <div class="manual-vocab-row">
+                <input type="text" class="vocab-word" placeholder="Vokabel">
+                <span class="vocab-arrow">&rarr;</span>
+                <input type="text" class="vocab-translation" placeholder="Übersetzung">
+                <button class="btn-remove-row" title="Entfernen">&times;</button>
+            </div>
+        `;
+        setupRemoveButtons();
+        refreshAddDropdowns();
+
+        $$('.nav-btn').forEach(b => b.classList.remove('active'));
+        $$('.nav-btn')[1].classList.add('active');
+        $$('.view').forEach(v => v.classList.remove('active'));
+        $('#view-cards').classList.add('active');
+        refreshCards();
     }
 
+
+    // --- Flashcards ---
     function refreshCards() {
         const lernsetId = $('#cards-lernset-filter')?.value || 'all';
         const kapitelId = $('#cards-kapitel-filter')?.value || 'all';
-        renderFilterDropdowns($('#cards-lernset-filter'), $('#cards-kapitel-filter'), lernsetId, kapitelId);
+
+        renderFilterDropdowns(
+            $('#cards-lernset-filter'),
+            $('#cards-kapitel-filter'),
+            lernsetId,
+            kapitelId
+        );
+
         currentCards = getFilteredVocabs(lernsetId, kapitelId);
-        for (let i = currentCards.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [currentCards[i], currentCards[j]] = [currentCards[j], currentCards[i]]; }
-        currentCardIndex = 0; isFlipped = false;
-        if (currentCards.length === 0) { $('#cards-empty').classList.remove('hidden'); $('#cards-container').classList.add('hidden'); }
-        else { $('#cards-empty').classList.add('hidden'); $('#cards-container').classList.remove('hidden'); showCard(); }
+
+        for (let i = currentCards.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [currentCards[i], currentCards[j]] = [currentCards[j], currentCards[i]];
+        }
+
+        currentCardIndex = 0;
+        isFlipped = false;
+
+        if (currentCards.length === 0) {
+            $('#cards-empty').classList.remove('hidden');
+            $('#cards-container').classList.add('hidden');
+        } else {
+            $('#cards-empty').classList.add('hidden');
+            $('#cards-container').classList.remove('hidden');
+            showCard();
+        }
     }
 
     function showCard() {
         if (currentCards.length === 0) return;
         const card = currentCards[currentCardIndex];
-        $('#card-word').textContent = card.word; $('#card-translation').textContent = card.translation;
+        $('#card-word').textContent = card.word;
+        $('#card-translation').textContent = card.translation;
         $('#cards-progress').textContent = `${currentCardIndex + 1} / ${currentCards.length}`;
-        isFlipped = false; $('#flashcard').classList.remove('flipped');
+        isFlipped = false;
+        $('#flashcard').classList.remove('flipped');
     }
 
     function initCards() {
-        $('#flashcard').addEventListener('click', flipCard);
+        const flashcard = $('#flashcard');
+        flashcard.addEventListener('click', flipCard);
+
         $('#btn-card-flip').addEventListener('click', flipCard);
-        $('#btn-card-prev').addEventListener('click', () => { if (currentCardIndex > 0) { currentCardIndex--; showCard(); } });
-        $('#btn-card-next').addEventListener('click', () => { if (currentCardIndex < currentCards.length - 1) { currentCardIndex++; showCard(); } });
+        $('#btn-card-prev').addEventListener('click', () => {
+            if (currentCardIndex > 0) {
+                currentCardIndex--;
+                showCard();
+            }
+        });
+        $('#btn-card-next').addEventListener('click', () => {
+            if (currentCardIndex < currentCards.length - 1) {
+                currentCardIndex++;
+                showCard();
+            }
+        });
+
         $$('.rating-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                const rating = btn.dataset.rating; const card = currentCards[currentCardIndex];
+                const rating = btn.dataset.rating;
+                const card = currentCards[currentCardIndex];
                 const vocab = allVocabs.find(v => v.id === card.id);
-                if (vocab) { vocab.rating = rating; vocab.lastSeen = new Date().toISOString(); save(); }
-                if (currentCardIndex < currentCards.length - 1) { currentCardIndex++; showCard(); }
+                if (vocab) {
+                    vocab.rating = rating;
+                    vocab.lastSeen = new Date().toISOString();
+                    save();
+                }
+                if (currentCardIndex < currentCards.length - 1) {
+                    currentCardIndex++;
+                    showCard();
+                }
             });
         });
-        $('#cards-lernset-filter').addEventListener('change', () => { $('#cards-kapitel-filter').value = 'all'; refreshCards(); });
+
+        $('#cards-lernset-filter').addEventListener('change', () => {
+            $('#cards-kapitel-filter').value = 'all';
+            refreshCards();
+        });
         $('#cards-kapitel-filter').addEventListener('change', () => refreshCards());
+
         document.addEventListener('keydown', e => {
             if (!$('#view-cards').classList.contains('active')) return;
             if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flipCard(); }
             if (e.key === 'ArrowLeft') { e.preventDefault(); $('#btn-card-prev').click(); }
             if (e.key === 'ArrowRight') { e.preventDefault(); $('#btn-card-next').click(); }
-            if (e.key === '1') $$('.rating-btn')[0]?.click(); if (e.key === '2') $$('.rating-btn')[1]?.click(); if (e.key === '3') $$('.rating-btn')[2]?.click();
+            if (e.key === '1') $$('.rating-btn')[0]?.click();
+            if (e.key === '2') $$('.rating-btn')[1]?.click();
+            if (e.key === '3') $$('.rating-btn')[2]?.click();
         });
     }
 
-    function flipCard() { isFlipped = !isFlipped; $('#flashcard').classList.toggle('flipped', isFlipped); }
+    function flipCard() {
+        isFlipped = !isFlipped;
+        $('#flashcard').classList.toggle('flipped', isFlipped);
+    }
 
+    // --- Quiz ---
     function refreshQuiz() {
         const lernsetId = $('#quiz-lernset-filter')?.value || 'all';
         const kapitelId = $('#quiz-kapitel-filter')?.value || 'all';
-        renderFilterDropdowns($('#quiz-lernset-filter'), $('#quiz-kapitel-filter'), lernsetId, kapitelId);
+
+        renderFilterDropdowns(
+            $('#quiz-lernset-filter'),
+            $('#quiz-kapitel-filter'),
+            lernsetId,
+            kapitelId
+        );
+
         const available = getFilteredVocabs(lernsetId, kapitelId);
-        if (available.length < 4) { $('#quiz-empty').classList.remove('hidden'); $('#quiz-setup').classList.add('hidden'); $('#quiz-active').classList.add('hidden'); $('#quiz-results').classList.add('hidden'); }
-        else { $('#quiz-empty').classList.add('hidden'); $('#quiz-setup').classList.remove('hidden'); $('#quiz-active').classList.add('hidden'); $('#quiz-results').classList.add('hidden'); $('#quiz-count').max = available.length; }
+
+        if (available.length < 4) {
+            $('#quiz-empty').classList.remove('hidden');
+            $('#quiz-setup').classList.add('hidden');
+            $('#quiz-active').classList.add('hidden');
+            $('#quiz-results').classList.add('hidden');
+        } else {
+            $('#quiz-empty').classList.add('hidden');
+            $('#quiz-setup').classList.remove('hidden');
+            $('#quiz-active').classList.add('hidden');
+            $('#quiz-results').classList.add('hidden');
+            $('#quiz-count').max = available.length;
+        }
     }
 
     function initQuiz() {
@@ -2205,8 +2863,15 @@ const App = (() => {
         $('#btn-check-answer').addEventListener('click', checkTypedAnswer);
         $('#btn-next-question').addEventListener('click', nextQuestion);
         $('#btn-restart-quiz').addEventListener('click', () => refreshQuiz());
-        $('#quiz-answer-input').addEventListener('keydown', e => { if (e.key === 'Enter') checkTypedAnswer(); });
-        $('#quiz-lernset-filter').addEventListener('change', () => { $('#quiz-kapitel-filter').value = 'all'; refreshQuiz(); });
+
+        $('#quiz-answer-input').addEventListener('keydown', e => {
+            if (e.key === 'Enter') checkTypedAnswer();
+        });
+
+        $('#quiz-lernset-filter').addEventListener('change', () => {
+            $('#quiz-kapitel-filter').value = 'all';
+            refreshQuiz();
+        });
         $('#quiz-kapitel-filter').addEventListener('change', () => refreshQuiz());
     }
 
@@ -2214,386 +2879,938 @@ const App = (() => {
         const lernsetId = $('#quiz-lernset-filter')?.value || 'all';
         const kapitelId = $('#quiz-kapitel-filter')?.value || 'all';
         const available = getFilteredVocabs(lernsetId, kapitelId);
+
         const count = Math.min(parseInt($('#quiz-count').value) || 10, available.length);
-        const direction = $('#quiz-direction').value; const mode = $('#quiz-mode').value;
+        const direction = $('#quiz-direction').value;
+        const mode = $('#quiz-mode').value;
+
         const shuffled = [...available].sort(() => Math.random() - 0.5).slice(0, count);
-        quizState = { questions: shuffled, direction, mode, current: 0, correct: 0, results: [] };
-        $('#quiz-setup').classList.add('hidden'); $('#quiz-active').classList.remove('hidden'); showQuestion();
+
+        quizState = {
+            questions: shuffled,
+            direction,
+            mode,
+            current: 0,
+            correct: 0,
+            results: []
+        };
+
+        $('#quiz-setup').classList.add('hidden');
+        $('#quiz-active').classList.remove('hidden');
+        showQuestion();
     }
 
     function showQuestion() {
         const q = quizState.questions[quizState.current];
-        const isReverse = quizState.direction === 'native-to-foreign' || (quizState.direction === 'mixed' && Math.random() > 0.5);
+        const isReverse = quizState.direction === 'native-to-foreign' ||
+            (quizState.direction === 'mixed' && Math.random() > 0.5);
+
         quizState.currentReverse = isReverse;
-        const prompt = isReverse ? q.translation : q.word; const answer = isReverse ? q.word : q.translation;
+        const prompt = isReverse ? q.translation : q.word;
+        const answer = isReverse ? q.word : q.translation;
         quizState.currentAnswer = answer;
+
         $('#quiz-progress').textContent = `Frage ${quizState.current + 1}/${quizState.questions.length}`;
         $('#quiz-score').textContent = `${quizState.correct} richtig`;
         $('#quiz-prompt').textContent = prompt;
-        $('#quiz-feedback').classList.add('hidden'); $('#btn-next-question').classList.add('hidden');
-        if (quizState.mode === 'multiple-choice') { $('#quiz-choices').classList.remove('hidden'); $('#quiz-typing').classList.add('hidden'); showChoices(q, isReverse); }
-        else { $('#quiz-choices').classList.add('hidden'); $('#quiz-typing').classList.remove('hidden'); const input = $('#quiz-answer-input'); input.value = ''; input.disabled = false; $('#btn-check-answer').disabled = false; input.focus(); }
+        $('#quiz-feedback').classList.add('hidden');
+        $('#btn-next-question').classList.add('hidden');
+
+        if (quizState.mode === 'multiple-choice') {
+            $('#quiz-choices').classList.remove('hidden');
+            $('#quiz-typing').classList.add('hidden');
+            showChoices(q, isReverse);
+        } else {
+            $('#quiz-choices').classList.add('hidden');
+            $('#quiz-typing').classList.remove('hidden');
+            const input = $('#quiz-answer-input');
+            input.value = '';
+            input.disabled = false;
+            $('#btn-check-answer').disabled = false;
+            input.focus();
+        }
     }
 
     function showChoices(correct, isReverse) {
-        const container = $('#quiz-choices'); container.innerHTML = '';
+        const container = $('#quiz-choices');
+        container.innerHTML = '';
+
         const correctAnswer = isReverse ? correct.word : correct.translation;
-        const others = allVocabs.filter(v => v.id !== correct.id).sort(() => Math.random() - 0.5).slice(0, 3).map(v => isReverse ? v.word : v.translation);
+
+        const others = allVocabs
+            .filter(v => v.id !== correct.id)
+            .sort(() => Math.random() - 0.5)
+            .slice(0, 3)
+            .map(v => isReverse ? v.word : v.translation);
+
         const choices = [correctAnswer, ...others].sort(() => Math.random() - 0.5);
+
         choices.forEach(choice => {
-            const btn = document.createElement('button'); btn.className = 'quiz-choice-btn'; btn.textContent = choice;
-            btn.addEventListener('click', () => handleChoice(btn, choice, correctAnswer)); container.appendChild(btn);
+            const btn = document.createElement('button');
+            btn.className = 'quiz-choice-btn';
+            btn.textContent = choice;
+            btn.addEventListener('click', () => handleChoice(btn, choice, correctAnswer));
+            container.appendChild(btn);
         });
     }
 
     function handleChoice(btn, chosen, correct) {
         const isCorrect = chosen === correct;
-        $$('.quiz-choice-btn').forEach(b => { b.disabled = true; if (b.textContent === correct) b.classList.add('correct'); if (b === btn && !isCorrect) b.classList.add('wrong'); });
+        const buttons = $$('.quiz-choice-btn');
+        buttons.forEach(b => {
+            b.disabled = true;
+            if (b.textContent === correct) b.classList.add('correct');
+            if (b === btn && !isCorrect) b.classList.add('wrong');
+        });
+
         recordAnswer(isCorrect, correct);
     }
 
     function checkTypedAnswer() {
-        const input = $('#quiz-answer-input'); const typed = input.value.trim().toLowerCase();
-        const correct = quizState.currentAnswer; const isCorrect = typed === correct.toLowerCase();
-        input.disabled = true; $('#btn-check-answer').disabled = true; recordAnswer(isCorrect, correct);
+        const input = $('#quiz-answer-input');
+        const typed = input.value.trim().toLowerCase();
+        const correct = quizState.currentAnswer;
+        const isCorrect = typed === correct.toLowerCase();
+
+        input.disabled = true;
+        $('#btn-check-answer').disabled = true;
+
+        recordAnswer(isCorrect, correct);
     }
 
     function recordAnswer(isCorrect, correctAnswer) {
         if (isCorrect) quizState.correct++;
         const q = quizState.questions[quizState.current];
-        quizState.results.push({ word: q.word, translation: q.translation, correct: isCorrect });
+        quizState.results.push({
+            word: q.word,
+            translation: q.translation,
+            correct: isCorrect
+        });
+
         const vocab = allVocabs.find(v => v.id === q.id);
-        if (vocab) { if (isCorrect) vocab.correctCount++; else vocab.wrongCount++; vocab.lastSeen = new Date().toISOString(); save(); }
-        const feedback = $('#quiz-feedback'); feedback.classList.remove('hidden');
-        if (isCorrect) { feedback.className = 'quiz-feedback correct'; feedback.textContent = 'Richtig!'; }
-        else { feedback.className = 'quiz-feedback wrong'; feedback.textContent = `Falsch! Richtig: ${correctAnswer}`; }
+        if (vocab) {
+            if (isCorrect) vocab.correctCount++;
+            else vocab.wrongCount++;
+            vocab.lastSeen = new Date().toISOString();
+            save();
+        }
+
+        // Streak tracking
+        if (isCorrect) recordCorrectAnswer();
+        else recordWrongAnswer();
+
+        const feedback = $('#quiz-feedback');
+        feedback.classList.remove('hidden');
+        if (isCorrect) {
+            feedback.className = 'quiz-feedback correct';
+            feedback.textContent = 'Richtig!';
+        } else {
+            feedback.className = 'quiz-feedback wrong';
+            feedback.textContent = `Falsch! Richtig: ${correctAnswer}`;
+        }
+
         $('#btn-next-question').classList.remove('hidden');
     }
 
-    function nextQuestion() { quizState.current++; if (quizState.current >= quizState.questions.length) showResults(); else showQuestion(); }
+    function nextQuestion() {
+        quizState.current++;
+        if (quizState.current >= quizState.questions.length) {
+            showResults();
+        } else {
+            showQuestion();
+        }
+    }
 
     function showResults() {
-        $('#quiz-active').classList.add('hidden'); $('#quiz-results').classList.remove('hidden');
+        $('#quiz-active').classList.add('hidden');
+        $('#quiz-results').classList.remove('hidden');
+
         const pct = Math.round((quizState.correct / quizState.questions.length) * 100);
         let emoji = pct >= 90 ? 'Ausgezeichnet!' : pct >= 70 ? 'Gut gemacht!' : pct >= 50 ? 'Weiter üben!' : 'Nicht aufgeben!';
-        $('#quiz-result-score').innerHTML = `<div class="score-circle"><span class="score-number">${pct}%</span></div><p>${quizState.correct} von ${quizState.questions.length} richtig</p><p class="score-message">${emoji}</p>`;
-        const details = $('#quiz-result-details'); details.innerHTML = '';
+
+        $('#quiz-result-score').innerHTML = `
+            <div class="score-circle">
+                <span class="score-number">${pct}%</span>
+            </div>
+            <p>${quizState.correct} von ${quizState.questions.length} richtig</p>
+            <p class="score-message">${emoji}</p>
+        `;
+
+        const details = $('#quiz-result-details');
+        details.innerHTML = '';
         quizState.results.forEach(r => {
-            const row = document.createElement('div'); row.className = `result-row ${r.correct ? 'correct' : 'wrong'}`;
-            row.innerHTML = `<span class="result-icon">${r.correct ? '&#10003;' : '&#10007;'}</span><span>${escapeHtml(r.word)}</span><span>&rarr;</span><span>${escapeHtml(r.translation)}</span>`;
+            const row = document.createElement('div');
+            row.className = `result-row ${r.correct ? 'correct' : 'wrong'}`;
+            row.innerHTML = `
+                <span class="result-icon">${r.correct ? '&#10003;' : '&#10007;'}</span>
+                <span>${escapeHtml(r.word)}</span>
+                <span>&rarr;</span>
+                <span>${escapeHtml(r.translation)}</span>
+            `;
             details.appendChild(row);
         });
     }
 
+    // --- Lernset Manager ---
     function refreshList() {
-        if (lernsets.length === 0) { $('#lernset-empty').classList.remove('hidden'); $('#lernset-manager').classList.add('hidden'); return; }
-        $('#lernset-empty').classList.add('hidden'); $('#lernset-manager').classList.remove('hidden'); renderLernsetList();
+        if (lernsets.length === 0) {
+            $('#lernset-empty').classList.remove('hidden');
+            $('#lernset-manager').classList.add('hidden');
+            return;
+        }
+
+        $('#lernset-empty').classList.add('hidden');
+        $('#lernset-manager').classList.remove('hidden');
+        renderLernsetList();
     }
 
     function renderLernsetList() {
-        const container = $('#lernset-list'); container.innerHTML = '';
+        const container = $('#lernset-list');
+        container.innerHTML = '';
+
         lernsets.forEach(ls => {
             const kapitel = vocabSets.filter(s => s.lernsetId === ls.id);
             const vocabCount = allVocabs.filter(v => kapitel.some(k => k.id === v.setId)).length;
-            const card = document.createElement('div'); card.className = 'lernset-card';
+
+            const card = document.createElement('div');
+            card.className = 'lernset-card';
             card.innerHTML = `
                 <div class="lernset-card-header" data-lernset-id="${ls.id}">
-                    <div class="lernset-card-info"><span class="lernset-card-expand">&#9654;</span><h4 class="lernset-card-name">${escapeHtml(ls.name)}</h4><span class="lernset-card-count">${vocabCount} Vokabeln &middot; ${kapitel.length} Kapitel</span></div>
-                    <div class="lernset-card-actions"><button class="btn btn-secondary btn-sm btn-rename-lernset" data-id="${ls.id}" title="Umbenennen">&#9998;</button><button class="btn btn-secondary btn-sm btn-delete-lernset" data-id="${ls.id}" title="Löschen">&times;</button></div>
+                    <div class="lernset-card-info">
+                        <span class="lernset-card-expand">&#9654;</span>
+                        <h4 class="lernset-card-name">${escapeHtml(ls.name)}</h4>
+                        <span class="lernset-card-count">${vocabCount} Vokabeln &middot; ${kapitel.length} Kapitel</span>
+                    </div>
+                    <div class="lernset-card-actions">
+                        <button class="btn btn-secondary btn-sm btn-rename-lernset" data-id="${ls.id}" title="Umbenennen">&#9998;</button>
+                        <button class="btn btn-secondary btn-sm btn-delete-lernset" data-id="${ls.id}" title="Löschen">&times;</button>
+                    </div>
                 </div>
                 <div class="lernset-card-body hidden" id="lernset-body-${ls.id}">
-                    <div class="kapitel-list">${kapitel.map(k => {
-                        const kCount = allVocabs.filter(v => v.setId === k.id).length;
-                        return `<div class="kapitel-row"><span class="kapitel-name">${escapeHtml(k.name)}</span><span class="kapitel-count">${kCount} Vokabeln</span><div class="kapitel-actions"><button class="btn btn-secondary btn-xs btn-move-kapitel" data-id="${k.id}" title="Verschieben">&#8644;</button><button class="btn btn-secondary btn-xs btn-copy-kapitel" data-id="${k.id}" title="Kopieren">&#9112;</button><button class="btn btn-secondary btn-xs btn-rename-kapitel" data-id="${k.id}" title="Umbenennen">&#9998;</button><button class="btn btn-secondary btn-xs btn-delete-kapitel" data-id="${k.id}" title="Löschen">&times;</button></div></div>`;
-                    }).join('')}</div>
+                    <div class="kapitel-list">
+                        ${kapitel.map(k => {
+                            const kCount = allVocabs.filter(v => v.setId === k.id).length;
+                            return `
+                                <div class="kapitel-row">
+                                    <span class="kapitel-name">${escapeHtml(k.name)}</span>
+                                    <span class="kapitel-count">${kCount} Vokabeln</span>
+                                    <div class="kapitel-actions">
+                                        <button class="btn btn-secondary btn-xs btn-move-kapitel" data-id="${k.id}" title="Verschieben">&#8644;</button>
+                                        <button class="btn btn-secondary btn-xs btn-copy-kapitel" data-id="${k.id}" title="Kopieren">&#9112;</button>
+                                        <button class="btn btn-secondary btn-xs btn-rename-kapitel" data-id="${k.id}" title="Umbenennen">&#9998;</button>
+                                        <button class="btn btn-secondary btn-xs btn-delete-kapitel" data-id="${k.id}" title="Löschen">&times;</button>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
                     <button class="btn btn-secondary btn-sm btn-add-kapitel" data-lernset-id="${ls.id}">+ Kapitel</button>
-                </div>`;
+                </div>
+            `;
             container.appendChild(card);
         });
+
         container.querySelectorAll('.lernset-card-header').forEach(header => {
             header.addEventListener('click', e => {
                 if (e.target.closest('.lernset-card-actions')) return;
-                const id = header.dataset.lernsetId; const body = $(`#lernset-body-${id}`); const arrow = header.querySelector('.lernset-card-expand');
-                body.classList.toggle('hidden'); arrow.classList.toggle('expanded');
+                const id = header.dataset.lernsetId;
+                const body = $(`#lernset-body-${id}`);
+                const arrow = header.querySelector('.lernset-card-expand');
+                body.classList.toggle('hidden');
+                arrow.classList.toggle('expanded');
             });
         });
+
         container.querySelectorAll('.btn-rename-lernset').forEach(btn => {
-            btn.addEventListener('click', e => { e.stopPropagation(); const ls = lernsets.find(l => l.id === btn.dataset.id); if (!ls) return; const name = prompt('Neuer Name:', ls.name); if (name && name.trim()) { ls.name = name.trim(); save(); renderLernsetList(); refreshAddDropdowns(); } });
+            btn.addEventListener('click', e => {
+                e.stopPropagation();
+                const ls = lernsets.find(l => l.id === btn.dataset.id);
+                if (!ls) return;
+                const name = prompt('Neuer Name:', ls.name);
+                if (name && name.trim()) {
+                    ls.name = name.trim();
+                    save();
+                    renderLernsetList();
+                    refreshAddDropdowns();
+                }
+            });
         });
+
         container.querySelectorAll('.btn-delete-lernset').forEach(btn => {
             btn.addEventListener('click', e => {
-                e.stopPropagation(); const ls = lernsets.find(l => l.id === btn.dataset.id); if (!ls) return;
-                const kapitel = vocabSets.filter(s => s.lernsetId === ls.id); const vocabCount = allVocabs.filter(v => kapitel.some(k => k.id === v.setId)).length;
+                e.stopPropagation();
+                const ls = lernsets.find(l => l.id === btn.dataset.id);
+                if (!ls) return;
+                const kapitel = vocabSets.filter(s => s.lernsetId === ls.id);
+                const vocabCount = allVocabs.filter(v => kapitel.some(k => k.id === v.setId)).length;
                 if (!confirm(`"${ls.name}" mit ${kapitel.length} Kapiteln und ${vocabCount} Vokabeln wirklich löschen?`)) return;
-                const kapIds = kapitel.map(k => k.id); allVocabs = allVocabs.filter(v => !kapIds.includes(v.setId));
-                vocabSets = vocabSets.filter(s => s.lernsetId !== ls.id); lernsets = lernsets.filter(l => l.id !== ls.id);
-                save(); refreshList(); refreshAddDropdowns();
+                const kapIds = kapitel.map(k => k.id);
+                allVocabs = allVocabs.filter(v => !kapIds.includes(v.setId));
+                vocabSets = vocabSets.filter(s => s.lernsetId !== ls.id);
+                lernsets = lernsets.filter(l => l.id !== ls.id);
+                save();
+                refreshList();
+                refreshAddDropdowns();
             });
         });
+
         container.querySelectorAll('.btn-rename-kapitel').forEach(btn => {
-            btn.addEventListener('click', () => { const kap = vocabSets.find(s => s.id === btn.dataset.id); if (!kap) return; const name = prompt('Neuer Name:', kap.name); if (name && name.trim()) { kap.name = name.trim(); save(); renderLernsetList(); } });
+            btn.addEventListener('click', () => {
+                const kap = vocabSets.find(s => s.id === btn.dataset.id);
+                if (!kap) return;
+                const name = prompt('Neuer Name:', kap.name);
+                if (name && name.trim()) {
+                    kap.name = name.trim();
+                    save();
+                    renderLernsetList();
+                }
+            });
         });
+
         container.querySelectorAll('.btn-delete-kapitel').forEach(btn => {
             btn.addEventListener('click', () => {
-                const kap = vocabSets.find(s => s.id === btn.dataset.id); if (!kap) return;
+                const kap = vocabSets.find(s => s.id === btn.dataset.id);
+                if (!kap) return;
                 const vocabCount = allVocabs.filter(v => v.setId === kap.id).length;
                 if (!confirm(`"${kap.name}" mit ${vocabCount} Vokabeln wirklich löschen?`)) return;
-                allVocabs = allVocabs.filter(v => v.setId !== kap.id); vocabSets = vocabSets.filter(s => s.id !== kap.id); save(); renderLernsetList();
+                allVocabs = allVocabs.filter(v => v.setId !== kap.id);
+                vocabSets = vocabSets.filter(s => s.id !== kap.id);
+                save();
+                renderLernsetList();
             });
         });
+
         container.querySelectorAll('.btn-add-kapitel').forEach(btn => {
             btn.addEventListener('click', () => {
-                const lernsetId = btn.dataset.lernsetId; const name = prompt('Name des neuen Kapitels:'); if (!name || !name.trim()) return;
+                const lernsetId = btn.dataset.lernsetId;
+                const name = prompt('Name des neuen Kapitels:');
+                if (!name || !name.trim()) return;
                 const ls = lernsets.find(l => l.id === lernsetId);
-                vocabSets.push({ id: Date.now().toString(), name: name.trim(), lernsetId, sourceLang: ls?.sourceLang || 'Englisch', targetLang: ls?.targetLang || 'Deutsch', date: new Date().toISOString() });
-                save(); renderLernsetList();
+                vocabSets.push({
+                    id: Date.now().toString(),
+                    name: name.trim(),
+                    lernsetId,
+                    sourceLang: ls?.sourceLang || 'Englisch',
+                    targetLang: ls?.targetLang || 'Deutsch',
+                    date: new Date().toISOString()
+                });
+                save();
+                renderLernsetList();
             });
         });
+
         container.querySelectorAll('.btn-move-kapitel').forEach(btn => {
-            btn.addEventListener('click', () => { const kapId = btn.dataset.id; const kap = vocabSets.find(s => s.id === kapId); if (!kap) return; const vocabCount = allVocabs.filter(v => v.setId === kapId).length; if (vocabCount === 0) { alert('Keine Vokabeln zum Verschieben.'); return; } openMoveCopyModal('move', kapId, kap.name, vocabCount); });
+            btn.addEventListener('click', () => {
+                const kapId = btn.dataset.id;
+                const kap = vocabSets.find(s => s.id === kapId);
+                if (!kap) return;
+                const vocabCount = allVocabs.filter(v => v.setId === kapId).length;
+                if (vocabCount === 0) { alert('Keine Vokabeln zum Verschieben.'); return; }
+                openMoveCopyModal('move', kapId, kap.name, vocabCount);
+            });
         });
+
         container.querySelectorAll('.btn-copy-kapitel').forEach(btn => {
-            btn.addEventListener('click', () => { const kapId = btn.dataset.id; const kap = vocabSets.find(s => s.id === kapId); if (!kap) return; const vocabCount = allVocabs.filter(v => v.setId === kapId).length; if (vocabCount === 0) { alert('Keine Vokabeln zum Kopieren.'); return; } openMoveCopyModal('copy', kapId, kap.name, vocabCount); });
+            btn.addEventListener('click', () => {
+                const kapId = btn.dataset.id;
+                const kap = vocabSets.find(s => s.id === kapId);
+                if (!kap) return;
+                const vocabCount = allVocabs.filter(v => v.setId === kapId).length;
+                if (vocabCount === 0) { alert('Keine Vokabeln zum Kopieren.'); return; }
+                openMoveCopyModal('copy', kapId, kap.name, vocabCount);
+            });
         });
     }
 
     function openMoveCopyModal(mode, sourceKapitelId, kapitelName, vocabCount) {
         const modal = $('#move-copy-modal');
-        $('#modal-title').textContent = mode === 'move' ? 'Vokabeln verschieben' : 'Vokabeln kopieren';
+        const sourceKap = vocabSets.find(s => s.id === sourceKapitelId);
+        const sourceLsId = sourceKap?.lernsetId;
+
+        $('#modal-title').textContent = mode === 'move'
+            ? `Vokabeln verschieben`
+            : `Vokabeln kopieren`;
         $('#modal-description').textContent = `${vocabCount} Vokabeln aus "${kapitelName}" ${mode === 'move' ? 'verschieben' : 'kopieren'} nach:`;
-        const lsSelect = $('#modal-target-lernset'); lsSelect.innerHTML = '';
-        lernsets.forEach(ls => { lsSelect.innerHTML += `<option value="${ls.id}">${escapeHtml(ls.name)}</option>`; });
+
+        const lsSelect = $('#modal-target-lernset');
+        lsSelect.innerHTML = '';
+        lernsets.forEach(ls => {
+            lsSelect.innerHTML += `<option value="${ls.id}">${escapeHtml(ls.name)}</option>`;
+        });
+
         function updateTargetKapitel() {
-            const targetLsId = lsSelect.value; const kapSelect = $('#modal-target-kapitel'); kapSelect.innerHTML = '';
-            vocabSets.filter(s => s.lernsetId === targetLsId).forEach(s => { if (mode === 'move' && s.id === sourceKapitelId) return; kapSelect.innerHTML += `<option value="${s.id}">${escapeHtml(s.name)}</option>`; });
-            if (kapSelect.options.length === 0) kapSelect.innerHTML = '<option value="">— Kein Kapitel vorhanden —</option>';
+            const targetLsId = lsSelect.value;
+            const kapSelect = $('#modal-target-kapitel');
+            kapSelect.innerHTML = '';
+            vocabSets.filter(s => s.lernsetId === targetLsId).forEach(s => {
+                if (mode === 'move' && s.id === sourceKapitelId) return;
+                kapSelect.innerHTML += `<option value="${s.id}">${escapeHtml(s.name)}</option>`;
+            });
+            if (kapSelect.options.length === 0) {
+                kapSelect.innerHTML = '<option value="">— Kein Kapitel vorhanden —</option>';
+            }
         }
-        lsSelect.onchange = updateTargetKapitel; updateTargetKapitel(); modal.classList.remove('hidden');
+
+        lsSelect.onchange = updateTargetKapitel;
+        updateTargetKapitel();
+
+        modal.classList.remove('hidden');
+
         $('#btn-modal-cancel').onclick = () => modal.classList.add('hidden');
+
         $('#btn-modal-confirm').onclick = () => {
-            const targetKapitelId = $('#modal-target-kapitel').value; if (!targetKapitelId) { alert('Bitte ein Ziel-Kapitel wählen.'); return; }
+            const targetKapitelId = $('#modal-target-kapitel').value;
+            if (!targetKapitelId) {
+                alert('Bitte ein Ziel-Kapitel wählen.');
+                return;
+            }
+
             const vocabs = allVocabs.filter(v => v.setId === sourceKapitelId);
-            if (mode === 'move') vocabs.forEach(v => { v.setId = targetKapitelId; });
-            else vocabs.forEach(v => { allVocabs.push({ ...v, id: Date.now().toString() + Math.random().toString(36).substr(2, 5), setId: targetKapitelId }); });
-            save(); modal.classList.add('hidden'); renderLernsetList();
+
+            if (mode === 'move') {
+                vocabs.forEach(v => { v.setId = targetKapitelId; });
+            } else {
+                vocabs.forEach(v => {
+                    allVocabs.push({
+                        ...v,
+                        id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+                        setId: targetKapitelId
+                    });
+                });
+            }
+
+            save();
+            modal.classList.add('hidden');
+            renderLernsetList();
             const targetKap = vocabSets.find(s => s.id === targetKapitelId);
-            showNotice(`${vocabs.length} Vokabeln nach "${targetKap?.name}" ${mode === 'move' ? 'verschoben' : 'kopiert'}.`);
+            const actionText = mode === 'move' ? 'verschoben' : 'kopiert';
+            showNotice(`${vocabs.length} Vokabeln nach "${targetKap?.name}" ${actionText}.`);
         };
     }
 
     function initList() {
         function createNewLernset() {
-            const name = prompt('Name des neuen Lernsets (z.B. "Englisch", "Französisch"):'); if (!name || !name.trim()) return;
-            const id = Date.now().toString(); lernsets.push({ id, name: name.trim(), sourceLang: 'Englisch', targetLang: 'Deutsch' });
-            save(); refreshList(); refreshAddDropdowns();
+            const name = prompt('Name des neuen Lernsets (z.B. "Englisch", "Französisch"):');
+            if (!name || !name.trim()) return;
+            const id = Date.now().toString();
+            lernsets.push({ id, name: name.trim(), sourceLang: 'Englisch', targetLang: 'Deutsch' });
+            save();
+            refreshList();
+            refreshAddDropdowns();
         }
         $('#btn-create-lernset').addEventListener('click', createNewLernset);
         $('#btn-create-lernset-empty').addEventListener('click', createNewLernset);
+
         $('#btn-export-all').addEventListener('click', () => {
-            const csv = 'Vokabel;Übersetzung;Lernset;Kapitel;Status\n' + allVocabs.map(v => {
-                const set = vocabSets.find(s => s.id === v.setId); const ls = set ? lernsets.find(l => l.id === set.lernsetId) : null;
-                return `"${v.word}";"${v.translation}";"${ls?.name || ''}";"${set?.name || ''}";"${v.rating}"`;
-            }).join('\n');
+            const csv = 'Vokabel;Übersetzung;Lernset;Kapitel;Status\n' +
+                allVocabs.map(v => {
+                    const set = vocabSets.find(s => s.id === v.setId);
+                    const ls = set ? lernsets.find(l => l.id === set.lernsetId) : null;
+                    return `"${v.word}";"${v.translation}";"${ls?.name || ''}";"${set?.name || ''}";"${v.rating}"`;
+                }).join('\n');
+
             const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url;
-            a.download = `vokabeln_${new Date().toISOString().slice(0, 10)}.csv`; a.click(); URL.revokeObjectURL(url);
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `vokabeln_${new Date().toISOString().slice(0, 10)}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
         });
+
         $('#csv-import-input').addEventListener('change', (e) => {
-            const file = e.target.files[0]; if (!file) return;
+            const file = e.target.files[0];
+            if (!file) return;
             const reader = new FileReader();
             reader.onload = (ev) => {
-                const text = ev.target.result; const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-                if (lines.length < 2) { alert('Die Datei enthält keine Vokabeln.'); return; }
-                const header = lines[0].toLowerCase(); const startIdx = (header.includes('vokabel') || header.includes('word')) ? 1 : 0;
-                const groups = {}; let importCount = 0;
+                const text = ev.target.result;
+                const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+                if (lines.length < 2) {
+                    alert('Die Datei enthält keine Vokabeln.');
+                    return;
+                }
+
+                const header = lines[0].toLowerCase();
+                const startIdx = (header.includes('vokabel') || header.includes('word')) ? 1 : 0;
+
+                const groups = {};
+                let importCount = 0;
+
                 for (let i = startIdx; i < lines.length; i++) {
                     const parts = lines[i].split(';').map(p => p.trim().replace(/^"|"$/g, ''));
                     if (parts.length < 2 || !parts[0] || !parts[1]) continue;
-                    const word = parts[0]; const translation = parts[1]; const lernsetName = parts[2] || 'Import'; const kapitelName = parts[3] || 'Kapitel 1';
-                    const key = `${lernsetName}|||${kapitelName}`; if (!groups[key]) groups[key] = { lernsetName, kapitelName, vocabs: [] };
+
+                    const word = parts[0];
+                    const translation = parts[1];
+                    const lernsetName = parts[2] || 'Import';
+                    const kapitelName = parts[3] || 'Kapitel 1';
+
+                    const key = `${lernsetName}|||${kapitelName}`;
+                    if (!groups[key]) groups[key] = { lernsetName, kapitelName, vocabs: [] };
                     groups[key].vocabs.push({ word, translation });
                 }
+
                 for (const key in groups) {
                     const g = groups[key];
+
                     let ls = lernsets.find(l => l.name === g.lernsetName);
-                    if (!ls) { ls = { id: Date.now().toString() + Math.random().toString(36).substr(2, 4), name: g.lernsetName, sourceLang: 'Englisch', targetLang: 'Deutsch' }; lernsets.push(ls); }
+                    if (!ls) {
+                        ls = { id: Date.now().toString() + Math.random().toString(36).substr(2, 4), name: g.lernsetName, sourceLang: 'Englisch', targetLang: 'Deutsch' };
+                        lernsets.push(ls);
+                    }
+
                     let kap = vocabSets.find(s => s.lernsetId === ls.id && s.name === g.kapitelName);
-                    if (!kap) { kap = { id: Date.now().toString() + Math.random().toString(36).substr(2, 5), name: g.kapitelName, lernsetId: ls.id, sourceLang: ls.sourceLang, targetLang: ls.targetLang, date: new Date().toISOString() }; vocabSets.push(kap); }
-                    g.vocabs.forEach(v => { allVocabs.push({ id: Date.now().toString() + Math.random().toString(36).substr(2, 5), word: v.word, translation: v.translation, setId: kap.id, sourceLang: kap.sourceLang, targetLang: kap.targetLang, rating: 'new', correctCount: 0, wrongCount: 0, lastSeen: null }); importCount++; });
+                    if (!kap) {
+                        kap = {
+                            id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+                            name: g.kapitelName,
+                            lernsetId: ls.id,
+                            sourceLang: ls.sourceLang,
+                            targetLang: ls.targetLang,
+                            date: new Date().toISOString()
+                        };
+                        vocabSets.push(kap);
+                    }
+
+                    g.vocabs.forEach(v => {
+                        allVocabs.push({
+                            id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+                            word: v.word,
+                            translation: v.translation,
+                            setId: kap.id,
+                            sourceLang: kap.sourceLang,
+                            targetLang: kap.targetLang,
+                            rating: 'new',
+                            correctCount: 0,
+                            wrongCount: 0,
+                            lastSeen: null
+                        });
+                        importCount++;
+                    });
                 }
-                save(); refreshList(); refreshAddDropdowns(); alert(`${importCount} Vokabeln importiert!`);
+
+                save();
+                refreshList();
+                refreshAddDropdowns();
+                alert(`${importCount} Vokabeln importiert!`);
             };
-            reader.readAsText(file, 'UTF-8'); e.target.value = '';
+            reader.readAsText(file, 'UTF-8');
+            e.target.value = '';
         });
     }
 
+    // --- Write Mode (Schreibmodus) ---
     let writeState = null;
 
     function refreshWrite() {
-        const lernsetId = $('#write-lernset-filter')?.value || 'all'; const kapitelId = $('#write-kapitel-filter')?.value || 'all';
-        renderFilterDropdowns($('#write-lernset-filter'), $('#write-kapitel-filter'), lernsetId, kapitelId);
+        const lernsetId = $('#write-lernset-filter')?.value || 'all';
+        const kapitelId = $('#write-kapitel-filter')?.value || 'all';
+
+        renderFilterDropdowns(
+            $('#write-lernset-filter'),
+            $('#write-kapitel-filter'),
+            lernsetId,
+            kapitelId
+        );
+
         const available = getFilteredVocabs(lernsetId, kapitelId);
-        if (available.length === 0) { $('#write-empty').classList.remove('hidden'); $('#write-container').classList.add('hidden'); return; }
-        $('#write-empty').classList.add('hidden'); $('#write-container').classList.remove('hidden');
-        $('#write-results').classList.add('hidden'); $('.write-card').classList.remove('hidden'); $('.write-progress').classList.remove('hidden');
+
+        if (available.length === 0) {
+            $('#write-empty').classList.remove('hidden');
+            $('#write-container').classList.add('hidden');
+            return;
+        }
+        $('#write-empty').classList.add('hidden');
+        $('#write-container').classList.remove('hidden');
+        $('#write-results').classList.add('hidden');
+        $('.write-card').classList.remove('hidden');
+        $('.write-progress').classList.remove('hidden');
         startWriteMode(available);
     }
 
     function startWriteMode(available) {
-        const vocabs = available || getFilteredVocabs($('#write-lernset-filter')?.value || 'all', $('#write-kapitel-filter')?.value || 'all');
+        const vocabs = available || getFilteredVocabs(
+            $('#write-lernset-filter')?.value || 'all',
+            $('#write-kapitel-filter')?.value || 'all'
+        );
         const shuffled = [...vocabs].sort(() => Math.random() - 0.5).slice(0, Math.min(10, vocabs.length));
-        writeState = { questions: shuffled, current: 0, correct: 0, results: [] }; showWriteQuestion();
+        writeState = {
+            questions: shuffled,
+            current: 0,
+            correct: 0,
+            results: []
+        };
+        showWriteQuestion();
     }
 
-    function getWriteDirection() { return $('#write-direction')?.value || 'foreign-to-native'; }
+    function getWriteDirection() {
+        return $('#write-direction')?.value || 'foreign-to-native';
+    }
 
     function showWriteQuestion() {
-        const q = writeState.questions[writeState.current]; const direction = getWriteDirection();
+        const q = writeState.questions[writeState.current];
+        const direction = getWriteDirection();
         const prompt = direction === 'native-to-foreign' ? q.translation : q.word;
         $('#write-progress').textContent = `${writeState.current + 1} / ${writeState.questions.length}`;
-        $('#write-score').textContent = `${writeState.correct} richtig`; $('#write-prompt-word').textContent = prompt;
-        $('#write-input').value = ''; $('#write-input').disabled = false;
+        $('#write-score').textContent = `${writeState.correct} richtig`;
+        $('#write-prompt-word').textContent = prompt;
+        $('#write-input').value = '';
+        $('#write-input').disabled = false;
         $('#write-input').classList.remove('input-correct', 'input-wrong');
-        $('#btn-write-check').textContent = 'Prüfen'; $('#btn-write-check').disabled = false;
-        $('#write-feedback').innerHTML = ''; $('#write-input').focus();
+        $('#btn-write-check').textContent = 'Prüfen';
+        $('#btn-write-check').disabled = false;
+        $('#write-feedback').innerHTML = '';
+        $('#write-input').focus();
     }
 
     function checkWriteAnswer() {
-        const input = $('#write-input'); const typed = input.value.trim(); if (!typed) return;
-        const q = writeState.questions[writeState.current]; const direction = getWriteDirection();
+        const input = $('#write-input');
+        const typed = input.value.trim();
+        if (!typed) return;
+
+        const q = writeState.questions[writeState.current];
+        const direction = getWriteDirection();
         const correct = direction === 'native-to-foreign' ? q.word : q.translation;
-        const isCorrect = typed.toLowerCase() === correct.toLowerCase(); const feedback = $('#write-feedback');
+        const isCorrect = typed.toLowerCase() === correct.toLowerCase();
+
+        const feedback = $('#write-feedback');
+
         if (isCorrect) {
-            input.classList.remove('input-wrong'); input.classList.add('input-correct'); input.disabled = true;
-            feedback.innerHTML = `<div class="write-feedback-text correct">Richtig!</div><div class="write-diff">${escapeHtml(correct).split('').map(c => `<span class="char-correct">${c}</span>`).join('')}</div>`;
-            const firstTryCorrect = !writeState.hadWrongAttempt; if (firstTryCorrect) writeState.correct++;
-            writeState.results.push({ word: q.word, translation: q.translation, correct: firstTryCorrect }); writeState.hadWrongAttempt = false;
+            input.classList.remove('input-wrong');
+            input.classList.add('input-correct');
+            input.disabled = true;
+            feedback.innerHTML = `
+                <div class="write-feedback-text correct">Richtig!</div>
+                <div class="write-diff">${escapeHtml(correct).split('').map(c => `<span class="char-correct">${c}</span>`).join('')}</div>
+            `;
+
+            const firstTryCorrect = !writeState.hadWrongAttempt;
+            if (firstTryCorrect) writeState.correct++;
+            writeState.results.push({ word: q.word, translation: q.translation, correct: firstTryCorrect });
+            writeState.hadWrongAttempt = false;
+
             const vocab = allVocabs.find(v => v.id === q.id);
-            if (vocab) { if (firstTryCorrect) vocab.correctCount++; else vocab.wrongCount++; vocab.lastSeen = new Date().toISOString(); save(); }
+            if (vocab) {
+                if (firstTryCorrect) vocab.correctCount++;
+                else vocab.wrongCount++;
+                vocab.lastSeen = new Date().toISOString();
+                save();
+            }
+
+            // Streak tracking
+            if (firstTryCorrect) recordCorrectAnswer();
+            else recordWrongAnswer();
+
             $('#btn-write-check').textContent = 'Weiter';
-            $('#btn-write-check').onclick = () => { $('#btn-write-check').onclick = null; nextWriteQuestion(); };
+            $('#btn-write-check').onclick = () => {
+                $('#btn-write-check').onclick = null;
+                nextWriteQuestion();
+            };
         } else {
-            writeState.hadWrongAttempt = true; input.classList.remove('input-correct'); input.classList.add('input-wrong');
+            writeState.hadWrongAttempt = true;
+            input.classList.remove('input-correct');
+            input.classList.add('input-wrong');
+
+            // Antwort-Streak zurücksetzen bei Fehler
+            recordWrongAnswer();
+
             const diffHtml = buildCharDiff(typed, correct);
-            feedback.innerHTML = `<div class="write-feedback-text wrong">Nicht ganz richtig — versuch es nochmal!</div><div class="write-diff">${diffHtml}</div>`;
-            input.value = ''; input.focus();
+            feedback.innerHTML = `
+                <div class="write-feedback-text wrong">Nicht ganz richtig — versuch es nochmal!</div>
+                <div class="write-diff">${diffHtml}</div>
+            `;
+            input.value = '';
+            input.focus();
         }
     }
 
     function buildCharDiff(typed, correct) {
-        let html = ''; const maxLen = Math.max(typed.length, correct.length);
+        let html = '';
+        const maxLen = Math.max(typed.length, correct.length);
         for (let i = 0; i < maxLen; i++) {
-            const correctChar = correct[i] || ''; const typedChar = typed[i] || '';
-            if (i >= correct.length) break;
-            else if (i >= typed.length) html += `<span class="char-missing">${escapeHtml(correctChar)}</span>`;
-            else if (typedChar.toLowerCase() === correctChar.toLowerCase()) html += `<span class="char-correct">${escapeHtml(correctChar)}</span>`;
-            else html += `<span class="char-wrong">${escapeHtml(correctChar)}</span>`;
+            const correctChar = correct[i] || '';
+            const typedChar = typed[i] || '';
+
+            if (i >= correct.length) {
+                break;
+            } else if (i >= typed.length) {
+                html += `<span class="char-missing">${escapeHtml(correctChar)}</span>`;
+            } else if (typedChar.toLowerCase() === correctChar.toLowerCase()) {
+                html += `<span class="char-correct">${escapeHtml(correctChar)}</span>`;
+            } else {
+                html += `<span class="char-wrong">${escapeHtml(correctChar)}</span>`;
+            }
         }
         return html;
     }
 
-    function nextWriteQuestion() { writeState.current++; if (writeState.current >= writeState.questions.length) showWriteResults(); else showWriteQuestion(); }
+    function nextWriteQuestion() {
+        writeState.current++;
+        if (writeState.current >= writeState.questions.length) {
+            showWriteResults();
+        } else {
+            showWriteQuestion();
+        }
+    }
 
     function showWriteResults() {
-        $('.write-card').classList.add('hidden'); $('.write-progress').classList.add('hidden'); $('#write-results').classList.remove('hidden');
+        $('.write-card').classList.add('hidden');
+        $('.write-progress').classList.add('hidden');
+        $('#write-results').classList.remove('hidden');
+
         const pct = Math.round((writeState.correct / writeState.questions.length) * 100);
         let msg = pct >= 90 ? 'Ausgezeichnet!' : pct >= 70 ? 'Gut gemacht!' : pct >= 50 ? 'Weiter üben!' : 'Nicht aufgeben!';
-        $('#write-result-score').innerHTML = `<div class="score-circle"><span class="score-number">${pct}%</span></div><p>${writeState.correct} von ${writeState.questions.length} richtig</p><p class="score-message">${msg}</p>`;
-        const details = $('#write-result-details'); details.innerHTML = '';
+
+        $('#write-result-score').innerHTML = `
+            <div class="score-circle">
+                <span class="score-number">${pct}%</span>
+            </div>
+            <p>${writeState.correct} von ${writeState.questions.length} richtig</p>
+            <p class="score-message">${msg}</p>
+        `;
+
+        const details = $('#write-result-details');
+        details.innerHTML = '';
         writeState.results.forEach(r => {
-            const row = document.createElement('div'); row.className = `result-row ${r.correct ? 'correct' : 'wrong'}`;
-            row.innerHTML = `<span class="result-icon">${r.correct ? '&#10003;' : '&#10007;'}</span><span>${escapeHtml(r.word)}</span><span>&rarr;</span><span>${escapeHtml(r.translation)}</span>`;
+            const row = document.createElement('div');
+            row.className = `result-row ${r.correct ? 'correct' : 'wrong'}`;
+            row.innerHTML = `
+                <span class="result-icon">${r.correct ? '&#10003;' : '&#10007;'}</span>
+                <span>${escapeHtml(r.word)}</span>
+                <span>&rarr;</span>
+                <span>${escapeHtml(r.translation)}</span>
+            `;
             details.appendChild(row);
         });
     }
 
     function initWrite() {
-        $('#btn-write-check').addEventListener('click', () => { if ($('#btn-write-check').textContent === 'Weiter') return; checkWriteAnswer(); });
-        $('#write-input').addEventListener('keydown', e => {
-            if (e.key === 'Enter') { e.preventDefault(); if ($('#btn-write-check').textContent === 'Weiter') nextWriteQuestion(); else checkWriteAnswer(); }
+        $('#btn-write-check').addEventListener('click', () => {
+            if ($('#btn-write-check').textContent === 'Weiter') return;
+            checkWriteAnswer();
         });
-        $('#btn-restart-write').addEventListener('click', () => { $('.write-card').classList.remove('hidden'); $('.write-progress').classList.remove('hidden'); $('#write-results').classList.add('hidden'); startWriteMode(); });
-        $('#write-lernset-filter').addEventListener('change', () => { $('#write-kapitel-filter').value = 'all'; refreshWrite(); });
+        $('#write-input').addEventListener('keydown', e => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if ($('#btn-write-check').textContent === 'Weiter') {
+                    nextWriteQuestion();
+                } else {
+                    checkWriteAnswer();
+                }
+            }
+        });
+        $('#btn-restart-write').addEventListener('click', () => {
+            $('.write-card').classList.remove('hidden');
+            $('.write-progress').classList.remove('hidden');
+            $('#write-results').classList.add('hidden');
+            startWriteMode();
+        });
+
+        $('#write-lernset-filter').addEventListener('change', () => {
+            $('#write-kapitel-filter').value = 'all';
+            refreshWrite();
+        });
         $('#write-kapitel-filter').addEventListener('change', () => refreshWrite());
         $('#write-direction').addEventListener('change', () => refreshWrite());
     }
 
+    // --- Settings ---
     async function loadAccountInfo() {
         let account = await getAccountFromCloud(currentUser);
-        if (!account) { const localAccounts = getAccounts(); account = localAccounts[currentUser]; }
+        if (!account) {
+            const localAccounts = getAccounts();
+            account = localAccounts[currentUser];
+        }
         $('#settings-username').textContent = account?.username || currentUser;
+
         const savedPw = localStorage.getItem('vokabel_currentPassword');
         const pwField = $('#settings-password');
-        if (savedPw) pwField.value = savedPw; else pwField.value = '••••••••';
-        pwField.type = 'password'; $('#btn-toggle-password').textContent = 'Anzeigen';
+        if (savedPw) {
+            pwField.value = savedPw;
+        } else {
+            pwField.value = '••••••••';
+        }
+        pwField.type = 'password';
+        $('#btn-toggle-password').textContent = 'Anzeigen';
     }
 
     function initSettings() {
-        const savedTheme = localStorage.getItem('theme') || 'light'; applyTheme(savedTheme);
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        applyTheme(savedTheme);
+
         loadAccountInfo();
+
         $('#btn-toggle-password').addEventListener('click', () => {
-            const pwField = $('#settings-password'); const btn = $('#btn-toggle-password');
-            if (pwField.type === 'password') { pwField.type = 'text'; btn.textContent = 'Verbergen'; }
-            else { pwField.type = 'password'; btn.textContent = 'Anzeigen'; }
+            const pwField = $('#settings-password');
+            const btn = $('#btn-toggle-password');
+            if (pwField.type === 'password') {
+                pwField.type = 'text';
+                btn.textContent = 'Verbergen';
+            } else {
+                pwField.type = 'password';
+                btn.textContent = 'Anzeigen';
+            }
         });
+
         $('#btn-change-password').addEventListener('click', () => {
             $('#password-change-form').classList.toggle('hidden');
-            $('#settings-new-password').value = ''; $('#settings-new-password-confirm').value = '';
+            $('#settings-new-password').value = '';
+            $('#settings-new-password-confirm').value = '';
             $('#password-change-error').classList.add('hidden');
         });
-        $('#btn-cancel-password').addEventListener('click', () => { $('#password-change-form').classList.add('hidden'); });
+
+        $('#btn-cancel-password').addEventListener('click', () => {
+            $('#password-change-form').classList.add('hidden');
+        });
+
         $('#btn-save-password').addEventListener('click', async () => {
             const newPw = $('#settings-new-password').value;
             const newPwConfirm = $('#settings-new-password-confirm').value;
             const errorEl = $('#password-change-error');
-            if (!newPw || !newPwConfirm) { errorEl.textContent = 'Bitte alle Felder ausfüllen.'; errorEl.classList.remove('hidden'); return; }
-            if (newPw.length < 4) { errorEl.textContent = 'Neues Passwort muss mindestens 4 Zeichen lang sein.'; errorEl.classList.remove('hidden'); return; }
-            if (newPw !== newPwConfirm) { errorEl.textContent = 'Neue Passwörter stimmen nicht überein.'; errorEl.classList.remove('hidden'); return; }
+
+            if (!newPw || !newPwConfirm) {
+                errorEl.textContent = 'Bitte alle Felder ausfüllen.';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            if (newPw.length < 4) {
+                errorEl.textContent = 'Neues Passwort muss mindestens 4 Zeichen lang sein.';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            if (newPw !== newPwConfirm) {
+                errorEl.textContent = 'Neue Passwörter stimmen nicht überein.';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
             let account = await getAccountFromCloud(currentUser);
-            if (!account) { const localAccounts = getAccounts(); account = localAccounts[currentUser]; }
-            const newHash = await hashPassword(newPw); account.passwordHash = newHash;
-            const localAccounts = getAccounts(); localAccounts[currentUser] = account; saveAccounts(localAccounts);
-            if (cloudAvailable) { try { await db.collection('accounts').doc(currentUser).update({ passwordHash: newHash }); } catch (e) { console.error('Cloud-Passwort-Update fehlgeschlagen:', e); } }
+            if (!account) {
+                const localAccounts = getAccounts();
+                account = localAccounts[currentUser];
+            }
+
+            const newHash = await hashPassword(newPw);
+            account.passwordHash = newHash;
+
+            const localAccounts = getAccounts();
+            localAccounts[currentUser] = account;
+            saveAccounts(localAccounts);
+
+            if (cloudAvailable) {
+                try {
+                    await db.collection('accounts').doc(currentUser).update({ passwordHash: newHash });
+                } catch (e) {
+                    console.error('Cloud-Passwort-Update fehlgeschlagen:', e);
+                }
+            }
+
             localStorage.setItem('vokabel_currentPassword', newPw);
-            $('#password-change-form').classList.add('hidden'); errorEl.classList.add('hidden'); loadAccountInfo();
+            $('#password-change-form').classList.add('hidden');
+            errorEl.classList.add('hidden');
+            loadAccountInfo();
             alert('Passwort erfolgreich geändert!');
         });
-        $$('.theme-toggle-btn').forEach(btn => { btn.addEventListener('click', () => { const theme = btn.dataset.theme; applyTheme(theme); localStorage.setItem('theme', theme); }); });
+
+        $$('.theme-toggle-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const theme = btn.dataset.theme;
+                applyTheme(theme);
+                localStorage.setItem('theme', theme);
+            });
+        });
+
         $('#btn-clear-all').addEventListener('click', () => {
             if (confirm('Wirklich ALLE Vokabeln löschen? Das kann nicht rückgängig gemacht werden!')) {
-                allVocabs = []; vocabSets = []; lernsets = []; save(); alert('Alle Vokabeln gelöscht.'); refreshAddDropdowns();
+                allVocabs = [];
+                vocabSets = [];
+                lernsets = [];
+                save();
+                alert('Alle Vokabeln gelöscht.');
+                refreshAddDropdowns();
             }
         });
+
         $('#btn-delete-account').addEventListener('click', async () => {
             const confirmText = prompt('Um deinen Account unwiderruflich zu löschen, gib deinen Benutzernamen ein:');
-            if (!confirmText || confirmText.toLowerCase() !== currentUser) { if (confirmText !== null) alert('Benutzername stimmt nicht überein. Löschung abgebrochen.'); return; }
-            if (!confirm('LETZTE WARNUNG: Dein Account und ALLE Vokabeln werden unwiderruflich gelöscht. Fortfahren?')) return;
+            if (!confirmText || confirmText.toLowerCase() !== currentUser) {
+                if (confirmText !== null) alert('Benutzername stimmt nicht überein. Löschung abgebrochen.');
+                return;
+            }
+
+            if (!confirm('LETZTE WARNUNG: Dein Account und ALLE Vokabeln werden unwiderruflich gelöscht. Fortfahren?')) {
+                return;
+            }
+
             const deletedUser = currentUser;
-            localStorage.removeItem(userKey('lernsets')); localStorage.removeItem(userKey('vocabSets')); localStorage.removeItem(userKey('allVocabs'));
-            const localAccounts = getAccounts(); delete localAccounts[deletedUser]; saveAccounts(localAccounts);
-            if (cloudAvailable) { try { await db.collection('userData').doc(deletedUser).delete(); await db.collection('accounts').doc(deletedUser).delete(); } catch (e) { console.warn('Cloud-Löschung fehlgeschlagen:', e); } }
-            currentUser = null; localStorage.removeItem('vokabel_currentUser'); localStorage.removeItem('vokabel_currentPassword');
-            lernsets = []; vocabSets = []; allVocabs = [];
-            alert('Dein Account wurde vollständig gelöscht.'); location.reload();
+
+            localStorage.removeItem(userKey('lernsets'));
+            localStorage.removeItem(userKey('vocabSets'));
+            localStorage.removeItem(userKey('allVocabs'));
+
+            const localAccounts = getAccounts();
+            delete localAccounts[deletedUser];
+            saveAccounts(localAccounts);
+
+            if (cloudAvailable) {
+                try {
+                    await db.collection('userData').doc(deletedUser).delete();
+                    await db.collection('accounts').doc(deletedUser).delete();
+                } catch (e) {
+                    console.warn('Cloud-Löschung fehlgeschlagen:', e);
+                }
+            }
+
+            currentUser = null;
+            localStorage.removeItem('vokabel_currentUser');
+            localStorage.removeItem('vokabel_currentPassword');
+            lernsets = [];
+            vocabSets = [];
+            allVocabs = [];
+
+            alert('Dein Account wurde vollständig gelöscht.');
+            location.reload();
         });
     }
 
     function applyTheme(theme) {
         document.documentElement.setAttribute('data-theme', theme);
-        $$('.theme-toggle-btn').forEach(b => { b.classList.toggle('active', b.dataset.theme === theme); });
+        $$('.theme-toggle-btn').forEach(b => {
+            b.classList.toggle('active', b.dataset.theme === theme);
+        });
     }
 
-    function escapeHtml(str) { const div = document.createElement('div'); div.textContent = str; return div.innerHTML; }
+    // --- Utils ---
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
 
     function showNotice(message) {
-        const existing = document.querySelector('.app-notice'); if (existing) existing.remove();
-        const notice = document.createElement('div'); notice.className = 'app-notice';
-        notice.innerHTML = `<span>${escapeHtml(message)}</span><button class="notice-close" aria-label="Schließen">&times;</button>`;
+        const existing = document.querySelector('.app-notice');
+        if (existing) existing.remove();
+
+        const notice = document.createElement('div');
+        notice.className = 'app-notice';
+        notice.innerHTML = `
+            <span>${escapeHtml(message)}</span>
+            <button class="notice-close" aria-label="Schließen">&times;</button>
+        `;
         notice.querySelector('.notice-close').addEventListener('click', () => notice.remove());
-        document.getElementById('app').appendChild(notice); setTimeout(() => notice.remove(), 8000);
+        document.getElementById('app').appendChild(notice);
+        setTimeout(() => notice.remove(), 8000);
     }
 
-    function init() { const savedTheme = localStorage.getItem('theme') || 'light'; applyTheme(savedTheme); initAuth(); }
+    // --- Init ---
+    function init() {
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        applyTheme(savedTheme);
+        initAuth();
+    }
+
     document.addEventListener('DOMContentLoaded', init);
 })();
     </script>
