@@ -498,7 +498,6 @@ header h1 {
     width: 18px;
     height: 18px;
     accent-color: var(--primary);
-    accent-color: var(--primary);
 }
 
 .vocab-word,
@@ -1299,7 +1298,6 @@ header h1 {
     outline: none;
     border-color: var(--primary);
 }
-
 .write-input-area input.input-correct {
     border-color: var(--success);
 }
@@ -1691,6 +1689,10 @@ header h1 {
                         </select>
                         <select id="cards-kapitel-filter" disabled>
                             <option value="all">Alle Kapitel</option>
+                        </select>
+                        <select id="cards-direction">
+                            <option value="foreign-to-native">Fremdsprache → Deutsch</option>
+                            <option value="native-to-foreign">Deutsch → Fremdsprache</option>
                         </select>
                     </div>
                 </div>
@@ -2766,8 +2768,16 @@ const App = (() => {
     function showCard() {
         if (currentCards.length === 0) return;
         const card = currentCards[currentCardIndex];
-        $('#card-word').textContent = card.word;
-        $('#card-translation').textContent = card.translation;
+        const direction = $('#cards-direction')?.value || 'foreign-to-native';
+        const isReverse = direction === 'native-to-foreign';
+        const front = isReverse ? card.translation : card.word;
+        const back = isReverse ? card.word : card.translation;
+        const frontLabel = isReverse ? 'Bedeutung' : 'Vokabel';
+        const backLabel = isReverse ? 'Vokabel' : 'Bedeutung';
+        $('#card-word').textContent = front;
+        $('#card-translation').textContent = back;
+        $('.flashcard-front .card-label').textContent = frontLabel;
+        $('.flashcard-back .card-label').textContent = backLabel;
         $('#cards-progress').textContent = `${currentCardIndex + 1} / ${currentCards.length}`;
         isFlipped = false;
         $('#flashcard').classList.remove('flipped');
@@ -2813,6 +2823,7 @@ const App = (() => {
             refreshCards();
         });
         $('#cards-kapitel-filter').addEventListener('change', () => refreshCards());
+        $('#cards-direction').addEventListener('change', () => showCard());
 
         document.addEventListener('keydown', e => {
             if (!$('#view-cards').classList.contains('active')) return;
