@@ -1298,6 +1298,7 @@ header h1 {
     outline: none;
     border-color: var(--primary);
 }
+
 .write-input-area input.input-correct {
     border-color: var(--success);
 }
@@ -1432,6 +1433,197 @@ header h1 {
 
 .streak-badge.streak-active .streak-icon {
     animation: streakPulse 1.5s ease-in-out infinite;
+}
+
+/* --- Schultest (Exam Mode) --- */
+.test-container {
+    max-width: 550px;
+    margin: 0 auto;
+}
+
+.test-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 2rem;
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.test-question-num {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+}
+
+.test-prompt-word {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: var(--text);
+}
+
+.test-input-area {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.test-input-area input {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-family: inherit;
+    text-align: center;
+    transition: border-color 0.2s;
+}
+
+.test-input-area input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.test-progress-bar {
+    width: 100%;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+.test-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--primary-light));
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+.test-timer {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    text-align: right;
+    margin-bottom: 0.5rem;
+}
+
+.grade-display {
+    text-align: center;
+    margin: 1.5rem 0;
+}
+
+.grade-circle {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    position: relative;
+}
+
+.grade-circle.grade-1 {
+    background: linear-gradient(135deg, #10b981, #34d399);
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+}
+
+.grade-circle.grade-2 {
+    background: linear-gradient(135deg, #22c55e, #86efac);
+    box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
+}
+
+.grade-circle.grade-3 {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+}
+
+.grade-circle.grade-4 {
+    background: linear-gradient(135deg, #f97316, #fb923c);
+    box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4);
+}
+
+.grade-circle.grade-5 {
+    background: linear-gradient(135deg, #ef4444, #f87171);
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+}
+
+.grade-circle.grade-6 {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
+}
+
+.grade-number {
+    font-size: 3rem;
+    font-weight: 800;
+    color: white;
+    line-height: 1;
+}
+
+.grade-label {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.grade-text {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.grade-text.grade-1 { color: #10b981; }
+.grade-text.grade-2 { color: #22c55e; }
+.grade-text.grade-3 { color: #f59e0b; }
+.grade-text.grade-4 { color: #f97316; }
+.grade-text.grade-5 { color: #ef4444; }
+.grade-text.grade-6 { color: #dc2626; }
+
+.grade-percent {
+    font-size: 1rem;
+    color: var(--text-secondary);
+}
+
+.test-results-details {
+    margin-top: 1rem;
+    text-align: left;
+}
+
+.test-result-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.test-result-row.correct {
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.test-result-row.wrong {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.test-result-row .result-icon {
+    font-size: 1.1rem;
+    width: 24px;
+    text-align: center;
+}
+
+.test-result-row.correct .result-icon { color: var(--success); }
+.test-result-row.wrong .result-icon { color: var(--danger); }
+
+.test-your-answer {
+    font-size: 0.8rem;
+    color: var(--danger);
+    font-style: italic;
 }
 
 /* --- Utility --- */
@@ -1614,6 +1806,7 @@ header h1 {
             <button class="nav-btn" data-view="cards">Karteikarten</button>
             <button class="nav-btn" data-view="write">Schreiben</button>
             <button class="nav-btn" data-view="quiz">Quiz</button>
+            <button class="nav-btn" data-view="test">Test</button>
             <button class="nav-btn" data-view="list">Lernsets</button>
             <button class="nav-btn" data-view="settings">Einstellungen</button>
         </nav>
@@ -1822,6 +2015,60 @@ header h1 {
                 <div id="quiz-result-score" class="result-score"></div>
                 <div id="quiz-result-details"></div>
                 <button id="btn-restart-quiz" class="btn btn-primary">Neues Quiz</button>
+            </div>
+        </section>
+
+        <!-- TEST (SCHULTEST) VIEW -->
+        <section id="view-test" class="view">
+            <div id="test-empty" class="empty-state">
+                <p>Noch keine Vokabeln zum Testen.</p>
+                <p>Gib zuerst mindestens 4 Vokabeln ein!</p>
+            </div>
+            <div id="test-setup" class="quiz-setup hidden">
+                <h3>Vokabeltest</h3>
+                <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:1rem;">Wie in der Schule: Schreibe die Übersetzung — am Ende gibt es eine Note von 1 bis 6.</p>
+                <div class="filter-bar">
+                    <select id="test-lernset-filter">
+                        <option value="all">Alle Lernsets</option>
+                    </select>
+                    <select id="test-kapitel-filter" disabled>
+                        <option value="all">Alle Kapitel</option>
+                    </select>
+                </div>
+                <label>Anzahl Fragen:
+                    <input type="number" id="test-count" value="20" min="4" max="100">
+                </label>
+                <label>Richtung:
+                    <select id="test-direction">
+                        <option value="foreign-to-native">Fremdsprache → Deutsch</option>
+                        <option value="native-to-foreign">Deutsch → Fremdsprache</option>
+                        <option value="mixed">Gemischt</option>
+                    </select>
+                </label>
+                <button id="btn-start-test" class="btn btn-primary" style="margin-top:0.5rem;">Test starten</button>
+            </div>
+            <div id="test-active" class="test-container hidden">
+                <div class="test-progress-bar">
+                    <div id="test-progress-fill" class="test-progress-fill" style="width:0%"></div>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:0.75rem;">
+                    <span id="test-progress-text" style="font-size:0.9rem;color:var(--text-secondary);">Frage 1 / 20</span>
+                    <span id="test-timer" class="test-timer"></span>
+                </div>
+                <div class="test-card">
+                    <div id="test-question-num" class="test-question-num">Aufgabe 1</div>
+                    <div id="test-prompt-word" class="test-prompt-word"></div>
+                    <div class="test-input-area">
+                        <input type="text" id="test-input" placeholder="Übersetzung eingeben..." autocomplete="off">
+                        <button id="btn-test-next" class="btn btn-primary">Weiter</button>
+                    </div>
+                </div>
+            </div>
+            <div id="test-results" class="quiz-results hidden">
+                <h3>Testergebnis</h3>
+                <div id="test-grade-display" class="grade-display"></div>
+                <div id="test-result-details" class="test-results-details"></div>
+                <button id="btn-restart-test" class="btn btn-primary" style="display:block;margin:1.5rem auto 0;">Neuer Test</button>
             </div>
         </section>
 
@@ -2078,177 +2325,6 @@ const App = (() => {
             }
         }
     }
-
-    // --- Auth: UI ---
-    async function initAuth() {
-        $('#show-register').addEventListener('click', e => {
-            e.preventDefault();
-            $('#auth-login').classList.add('hidden');
-            $('#auth-register').classList.remove('hidden');
-            $('#register-error').classList.add('hidden');
-        });
-
-        $('#show-login').addEventListener('click', e => {
-            e.preventDefault();
-            $('#auth-register').classList.add('hidden');
-            $('#auth-login').classList.remove('hidden');
-            $('#login-error').classList.add('hidden');
-        });
-
-        $('#btn-login').addEventListener('click', handleLogin);
-        $('#login-password').addEventListener('keydown', e => {
-            if (e.key === 'Enter') handleLogin();
-        });
-        $('#login-username').addEventListener('keydown', e => {
-            if (e.key === 'Enter') $('#login-password').focus();
-        });
-
-        $('#btn-register').addEventListener('click', handleRegister);
-        $('#register-password-confirm').addEventListener('keydown', e => {
-            if (e.key === 'Enter') handleRegister();
-        });
-
-        $('#btn-logout').addEventListener('click', handleLogout);
-
-        // Check if already logged in
-        const savedUser = localStorage.getItem('vokabel_currentUser');
-        if (savedUser) {
-            // Prüfe lokal UND in der Cloud
-            const localAccounts = getAccounts();
-            let accountExists = !!localAccounts[savedUser];
-
-            if (!accountExists && cloudAvailable) {
-                const cloudAccount = await getAccountFromCloud(savedUser);
-                accountExists = !!cloudAccount;
-                if (cloudAccount) {
-                    localAccounts[savedUser] = cloudAccount;
-                    saveAccounts(localAccounts);
-                }
-            }
-
-            if (accountExists) {
-                currentUser = savedUser;
-                showApp();
-                return;
-            }
-        }
-        showAuth();
-    }
-
-    async function handleLogin() {
-        const username = $('#login-username').value.trim();
-        const password = $('#login-password').value;
-        const errorEl = $('#login-error');
-
-        if (!username || !password) {
-            errorEl.textContent = 'Bitte Benutzername und Passwort eingeben.';
-            errorEl.classList.remove('hidden');
-            return;
-        }
-
-        const userKey = username.toLowerCase();
-
-        // Zuerst Cloud prüfen, dann lokal
-        let account = null;
-        let cloudError = null;
-
-        if (cloudAvailable) {
-            try {
-                const doc = await db.collection('accounts').doc(userKey).get();
-                if (doc.exists) {
-                    account = doc.data();
-                }
-            } catch (e) {
-                cloudError = e;
-                console.error('Cloud-Login fehlgeschlagen:', e);
-            }
-        }
-
-        if (!account) {
-            const localAccounts = getAccounts();
-            account = localAccounts[userKey];
-        }
-
-        if (!account) {
-            let msg = 'Benutzername nicht gefunden.';
-            if (!cloudAvailable) {
-                msg += ' (Cloud nicht verfügbar — nur lokale Accounts möglich)';
-            } else if (cloudError) {
-                msg += ` (Cloud-Fehler: ${cloudError.code || cloudError.message}. Prüfe die Firestore-Sicherheitsregeln!)`;
-            }
-            errorEl.textContent = msg;
-            errorEl.classList.remove('hidden');
-            return;
-        }
-
-        const hash = await hashPassword(password);
-        if (hash !== account.passwordHash) {
-            errorEl.textContent = 'Falsches Passwort.';
-            errorEl.classList.remove('hidden');
-            return;
-        }
-
-        // Account lokal cachen
-        const localAccounts = getAccounts();
-        localAccounts[userKey] = account;
-        saveAccounts(localAccounts);
-
-        // Account in Cloud synchronisieren (falls noch nicht dort)
-        if (cloudAvailable) {
-            try {
-                const cloudDoc = await db.collection('accounts').doc(userKey).get();
-                if (!cloudDoc.exists) {
-                    await db.collection('accounts').doc(userKey).set(account);
-                    console.log('Account erfolgreich in Cloud synchronisiert');
-                }
-            } catch (e) {
-                console.error('Account-Cloud-Sync fehlgeschlagen:', e);
-                alert('Hinweis: Account konnte nicht in die Cloud synchronisiert werden: ' + (e.code || e.message));
-            }
-        }
-
-        currentUser = userKey;
-        localStorage.setItem('vokabel_currentUser', currentUser);
-        localStorage.setItem('vokabel_currentPassword', password);
-        showApp();
-    }
-
-    async function handleRegister() {
-        const username = $('#register-username').value.trim();
-        const password = $('#register-password').value;
-        const passwordConfirm = $('#register-password-confirm').value;
-        const errorEl = $('#register-error');
-
-        if (!username || !password) {
-            errorEl.textContent = 'Bitte alle Felder ausfüllen.';
-            errorEl.classList.remove('hidden');
-            return;
-        }
-
-        if (username.length < 3) {
-            errorEl.textContent = 'Benutzername muss mindestens 3 Zeichen lang sein.';
-            errorEl.classList.remove('hidden');
-            return;
-        }
-
-        if (password.length < 4) {
-            errorEl.textContent = 'Passwort muss mindestens 4 Zeichen lang sein.';
-            errorEl.classList.remove('hidden');
-            return;
-        }
-
-        if (password !== passwordConfirm) {
-            errorEl.textContent = 'Passwörter stimmen nicht überein.';
-            errorEl.classList.remove('hidden');
-            return;
-        }
-
-        const userKeyName = username.toLowerCase();
-
-        // Prüfe in Cloud UND lokal ob Username schon existiert
-        const cloudAccount = await getAccountFromCloud(userKeyName);
-        const localAccounts = getAccounts();
-
         if (cloudAccount || localAccounts[userKeyName]) {
             errorEl.textContent = 'Benutzername ist bereits vergeben.';
             errorEl.classList.remove('hidden');
@@ -2332,6 +2408,7 @@ const App = (() => {
             initCards();
             initWrite();
             initQuiz();
+            initTest();
             initList();
             initSettings();
             appInitialized = true;
@@ -2369,6 +2446,7 @@ const App = (() => {
                 if (view === 'cards') refreshCards();
                 if (view === 'write') refreshWrite();
                 if (view === 'quiz') refreshQuiz();
+                if (view === 'test') refreshTest();
                 if (view === 'list') refreshList();
             });
         });
@@ -2379,11 +2457,13 @@ const App = (() => {
         localStorage.setItem(userKey('lernsets'), JSON.stringify(lernsets));
         localStorage.setItem(userKey('vocabSets'), JSON.stringify(vocabSets));
         localStorage.setItem(userKey('allVocabs'), JSON.stringify(allVocabs));
+        // Cloud-Sync im Hintergrund
         saveToCloud();
     }
 
     // --- Streak Functions ---
     async function loadStreakData() {
+        // Versuche aus Cloud zu laden
         if (cloudAvailable && currentUser) {
             try {
                 const doc = await db.collection('userData').doc(currentUser).get();
@@ -2394,6 +2474,7 @@ const App = (() => {
                         lastStudyDate = data.lastStudyDate || null;
                         answerStreak = data.answerStreak || 0;
                         bestAnswerStreak = data.bestAnswerStreak || 0;
+                        // Lokal cachen
                         localStorage.setItem(userKey('dailyStreak'), dailyStreak.toString());
                         localStorage.setItem(userKey('lastStudyDate'), lastStudyDate || '');
                         localStorage.setItem(userKey('answerStreak'), answerStreak.toString());
@@ -2407,6 +2488,7 @@ const App = (() => {
                 console.warn('Streak cloud load failed:', e);
             }
         }
+        // Fallback: localStorage
         dailyStreak = parseInt(localStorage.getItem(userKey('dailyStreak')) || '0');
         lastStudyDate = localStorage.getItem(userKey('lastStudyDate')) || null;
         answerStreak = parseInt(localStorage.getItem(userKey('answerStreak')) || '0');
@@ -2420,6 +2502,7 @@ const App = (() => {
         localStorage.setItem(userKey('lastStudyDate'), lastStudyDate || '');
         localStorage.setItem(userKey('answerStreak'), answerStreak.toString());
         localStorage.setItem(userKey('bestAnswerStreak'), bestAnswerStreak.toString());
+        // Streak-Daten auch in Cloud speichern
         if (cloudAvailable && currentUser) {
             db.collection('userData').doc(currentUser).set({
                 dailyStreak,
@@ -2441,6 +2524,7 @@ const App = (() => {
         const now = new Date(today);
         const diffDays = Math.floor((now - last) / (1000 * 60 * 60 * 24));
         if (diffDays > 1) {
+            // Streak unterbrochen
             dailyStreak = 0;
             saveStreakData();
         }
@@ -2448,7 +2532,7 @@ const App = (() => {
 
     function recordStudyActivity() {
         const today = getTodayString();
-        if (lastStudyDate === today) return;
+        if (lastStudyDate === today) return; // Heute schon gezählt
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
         const yesterdayStr = yesterday.toISOString().slice(0, 10);
@@ -2495,9 +2579,11 @@ const App = (() => {
             answerBadge.classList.toggle('streak-active', answerStreak >= 3);
         }
 
+        // Quiz inline streak
         const quizStreakNum = $('#quiz-streak-num');
         if (quizStreakNum) quizStreakNum.textContent = answerStreak;
 
+        // Write inline streak
         const writeStreakNum = $('#write-streak-num');
         if (writeStreakNum) writeStreakNum.textContent = answerStreak;
     }
@@ -2536,6 +2622,7 @@ const App = (() => {
         $('#btn-new-lernset').addEventListener('click', createNewLernset);
         $('#btn-new-kapitel').addEventListener('click', createNewKapitel);
 
+        // Update kapitel dropdown when lernset changes
         $('#add-lernset').addEventListener('change', () => {
             updateKapitelDropdown();
         });
@@ -2543,6 +2630,7 @@ const App = (() => {
         setupRemoveButtons();
         refreshAddDropdowns();
 
+        // Allow Enter in last input to add new row
         $('#manual-vocab-list').addEventListener('keydown', e => {
             if (e.key === 'Enter') {
                 e.preventDefault();
@@ -2678,11 +2766,13 @@ const App = (() => {
         const sourceLang = $('#source-lang').value;
         const targetLang = $('#target-lang').value;
 
+        // Auto-create lernset if none selected
         if (!lernsetId) {
             lernsetId = Date.now().toString();
             lernsets.push({ id: lernsetId, name: sourceLang, sourceLang, targetLang });
         }
 
+        // Auto-create kapitel if none selected
         if (!kapitelId) {
             kapitelId = Date.now().toString() + '_k';
             const kapitelName = `Kapitel ${vocabSets.filter(s => s.lernsetId === lernsetId).length + 1}`;
@@ -2714,6 +2804,7 @@ const App = (() => {
         save();
         alert(`${vocabs.length} Vokabeln gespeichert!`);
 
+        // Clear inputs
         $('#manual-vocab-list').innerHTML = `
             <div class="manual-vocab-row">
                 <input type="text" class="vocab-word" placeholder="Vokabel">
@@ -2725,13 +2816,13 @@ const App = (() => {
         setupRemoveButtons();
         refreshAddDropdowns();
 
+        // Switch to flashcards
         $$('.nav-btn').forEach(b => b.classList.remove('active'));
         $$('.nav-btn')[1].classList.add('active');
         $$('.view').forEach(v => v.classList.remove('active'));
         $('#view-cards').classList.add('active');
         refreshCards();
     }
-
 
     // --- Flashcards ---
     function refreshCards() {
@@ -2747,6 +2838,7 @@ const App = (() => {
 
         currentCards = getFilteredVocabs(lernsetId, kapitelId);
 
+        // Shuffle
         for (let i = currentCards.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [currentCards[i], currentCards[j]] = [currentCards[j], currentCards[i]];
@@ -2825,6 +2917,7 @@ const App = (() => {
         $('#cards-kapitel-filter').addEventListener('change', () => refreshCards());
         $('#cards-direction').addEventListener('change', () => showCard());
 
+        // Keyboard shortcuts
         document.addEventListener('keydown', e => {
             if (!$('#view-cards').classList.contains('active')) return;
             if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flipCard(); }
@@ -2991,6 +3084,7 @@ const App = (() => {
 
     function recordAnswer(isCorrect, correctAnswer) {
         if (isCorrect) quizState.correct++;
+
         const q = quizState.questions[quizState.current];
         quizState.results.push({
             word: q.word,
@@ -3121,6 +3215,7 @@ const App = (() => {
             container.appendChild(card);
         });
 
+        // Toggle expand
         container.querySelectorAll('.lernset-card-header').forEach(header => {
             header.addEventListener('click', e => {
                 if (e.target.closest('.lernset-card-actions')) return;
@@ -3132,6 +3227,7 @@ const App = (() => {
             });
         });
 
+        // Rename lernset
         container.querySelectorAll('.btn-rename-lernset').forEach(btn => {
             btn.addEventListener('click', e => {
                 e.stopPropagation();
@@ -3147,6 +3243,7 @@ const App = (() => {
             });
         });
 
+        // Delete lernset
         container.querySelectorAll('.btn-delete-lernset').forEach(btn => {
             btn.addEventListener('click', e => {
                 e.stopPropagation();
@@ -3165,6 +3262,7 @@ const App = (() => {
             });
         });
 
+        // Rename kapitel
         container.querySelectorAll('.btn-rename-kapitel').forEach(btn => {
             btn.addEventListener('click', () => {
                 const kap = vocabSets.find(s => s.id === btn.dataset.id);
@@ -3178,6 +3276,7 @@ const App = (() => {
             });
         });
 
+        // Delete kapitel
         container.querySelectorAll('.btn-delete-kapitel').forEach(btn => {
             btn.addEventListener('click', () => {
                 const kap = vocabSets.find(s => s.id === btn.dataset.id);
@@ -3191,6 +3290,7 @@ const App = (() => {
             });
         });
 
+        // Add kapitel
         container.querySelectorAll('.btn-add-kapitel').forEach(btn => {
             btn.addEventListener('click', () => {
                 const lernsetId = btn.dataset.lernsetId;
@@ -3210,6 +3310,7 @@ const App = (() => {
             });
         });
 
+        // Move kapitel vocabs
         container.querySelectorAll('.btn-move-kapitel').forEach(btn => {
             btn.addEventListener('click', () => {
                 const kapId = btn.dataset.id;
@@ -3221,6 +3322,7 @@ const App = (() => {
             });
         });
 
+        // Copy kapitel vocabs
         container.querySelectorAll('.btn-copy-kapitel').forEach(btn => {
             btn.addEventListener('click', () => {
                 const kapId = btn.dataset.id;
@@ -3243,6 +3345,7 @@ const App = (() => {
             : `Vokabeln kopieren`;
         $('#modal-description').textContent = `${vocabCount} Vokabeln aus "${kapitelName}" ${mode === 'move' ? 'verschieben' : 'kopieren'} nach:`;
 
+        // Populate lernset dropdown
         const lsSelect = $('#modal-target-lernset');
         lsSelect.innerHTML = '';
         lernsets.forEach(ls => {
@@ -3329,6 +3432,7 @@ const App = (() => {
             URL.revokeObjectURL(url);
         });
 
+        // CSV Import
         $('#csv-import-input').addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -3341,13 +3445,16 @@ const App = (() => {
                     return;
                 }
 
+                // Skip header line
                 const header = lines[0].toLowerCase();
                 const startIdx = (header.includes('vokabel') || header.includes('word')) ? 1 : 0;
 
+                // Group by Lernset + Kapitel
                 const groups = {};
                 let importCount = 0;
 
                 for (let i = startIdx; i < lines.length; i++) {
+                    // Parse CSV with semicolon separator, handle quoted fields
                     const parts = lines[i].split(';').map(p => p.trim().replace(/^"|"$/g, ''));
                     if (parts.length < 2 || !parts[0] || !parts[1]) continue;
 
@@ -3364,12 +3471,14 @@ const App = (() => {
                 for (const key in groups) {
                     const g = groups[key];
 
+                    // Find or create Lernset
                     let ls = lernsets.find(l => l.name === g.lernsetName);
                     if (!ls) {
                         ls = { id: Date.now().toString() + Math.random().toString(36).substr(2, 4), name: g.lernsetName, sourceLang: 'Englisch', targetLang: 'Deutsch' };
                         lernsets.push(ls);
                     }
 
+                    // Find or create Kapitel
                     let kap = vocabSets.find(s => s.lernsetId === ls.id && s.name === g.kapitelName);
                     if (!kap) {
                         kap = {
@@ -3383,6 +3492,7 @@ const App = (() => {
                         vocabSets.push(kap);
                     }
 
+                    // Add vocabs
                     g.vocabs.forEach(v => {
                         allVocabs.push({
                             id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
@@ -3408,6 +3518,210 @@ const App = (() => {
             reader.readAsText(file, 'UTF-8');
             e.target.value = '';
         });
+    }
+
+    // --- Test Mode (Schultest) ---
+    let testState = null;
+    let testTimerInterval = null;
+
+    function refreshTest() {
+        const lernsetId = $('#test-lernset-filter')?.value || 'all';
+        const kapitelId = $('#test-kapitel-filter')?.value || 'all';
+
+        renderFilterDropdowns(
+            $('#test-lernset-filter'),
+            $('#test-kapitel-filter'),
+            lernsetId,
+            kapitelId
+        );
+
+        const available = getFilteredVocabs(lernsetId, kapitelId);
+
+        if (available.length < 4) {
+            $('#test-empty').classList.remove('hidden');
+            $('#test-setup').classList.add('hidden');
+            $('#test-active').classList.add('hidden');
+            $('#test-results').classList.add('hidden');
+        } else {
+            $('#test-empty').classList.add('hidden');
+            $('#test-setup').classList.remove('hidden');
+            $('#test-active').classList.add('hidden');
+            $('#test-results').classList.add('hidden');
+            $('#test-count').max = available.length;
+        }
+    }
+
+    function initTest() {
+        $('#btn-start-test').addEventListener('click', startTest);
+        $('#btn-test-next').addEventListener('click', submitTestAnswer);
+        $('#btn-restart-test').addEventListener('click', () => refreshTest());
+
+        $('#test-input').addEventListener('keydown', e => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                submitTestAnswer();
+            }
+        });
+
+        $('#test-lernset-filter').addEventListener('change', () => {
+            $('#test-kapitel-filter').value = 'all';
+            refreshTest();
+        });
+        $('#test-kapitel-filter').addEventListener('change', () => refreshTest());
+    }
+
+    function startTest() {
+        const lernsetId = $('#test-lernset-filter')?.value || 'all';
+        const kapitelId = $('#test-kapitel-filter')?.value || 'all';
+        const available = getFilteredVocabs(lernsetId, kapitelId);
+
+        const count = Math.min(parseInt($('#test-count').value) || 20, available.length);
+        const direction = $('#test-direction').value;
+
+        const shuffled = [...available].sort(() => Math.random() - 0.5).slice(0, count);
+
+        testState = {
+            questions: shuffled,
+            direction,
+            current: 0,
+            results: [],
+            startTime: Date.now()
+        };
+
+        $('#test-setup').classList.add('hidden');
+        $('#test-active').classList.remove('hidden');
+
+        // Timer starten
+        if (testTimerInterval) clearInterval(testTimerInterval);
+        testTimerInterval = setInterval(updateTestTimer, 1000);
+        updateTestTimer();
+
+        showTestQuestion();
+    }
+
+    function updateTestTimer() {
+        if (!testState) return;
+        const elapsed = Math.floor((Date.now() - testState.startTime) / 1000);
+        const mins = Math.floor(elapsed / 60);
+        const secs = elapsed % 60;
+        const timerEl = $('#test-timer');
+        if (timerEl) timerEl.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function showTestQuestion() {
+        const q = testState.questions[testState.current];
+        const total = testState.questions.length;
+        const isReverse = testState.direction === 'native-to-foreign' ||
+            (testState.direction === 'mixed' && Math.random() > 0.5);
+
+        testState.currentReverse = isReverse;
+        const prompt = isReverse ? q.translation : q.word;
+
+        $('#test-question-num').textContent = `Aufgabe ${testState.current + 1}`;
+        $('#test-prompt-word').textContent = prompt;
+        $('#test-progress-text').textContent = `Frage ${testState.current + 1} / ${total}`;
+        $('#test-progress-fill').style.width = `${((testState.current) / total) * 100}%`;
+
+        const input = $('#test-input');
+        input.value = '';
+        input.disabled = false;
+        input.focus();
+        $('#btn-test-next').disabled = false;
+    }
+
+    function submitTestAnswer() {
+        const input = $('#test-input');
+        const typed = input.value.trim();
+
+        const q = testState.questions[testState.current];
+        const isReverse = testState.currentReverse;
+        const correctAnswer = isReverse ? q.word : q.translation;
+        const isCorrect = typed.toLowerCase() === correctAnswer.toLowerCase();
+
+        testState.results.push({
+            word: q.word,
+            translation: q.translation,
+            typed: typed,
+            correct: isCorrect,
+            correctAnswer: correctAnswer
+        });
+
+        // Vocab-Statistik aktualisieren
+        const vocab = allVocabs.find(v => v.id === q.id);
+        if (vocab) {
+            if (isCorrect) vocab.correctCount++;
+            else vocab.wrongCount++;
+            vocab.lastSeen = new Date().toISOString();
+            save();
+        }
+
+        // Streak tracking
+        if (isCorrect) recordCorrectAnswer();
+        else recordWrongAnswer();
+
+        testState.current++;
+        if (testState.current >= testState.questions.length) {
+            showTestResults();
+        } else {
+            showTestQuestion();
+        }
+    }
+
+    function calculateGrade(percent) {
+        // Deutsches Notensystem
+        if (percent >= 92) return { grade: 1, text: 'Sehr gut', short: '1' };
+        if (percent >= 81) return { grade: 2, text: 'Gut', short: '2' };
+        if (percent >= 67) return { grade: 3, text: 'Befriedigend', short: '3' };
+        if (percent >= 50) return { grade: 4, text: 'Ausreichend', short: '4' };
+        if (percent >= 30) return { grade: 5, text: 'Mangelhaft', short: '5' };
+        return { grade: 6, text: 'Ungenügend', short: '6' };
+    }
+
+    function showTestResults() {
+        if (testTimerInterval) { clearInterval(testTimerInterval); testTimerInterval = null; }
+
+        $('#test-active').classList.add('hidden');
+        $('#test-results').classList.remove('hidden');
+
+        const correctCount = testState.results.filter(r => r.correct).length;
+        const total = testState.results.length;
+        const percent = Math.round((correctCount / total) * 100);
+        const gradeInfo = calculateGrade(percent);
+
+        const elapsed = Math.floor((Date.now() - testState.startTime) / 1000);
+        const mins = Math.floor(elapsed / 60);
+        const secs = elapsed % 60;
+
+        $('#test-grade-display').innerHTML = `
+            <div class="grade-circle grade-${gradeInfo.grade}">
+                <span class="grade-number">${gradeInfo.short}</span>
+                <span class="grade-label">Note</span>
+            </div>
+            <div class="grade-text grade-${gradeInfo.grade}">${gradeInfo.text}</div>
+            <div class="grade-percent">${correctCount} von ${total} richtig (${percent}%)</div>
+            <div style="font-size:0.85rem;color:var(--text-secondary);margin-top:0.5rem;">Zeit: ${mins}:${secs.toString().padStart(2, '0')} Minuten</div>
+        `;
+
+        const details = $('#test-result-details');
+        details.innerHTML = '';
+        testState.results.forEach((r, i) => {
+            const row = document.createElement('div');
+            row.className = `test-result-row ${r.correct ? 'correct' : 'wrong'}`;
+            let inner = `
+                <span class="result-icon">${r.correct ? '&#10003;' : '&#10007;'}</span>
+                <span>${escapeHtml(r.word)}</span>
+                <span>&rarr;</span>
+                <span>${escapeHtml(r.translation)}</span>
+            `;
+            if (!r.correct) {
+                inner += `<span class="test-your-answer">(deine Antwort: "${escapeHtml(r.typed || '—')}")</span>`;
+            }
+            row.innerHTML = inner;
+            details.appendChild(row);
+        });
+
+        // Fortschrittsbalken auf 100%
+        $('#test-progress-fill').style.width = '100%';
     }
 
     // --- Write Mode (Schreibmodus) ---
@@ -3649,8 +3963,10 @@ const App = (() => {
         const savedTheme = localStorage.getItem('theme') || 'light';
         applyTheme(savedTheme);
 
+        // Account-Info anzeigen
         loadAccountInfo();
 
+        // Passwort anzeigen/verbergen
         $('#btn-toggle-password').addEventListener('click', () => {
             const pwField = $('#settings-password');
             const btn = $('#btn-toggle-password');
@@ -3663,6 +3979,7 @@ const App = (() => {
             }
         });
 
+        // Passwort ändern
         $('#btn-change-password').addEventListener('click', () => {
             $('#password-change-form').classList.toggle('hidden');
             $('#settings-new-password').value = '';
@@ -3703,6 +4020,7 @@ const App = (() => {
                 account = localAccounts[currentUser];
             }
 
+            // Neues Passwort speichern
             const newHash = await hashPassword(newPw);
             account.passwordHash = newHash;
 
@@ -3757,6 +4075,7 @@ const App = (() => {
 
             const deletedUser = currentUser;
 
+            // Lokale Daten löschen
             localStorage.removeItem(userKey('lernsets'));
             localStorage.removeItem(userKey('vocabSets'));
             localStorage.removeItem(userKey('allVocabs'));
@@ -3765,6 +4084,7 @@ const App = (() => {
             delete localAccounts[deletedUser];
             saveAccounts(localAccounts);
 
+            // Cloud-Daten löschen
             if (cloudAvailable) {
                 try {
                     await db.collection('userData').doc(deletedUser).delete();
@@ -3774,6 +4094,7 @@ const App = (() => {
                 }
             }
 
+            // Ausloggen
             currentUser = null;
             localStorage.removeItem('vokabel_currentUser');
             localStorage.removeItem('vokabel_currentPassword');
