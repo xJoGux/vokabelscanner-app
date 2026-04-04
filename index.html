@@ -1501,6 +1501,7 @@ header h1 {
     border-radius: 3px;
     transition: width 0.3s ease;
 }
+
 .test-timer {
     font-size: 0.85rem;
     color: var(--text-secondary);
@@ -2157,8 +2158,8 @@ header h1 {
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="<https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js>"></script>
+    <script src="<https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js>"></script>
     <script>
 // ============================================================
 // MemoryDeck - Main Application
@@ -2169,12 +2170,20 @@ const App = (() => {
     const $ = (sel) => document.querySelector(sel);
     const $$ = (sel) => document.querySelectorAll(sel);
 
+    // --- Cloud Timeout Helper ---
+    function withTimeout(promise, ms = 5000) {
+        return Promise.race([
+            promise,
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Cloud-Timeout')), ms))
+        ]);
+    }
+
     // --- Firebase Setup ---
     // WICHTIG: Ersetze diese Werte mit deinen eigenen Firebase-Projektdaten!
-    // Anleitung: https://console.firebase.google.com → Projekt erstellen → Projekteinstellungen → Web-App hinzufügen
+    // Anleitung: <https://console.firebase.google.com> → Projekt erstellen → Projekteinstellungen → Web-App hinzufügen
     const firebaseConfig = {
         apiKey: "AIzaSyBqYqgPi_qeSxhmVpeDZcLd8Hl6OotdA_I",
-        authDomain: "memorydeck-af728.firebaseapp.com",
+        authDomain: "<memorydeck-af728.firebaseapp.com>",
         projectId: "memorydeck-af728",
         storageBucket: "memorydeck-af728.firebasestorage.app",
         messagingSenderId: "1077936268943",
@@ -2225,7 +2234,7 @@ const App = (() => {
     async function getAccountFromCloud(username) {
         if (!cloudAvailable) return null;
         try {
-            const doc = await db.collection('accounts').doc(username).get();
+            const doc = await withTimeout(db.collection('accounts').doc(username).get());
             return doc.exists ? doc.data() : null;
         } catch (e) {
             console.warn('Cloud-Abfrage fehlgeschlagen:', e);
@@ -2245,22 +2254,21 @@ const App = (() => {
     async function saveToCloud() {
         if (!cloudAvailable || !currentUser) return;
         try {
-            await db.collection('userData').doc(currentUser).set({
+            await withTimeout(db.collection('userData').doc(currentUser).set({
                 lernsets,
                 vocabSets,
                 allVocabs,
                 lastUpdated: new Date().toISOString()
-            });
+            }), 8000);
         } catch (e) {
-            console.error('Cloud-Sync fehlgeschlagen:', e);
-            showNotice('Cloud-Sync fehlgeschlagen: ' + (e.code || e.message));
+            console.warn('Cloud-Sync fehlgeschlagen:', e);
         }
     }
 
     async function loadFromCloud() {
         if (!cloudAvailable || !currentUser) return false;
         try {
-            const doc = await db.collection('userData').doc(currentUser).get();
+            const doc = await withTimeout(db.collection('userData').doc(currentUser).get());
             if (doc.exists) {
                 const data = doc.data();
                 lernsets = data.lernsets || [];
@@ -2325,6 +2333,163 @@ const App = (() => {
             }
         }
     }
+
+    // --- Auth: UI ---
+    async function initAuth() {
+        $('#show-register').addEventListener('click', e => {
+            e.preventDefault();
+            $('#auth-login').classList.add('hidden');
+            $('#auth-register').classList.remove('hidden');
+            $('#register-error').classList.add('hidden');
+        });
+
+        $('#show-login').addEventListener('click', e => {
+            e.preventDefault();
+            $('#auth-register').classList.add('hidden');
+            $('#auth-login').classList.remove('hidden');
+            $('#login-error').classList.add('hidden');
+        });
+
+        $('#btn-login').addEventListener('click', handleLogin);
+        $('#login-password').addEventListener('keydown', e => {
+            if (e.key === 'Enter') handleLogin();
+        });
+        $('#login-username').addEventListener('keydown', e => {
+            if (e.key === 'Enter') $('#login-password').focus();
+        });
+
+        $('#btn-register').addEventListener('click', handleRegister);
+        $('#register-password-confirm').addEventListener('keydown', e => {
+            if (e.key === 'Enter') handleRegister();
+        });
+
+        $('#btn-logout').addEventListener('click', handleLogout);
+
+        // Check if already logged in
+        const savedUser = localStorage.getItem('vokabel_currentUser');
+        if (savedUser) {
+            // Prüfe zuerst LOKAL
+            const localAccounts = getAccounts();
+            if (localAccounts[savedUser]) {
+                currentUser = savedUser;
+                showApp();
+                return;
+            }
+
+            // Fallback: Cloud prüfen (mit Timeout)
+            if (cloudAvailable) {
+                const cloudAccount = await getAccountFromCloud(savedUser);
+                if (cloudAccount) {
+                    localAccounts[savedUser] = cloudAccount;
+                    saveAccounts(localAccounts);
+                    currentUser = savedUser;
+                    showApp();
+                    return;
+                }
+            }
+        }
+        showAuth();
+    }
+
+    async function handleLogin() {
+        const username = $('#login-username').value.trim();
+        const password = $('#login-password').value;
+        const errorEl = $('#login-error');
+
+        if (!username || !password) {
+            errorEl.textContent = 'Bitte Benutzername und Passwort eingeben.';
+            errorEl.classList.remove('hidden');
+            return;
+        }
+
+        const loginKey = username.toLowerCase();
+
+        // Zuerst LOKAL prüfen, dann Cloud (mit Timeout)
+        const localAccounts = getAccounts();
+        let account = localAccounts[loginKey] || null;
+
+        if (!account && cloudAvailable) {
+            try {
+                const doc = await withTimeout(db.collection('accounts').doc(loginKey).get());
+                if (doc.exists) {
+                    account = doc.data();
+                    // Lokal cachen
+                    localAccounts[loginKey] = account;
+                    saveAccounts(localAccounts);
+                }
+            } catch (e) {
+                console.warn('Cloud-Login fehlgeschlagen:', e);
+            }
+        }
+
+        if (!account) {
+            errorEl.textContent = 'Benutzername nicht gefunden.';
+            errorEl.classList.remove('hidden');
+            return;
+        }
+
+        const hash = await hashPassword(password);
+        if (hash !== account.passwordHash) {
+            errorEl.textContent = 'Falsches Passwort.';
+            errorEl.classList.remove('hidden');
+            return;
+        }
+
+        // Account lokal cachen
+        localAccounts[loginKey] = account;
+        saveAccounts(localAccounts);
+
+        currentUser = loginKey;
+        localStorage.setItem('vokabel_currentUser', currentUser);
+        localStorage.setItem('vokabel_currentPassword', password);
+        showApp();
+
+        // Cloud-Sync im Hintergrund (nicht blockierend)
+        if (cloudAvailable) {
+            withTimeout(db.collection('accounts').doc(loginKey).get()).then(cloudDoc => {
+                if (!cloudDoc.exists) {
+                    db.collection('accounts').doc(loginKey).set(account).catch(() => {});
+                }
+            }).catch(() => {});
+        }
+    }
+
+    async function handleRegister() {
+        const username = $('#register-username').value.trim();
+        const password = $('#register-password').value;
+        const passwordConfirm = $('#register-password-confirm').value;
+        const errorEl = $('#register-error');
+
+        if (!username || !password) {
+            errorEl.textContent = 'Bitte alle Felder ausfüllen.';
+            errorEl.classList.remove('hidden');
+            return;
+        }
+
+        if (username.length < 3) {
+            errorEl.textContent = 'Benutzername muss mindestens 3 Zeichen lang sein.';
+            errorEl.classList.remove('hidden');
+            return;
+        }
+
+        if (password.length < 4) {
+            errorEl.textContent = 'Passwort muss mindestens 4 Zeichen lang sein.';
+            errorEl.classList.remove('hidden');
+            return;
+        }
+
+        if (password !== passwordConfirm) {
+            errorEl.textContent = 'Passwörter stimmen nicht überein.';
+            errorEl.classList.remove('hidden');
+            return;
+        }
+
+        const userKeyName = username.toLowerCase();
+
+        // Prüfe lokal UND in Cloud ob Username schon existiert
+        const localAccounts = getAccounts();
+        const cloudAccount = await getAccountFromCloud(userKeyName);
+
         if (cloudAccount || localAccounts[userKeyName]) {
             errorEl.textContent = 'Benutzername ist bereits vergeben.';
             errorEl.classList.remove('hidden');
@@ -2344,10 +2509,9 @@ const App = (() => {
 
         if (cloudAvailable) {
             try {
-                await db.collection('accounts').doc(userKeyName).set(accountData);
+                await withTimeout(db.collection('accounts').doc(userKeyName).set(accountData));
             } catch (e) {
-                console.error('Cloud-Registrierung fehlgeschlagen:', e);
-                alert('Achtung: Account wurde nur lokal gespeichert! Cloud-Sync fehlgeschlagen: ' + (e.code || e.message) + '\n\nPrüfe die Firestore-Sicherheitsregeln in der Firebase Console.');
+                console.warn('Cloud-Registrierung fehlgeschlagen:', e);
             }
         }
 
@@ -2386,13 +2550,10 @@ const App = (() => {
         $('#auth-screen').classList.add('hidden');
         $('#app').classList.remove('hidden');
 
-        // Username anzeigen - Cloud oder lokal
-        let account = await getAccountFromCloud(currentUser);
-        if (!account) {
-            const localAccounts = getAccounts();
-            account = localAccounts[currentUser];
-        }
-        $('#current-user').textContent = account?.username || currentUser;
+        // Username anzeigen - zuerst lokal (sofort), dann Cloud im Hintergrund
+        const localAccounts = getAccounts();
+        const localAccount = localAccounts[currentUser];
+        $('#current-user').textContent = localAccount?.username || currentUser;
 
         await loadUserData();
         loadStreakData();
@@ -2424,6 +2585,7 @@ const App = (() => {
     // --- Migration: ensure old data gets a default lernset ---
     function migrateData() {
         if (vocabSets.length > 0 && lernsets.length === 0) {
+            // Old data without lernsets — create a default one
             const defaultLernset = { id: 'default', name: 'Allgemein', sourceLang: 'Englisch', targetLang: 'Deutsch' };
             lernsets.push(defaultLernset);
             vocabSets.forEach(s => {
@@ -2466,7 +2628,7 @@ const App = (() => {
         // Versuche aus Cloud zu laden
         if (cloudAvailable && currentUser) {
             try {
-                const doc = await db.collection('userData').doc(currentUser).get();
+                const doc = await withTimeout(db.collection('userData').doc(currentUser).get());
                 if (doc.exists) {
                     const data = doc.data();
                     if (data.dailyStreak !== undefined) {
@@ -2502,14 +2664,14 @@ const App = (() => {
         localStorage.setItem(userKey('lastStudyDate'), lastStudyDate || '');
         localStorage.setItem(userKey('answerStreak'), answerStreak.toString());
         localStorage.setItem(userKey('bestAnswerStreak'), bestAnswerStreak.toString());
-        // Streak-Daten auch in Cloud speichern
+        // Streak-Daten auch in Cloud speichern (nicht blockierend)
         if (cloudAvailable && currentUser) {
-            db.collection('userData').doc(currentUser).set({
+            withTimeout(db.collection('userData').doc(currentUser).set({
                 dailyStreak,
                 lastStudyDate,
                 answerStreak,
                 bestAnswerStreak
-            }, { merge: true }).catch(e => console.warn('Streak cloud sync failed:', e));
+            }, { merge: true })).catch(() => {});
         }
     }
 
@@ -2592,8 +2754,8 @@ const App = (() => {
     function getFilteredVocabs(lernsetId, kapitelId) {
         if (!lernsetId || lernsetId === 'all') return [...allVocabs];
         const setIds = vocabSets
-            .filter(s => s.lernsetId === lernsetId && (!kapitelId || kapitelId === 'all' || s.id === kapitelId))
-            .map(s => s.id);
+            .filter(s => s.lernsetId === lernsetId && (!kapitelId || kapitelId === 'all' || <s.id> === kapitelId))
+            .map(s => <s.id>);
         return allVocabs.filter(v => setIds.includes(v.setId));
     }
 
@@ -2601,13 +2763,13 @@ const App = (() => {
     function renderFilterDropdowns(lernsetSelect, kapitelSelect, selectedLernset, selectedKapitel) {
         lernsetSelect.innerHTML = '<option value="all">Alle Lernsets</option>';
         lernsets.forEach(ls => {
-            lernsetSelect.innerHTML += `<option value="${ls.id}" ${ls.id === selectedLernset ? 'selected' : ''}>${escapeHtml(ls.name)}</option>`;
+            lernsetSelect.innerHTML += `<option value="${<ls.id>}" ${<ls.id> === selectedLernset ? 'selected' : ''}>${escapeHtml(ls.name)}</option>`;
         });
 
         kapitelSelect.innerHTML = '<option value="all">Alle Kapitel</option>';
         if (selectedLernset && selectedLernset !== 'all') {
             vocabSets.filter(s => s.lernsetId === selectedLernset).forEach(s => {
-                kapitelSelect.innerHTML += `<option value="${s.id}" ${s.id === selectedKapitel ? 'selected' : ''}>${escapeHtml(s.name)}</option>`;
+                kapitelSelect.innerHTML += `<option value="${<s.id>}" ${<s.id> === selectedKapitel ? 'selected' : ''}>${escapeHtml(s.name)}</option>`;
             });
             kapitelSelect.disabled = false;
         } else {
@@ -2654,7 +2816,7 @@ const App = (() => {
         const lsSelect = $('#add-lernset');
         lsSelect.innerHTML = '<option value="">Lernset wählen...</option>';
         lernsets.forEach(ls => {
-            lsSelect.innerHTML += `<option value="${ls.id}">${escapeHtml(ls.name)}</option>`;
+            lsSelect.innerHTML += `<option value="${<ls.id>}">${escapeHtml(ls.name)}</option>`;
         });
         updateKapitelDropdown();
     }
@@ -2665,7 +2827,7 @@ const App = (() => {
         kapSelect.innerHTML = '<option value="">Kapitel wählen...</option>';
         if (lernsetId) {
             vocabSets.filter(s => s.lernsetId === lernsetId).forEach(s => {
-                kapSelect.innerHTML += `<option value="${s.id}">${escapeHtml(s.name)}</option>`;
+                kapSelect.innerHTML += `<option value="${<s.id>}">${escapeHtml(s.name)}</option>`;
             });
             kapSelect.disabled = false;
             $('#btn-new-kapitel').disabled = false;
@@ -2699,7 +2861,7 @@ const App = (() => {
         const name = prompt('Name des neuen Kapitels (z.B. "Unit 1", "Lektion 3"):');
         if (!name || !name.trim()) return;
 
-        const ls = lernsets.find(l => l.id === lernsetId);
+        const ls = lernsets.find(l => <l.id> === lernsetId);
         const id = Date.now().toString();
         vocabSets.push({
             id,
@@ -2824,6 +2986,7 @@ const App = (() => {
         refreshCards();
     }
 
+
     // --- Flashcards ---
     function refreshCards() {
         const lernsetId = $('#cards-lernset-filter')?.value || 'all';
@@ -2897,7 +3060,7 @@ const App = (() => {
             btn.addEventListener('click', () => {
                 const rating = btn.dataset.rating;
                 const card = currentCards[currentCardIndex];
-                const vocab = allVocabs.find(v => v.id === card.id);
+                const vocab = allVocabs.find(v => <v.id> === <card.id>);
                 if (vocab) {
                     vocab.rating = rating;
                     vocab.lastSeen = new Date().toISOString();
@@ -3042,7 +3205,7 @@ const App = (() => {
         const correctAnswer = isReverse ? correct.word : correct.translation;
 
         const others = allVocabs
-            .filter(v => v.id !== correct.id)
+            .filter(v => <v.id> !== <correct.id>)
             .sort(() => Math.random() - 0.5)
             .slice(0, 3)
             .map(v => isReverse ? v.word : v.translation);
@@ -3092,7 +3255,7 @@ const App = (() => {
             correct: isCorrect
         });
 
-        const vocab = allVocabs.find(v => v.id === q.id);
+        const vocab = allVocabs.find(v => <v.id> === <q.id>);
         if (vocab) {
             if (isCorrect) vocab.correctCount++;
             else vocab.wrongCount++;
@@ -3174,42 +3337,42 @@ const App = (() => {
         container.innerHTML = '';
 
         lernsets.forEach(ls => {
-            const kapitel = vocabSets.filter(s => s.lernsetId === ls.id);
-            const vocabCount = allVocabs.filter(v => kapitel.some(k => k.id === v.setId)).length;
+            const kapitel = vocabSets.filter(s => s.lernsetId === <ls.id>);
+            const vocabCount = allVocabs.filter(v => kapitel.some(k => <k.id> === v.setId)).length;
 
             const card = document.createElement('div');
             card.className = 'lernset-card';
             card.innerHTML = `
-                <div class="lernset-card-header" data-lernset-id="${ls.id}">
+                <div class="lernset-card-header" data-lernset-id="${<ls.id>}">
                     <div class="lernset-card-info">
                         <span class="lernset-card-expand">&#9654;</span>
                         <h4 class="lernset-card-name">${escapeHtml(ls.name)}</h4>
                         <span class="lernset-card-count">${vocabCount} Vokabeln &middot; ${kapitel.length} Kapitel</span>
                     </div>
                     <div class="lernset-card-actions">
-                        <button class="btn btn-secondary btn-sm btn-rename-lernset" data-id="${ls.id}" title="Umbenennen">&#9998;</button>
-                        <button class="btn btn-secondary btn-sm btn-delete-lernset" data-id="${ls.id}" title="Löschen">&times;</button>
+                        <button class="btn btn-secondary btn-sm btn-rename-lernset" data-id="${<ls.id>}" title="Umbenennen">&#9998;</button>
+                        <button class="btn btn-secondary btn-sm btn-delete-lernset" data-id="${<ls.id>}" title="Löschen">&times;</button>
                     </div>
                 </div>
-                <div class="lernset-card-body hidden" id="lernset-body-${ls.id}">
+                <div class="lernset-card-body hidden" id="lernset-body-${<ls.id>}">
                     <div class="kapitel-list">
                         ${kapitel.map(k => {
-                            const kCount = allVocabs.filter(v => v.setId === k.id).length;
+                            const kCount = allVocabs.filter(v => v.setId === <k.id>).length;
                             return `
                                 <div class="kapitel-row">
                                     <span class="kapitel-name">${escapeHtml(k.name)}</span>
                                     <span class="kapitel-count">${kCount} Vokabeln</span>
                                     <div class="kapitel-actions">
-                                        <button class="btn btn-secondary btn-xs btn-move-kapitel" data-id="${k.id}" title="Verschieben">&#8644;</button>
-                                        <button class="btn btn-secondary btn-xs btn-copy-kapitel" data-id="${k.id}" title="Kopieren">&#9112;</button>
-                                        <button class="btn btn-secondary btn-xs btn-rename-kapitel" data-id="${k.id}" title="Umbenennen">&#9998;</button>
-                                        <button class="btn btn-secondary btn-xs btn-delete-kapitel" data-id="${k.id}" title="Löschen">&times;</button>
+                                        <button class="btn btn-secondary btn-xs btn-move-kapitel" data-id="${<k.id>}" title="Verschieben">&#8644;</button>
+                                        <button class="btn btn-secondary btn-xs btn-copy-kapitel" data-id="${<k.id>}" title="Kopieren">&#9112;</button>
+                                        <button class="btn btn-secondary btn-xs btn-rename-kapitel" data-id="${<k.id>}" title="Umbenennen">&#9998;</button>
+                                        <button class="btn btn-secondary btn-xs btn-delete-kapitel" data-id="${<k.id>}" title="Löschen">&times;</button>
                                     </div>
                                 </div>
                             `;
                         }).join('')}
                     </div>
-                    <button class="btn btn-secondary btn-sm btn-add-kapitel" data-lernset-id="${ls.id}">+ Kapitel</button>
+                    <button class="btn btn-secondary btn-sm btn-add-kapitel" data-lernset-id="${<ls.id>}">+ Kapitel</button>
                 </div>
             `;
             container.appendChild(card);
@@ -3231,7 +3394,7 @@ const App = (() => {
         container.querySelectorAll('.btn-rename-lernset').forEach(btn => {
             btn.addEventListener('click', e => {
                 e.stopPropagation();
-                const ls = lernsets.find(l => l.id === btn.dataset.id);
+                const ls = lernsets.find(l => <l.id> === <btn.dataset.id>);
                 if (!ls) return;
                 const name = prompt('Neuer Name:', ls.name);
                 if (name && name.trim()) {
@@ -3247,15 +3410,15 @@ const App = (() => {
         container.querySelectorAll('.btn-delete-lernset').forEach(btn => {
             btn.addEventListener('click', e => {
                 e.stopPropagation();
-                const ls = lernsets.find(l => l.id === btn.dataset.id);
+                const ls = lernsets.find(l => <l.id> === <btn.dataset.id>);
                 if (!ls) return;
-                const kapitel = vocabSets.filter(s => s.lernsetId === ls.id);
-                const vocabCount = allVocabs.filter(v => kapitel.some(k => k.id === v.setId)).length;
+                const kapitel = vocabSets.filter(s => s.lernsetId === <ls.id>);
+                const vocabCount = allVocabs.filter(v => kapitel.some(k => <k.id> === v.setId)).length;
                 if (!confirm(`"${ls.name}" mit ${kapitel.length} Kapiteln und ${vocabCount} Vokabeln wirklich löschen?`)) return;
-                const kapIds = kapitel.map(k => k.id);
+                const kapIds = kapitel.map(k => <k.id>);
                 allVocabs = allVocabs.filter(v => !kapIds.includes(v.setId));
-                vocabSets = vocabSets.filter(s => s.lernsetId !== ls.id);
-                lernsets = lernsets.filter(l => l.id !== ls.id);
+                vocabSets = vocabSets.filter(s => s.lernsetId !== <ls.id>);
+                lernsets = lernsets.filter(l => <l.id> !== <ls.id>);
                 save();
                 refreshList();
                 refreshAddDropdowns();
@@ -3265,7 +3428,7 @@ const App = (() => {
         // Rename kapitel
         container.querySelectorAll('.btn-rename-kapitel').forEach(btn => {
             btn.addEventListener('click', () => {
-                const kap = vocabSets.find(s => s.id === btn.dataset.id);
+                const kap = vocabSets.find(s => <s.id> === <btn.dataset.id>);
                 if (!kap) return;
                 const name = prompt('Neuer Name:', kap.name);
                 if (name && name.trim()) {
@@ -3279,12 +3442,12 @@ const App = (() => {
         // Delete kapitel
         container.querySelectorAll('.btn-delete-kapitel').forEach(btn => {
             btn.addEventListener('click', () => {
-                const kap = vocabSets.find(s => s.id === btn.dataset.id);
+                const kap = vocabSets.find(s => <s.id> === <btn.dataset.id>);
                 if (!kap) return;
-                const vocabCount = allVocabs.filter(v => v.setId === kap.id).length;
+                const vocabCount = allVocabs.filter(v => v.setId === <kap.id>).length;
                 if (!confirm(`"${kap.name}" mit ${vocabCount} Vokabeln wirklich löschen?`)) return;
-                allVocabs = allVocabs.filter(v => v.setId !== kap.id);
-                vocabSets = vocabSets.filter(s => s.id !== kap.id);
+                allVocabs = allVocabs.filter(v => v.setId !== <kap.id>);
+                vocabSets = vocabSets.filter(s => <s.id> !== <kap.id>);
                 save();
                 renderLernsetList();
             });
@@ -3296,7 +3459,7 @@ const App = (() => {
                 const lernsetId = btn.dataset.lernsetId;
                 const name = prompt('Name des neuen Kapitels:');
                 if (!name || !name.trim()) return;
-                const ls = lernsets.find(l => l.id === lernsetId);
+                const ls = lernsets.find(l => <l.id> === lernsetId);
                 vocabSets.push({
                     id: Date.now().toString(),
                     name: name.trim(),
@@ -3313,8 +3476,8 @@ const App = (() => {
         // Move kapitel vocabs
         container.querySelectorAll('.btn-move-kapitel').forEach(btn => {
             btn.addEventListener('click', () => {
-                const kapId = btn.dataset.id;
-                const kap = vocabSets.find(s => s.id === kapId);
+                const kapId = <btn.dataset.id>;
+                const kap = vocabSets.find(s => <s.id> === kapId);
                 if (!kap) return;
                 const vocabCount = allVocabs.filter(v => v.setId === kapId).length;
                 if (vocabCount === 0) { alert('Keine Vokabeln zum Verschieben.'); return; }
@@ -3325,8 +3488,8 @@ const App = (() => {
         // Copy kapitel vocabs
         container.querySelectorAll('.btn-copy-kapitel').forEach(btn => {
             btn.addEventListener('click', () => {
-                const kapId = btn.dataset.id;
-                const kap = vocabSets.find(s => s.id === kapId);
+                const kapId = <btn.dataset.id>;
+                const kap = vocabSets.find(s => <s.id> === kapId);
                 if (!kap) return;
                 const vocabCount = allVocabs.filter(v => v.setId === kapId).length;
                 if (vocabCount === 0) { alert('Keine Vokabeln zum Kopieren.'); return; }
@@ -3337,7 +3500,7 @@ const App = (() => {
 
     function openMoveCopyModal(mode, sourceKapitelId, kapitelName, vocabCount) {
         const modal = $('#move-copy-modal');
-        const sourceKap = vocabSets.find(s => s.id === sourceKapitelId);
+        const sourceKap = vocabSets.find(s => <s.id> === sourceKapitelId);
         const sourceLsId = sourceKap?.lernsetId;
 
         $('#modal-title').textContent = mode === 'move'
@@ -3349,7 +3512,7 @@ const App = (() => {
         const lsSelect = $('#modal-target-lernset');
         lsSelect.innerHTML = '';
         lernsets.forEach(ls => {
-            lsSelect.innerHTML += `<option value="${ls.id}">${escapeHtml(ls.name)}</option>`;
+            lsSelect.innerHTML += `<option value="${<ls.id>}">${escapeHtml(ls.name)}</option>`;
         });
 
         function updateTargetKapitel() {
@@ -3357,8 +3520,8 @@ const App = (() => {
             const kapSelect = $('#modal-target-kapitel');
             kapSelect.innerHTML = '';
             vocabSets.filter(s => s.lernsetId === targetLsId).forEach(s => {
-                if (mode === 'move' && s.id === sourceKapitelId) return;
-                kapSelect.innerHTML += `<option value="${s.id}">${escapeHtml(s.name)}</option>`;
+                if (mode === 'move' && <s.id> === sourceKapitelId) return;
+                kapSelect.innerHTML += `<option value="${<s.id>}">${escapeHtml(s.name)}</option>`;
             });
             if (kapSelect.options.length === 0) {
                 kapSelect.innerHTML = '<option value="">— Kein Kapitel vorhanden —</option>';
@@ -3396,7 +3559,7 @@ const App = (() => {
             save();
             modal.classList.add('hidden');
             renderLernsetList();
-            const targetKap = vocabSets.find(s => s.id === targetKapitelId);
+            const targetKap = vocabSets.find(s => <s.id> === targetKapitelId);
             const actionText = mode === 'move' ? 'verschoben' : 'kopiert';
             showNotice(`${vocabs.length} Vokabeln nach "${targetKap?.name}" ${actionText}.`);
         };
@@ -3418,8 +3581,8 @@ const App = (() => {
         $('#btn-export-all').addEventListener('click', () => {
             const csv = 'Vokabel;Übersetzung;Lernset;Kapitel;Status\n' +
                 allVocabs.map(v => {
-                    const set = vocabSets.find(s => s.id === v.setId);
-                    const ls = set ? lernsets.find(l => l.id === set.lernsetId) : null;
+                    const set = vocabSets.find(s => <s.id> === v.setId);
+                    const ls = set ? lernsets.find(l => <l.id> === set.lernsetId) : null;
                     return `"${v.word}";"${v.translation}";"${ls?.name || ''}";"${set?.name || ''}";"${v.rating}"`;
                 }).join('\n');
 
@@ -3479,12 +3642,12 @@ const App = (() => {
                     }
 
                     // Find or create Kapitel
-                    let kap = vocabSets.find(s => s.lernsetId === ls.id && s.name === g.kapitelName);
+                    let kap = vocabSets.find(s => s.lernsetId === <ls.id> && s.name === g.kapitelName);
                     if (!kap) {
                         kap = {
                             id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
                             name: g.kapitelName,
-                            lernsetId: ls.id,
+                            lernsetId: <ls.id>,
                             sourceLang: ls.sourceLang,
                             targetLang: ls.targetLang,
                             date: new Date().toISOString()
@@ -3498,7 +3661,7 @@ const App = (() => {
                             id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
                             word: v.word,
                             translation: v.translation,
-                            setId: kap.id,
+                            setId: <kap.id>,
                             sourceLang: kap.sourceLang,
                             targetLang: kap.targetLang,
                             rating: 'new',
@@ -3647,7 +3810,7 @@ const App = (() => {
         });
 
         // Vocab-Statistik aktualisieren
-        const vocab = allVocabs.find(v => v.id === q.id);
+        const vocab = allVocabs.find(v => <v.id> === <q.id>);
         if (vocab) {
             if (isCorrect) vocab.correctCount++;
             else vocab.wrongCount++;
@@ -3814,7 +3977,7 @@ const App = (() => {
             writeState.results.push({ word: q.word, translation: q.translation, correct: firstTryCorrect });
             writeState.hadWrongAttempt = false;
 
-            const vocab = allVocabs.find(v => v.id === q.id);
+            const vocab = allVocabs.find(v => <v.id> === <q.id>);
             if (vocab) {
                 if (firstTryCorrect) vocab.correctCount++;
                 else vocab.wrongCount++;
@@ -3941,11 +4104,8 @@ const App = (() => {
 
     // --- Settings ---
     async function loadAccountInfo() {
-        let account = await getAccountFromCloud(currentUser);
-        if (!account) {
-            const localAccounts = getAccounts();
-            account = localAccounts[currentUser];
-        }
+        const localAccounts = getAccounts();
+        let account = localAccounts[currentUser];
         $('#settings-username').textContent = account?.username || currentUser;
 
         const savedPw = localStorage.getItem('vokabel_currentPassword');
@@ -4014,26 +4174,26 @@ const App = (() => {
                 return;
             }
 
-            let account = await getAccountFromCloud(currentUser);
+            const localAccounts = getAccounts();
+            let account = localAccounts[currentUser];
             if (!account) {
-                const localAccounts = getAccounts();
-                account = localAccounts[currentUser];
+                account = await getAccountFromCloud(currentUser);
+            }
+            if (!account) {
+                errorEl.textContent = 'Account nicht gefunden.';
+                errorEl.classList.remove('hidden');
+                return;
             }
 
             // Neues Passwort speichern
             const newHash = await hashPassword(newPw);
             account.passwordHash = newHash;
 
-            const localAccounts = getAccounts();
             localAccounts[currentUser] = account;
             saveAccounts(localAccounts);
 
             if (cloudAvailable) {
-                try {
-                    await db.collection('accounts').doc(currentUser).update({ passwordHash: newHash });
-                } catch (e) {
-                    console.error('Cloud-Passwort-Update fehlgeschlagen:', e);
-                }
+                withTimeout(db.collection('accounts').doc(currentUser).update({ passwordHash: newHash })).catch(() => {});
             }
 
             localStorage.setItem('vokabel_currentPassword', newPw);
@@ -4084,14 +4244,10 @@ const App = (() => {
             delete localAccounts[deletedUser];
             saveAccounts(localAccounts);
 
-            // Cloud-Daten löschen
+            // Cloud-Daten löschen (nicht blockierend)
             if (cloudAvailable) {
-                try {
-                    await db.collection('userData').doc(deletedUser).delete();
-                    await db.collection('accounts').doc(deletedUser).delete();
-                } catch (e) {
-                    console.warn('Cloud-Löschung fehlgeschlagen:', e);
-                }
+                withTimeout(db.collection('userData').doc(deletedUser).delete()).catch(() => {});
+                withTimeout(db.collection('accounts').doc(deletedUser).delete()).catch(() => {});
             }
 
             // Ausloggen
