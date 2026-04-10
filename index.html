@@ -1045,6 +1045,78 @@ header h1 {
     margin-top: 1.25rem;
 }
 
+/* --- Edit Kapitel Modal --- */
+.edit-kapitel-dialog {
+    max-width: 600px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.edit-kapitel-hint {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+}
+
+.edit-vocab-list {
+    flex: 1;
+    max-height: 50vh;
+    overflow-y: auto;
+    margin-bottom: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 0.25rem;
+}
+
+.edit-vocab-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.edit-vocab-row input {
+    flex: 1;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    background: var(--bg);
+    color: var(--text);
+    font-family: inherit;
+    min-width: 0;
+}
+
+.edit-vocab-row input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.15);
+}
+
+.edit-vocab-row .vocab-arrow {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.edit-lernset-input {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background: var(--bg);
+    color: var(--text);
+    font-family: inherit;
+}
+
+.edit-lernset-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.15);
+}
+
 /* --- Settings --- */
 .settings-form {
     background: var(--surface);
@@ -2154,6 +2226,52 @@ header h1 {
             <div class="modal-actions">
                 <button id="btn-modal-cancel" class="btn btn-secondary">Abbrechen</button>
                 <button id="btn-modal-confirm" class="btn btn-primary">Bestätigen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Kapitel (Vokabeln) Modal -->
+    <div id="edit-kapitel-modal" class="modal-overlay hidden">
+        <div class="modal-dialog edit-kapitel-dialog">
+            <h3 id="edit-kapitel-title">Vokabeln bearbeiten</h3>
+            <p class="edit-kapitel-hint">Bearbeite die Vokabeln direkt. Leere Felder werden beim Speichern geloescht.</p>
+            <div id="edit-vocab-list" class="edit-vocab-list"></div>
+            <button id="btn-add-edit-vocab-row" class="btn btn-secondary btn-sm">+ Neue Vokabel</button>
+            <div class="modal-actions">
+                <button id="btn-edit-kapitel-cancel" class="btn btn-secondary">Abbrechen</button>
+                <button id="btn-edit-kapitel-save" class="btn btn-primary">Speichern</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Lernset Modal -->
+    <div id="edit-lernset-modal" class="modal-overlay hidden">
+        <div class="modal-dialog">
+            <h3>Lernset bearbeiten</h3>
+            <div class="modal-field">
+                <label>Name:</label>
+                <input type="text" id="edit-lernset-name" class="edit-lernset-input">
+            </div>
+            <div class="modal-field">
+                <label>Quellsprache:</label>
+                <select id="edit-lernset-source">
+                    <option value="Französisch">Französisch</option>
+                    <option value="Englisch">Englisch</option>
+                    <option value="Spanisch">Spanisch</option>
+                    <option value="Latein">Latein</option>
+                    <option value="Italienisch">Italienisch</option>
+                </select>
+            </div>
+            <div class="modal-field">
+                <label>Zielsprache:</label>
+                <select id="edit-lernset-target">
+                    <option value="Deutsch">Deutsch</option>
+                    <option value="Englisch">Englisch</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button id="btn-edit-lernset-cancel" class="btn btn-secondary">Abbrechen</button>
+                <button id="btn-edit-lernset-save" class="btn btn-primary">Speichern</button>
             </div>
         </div>
     </div>
@@ -3415,6 +3533,7 @@ const App = (() => {
                         <span class="lernset-card-count">${vocabCount} Vokabeln &middot; ${kapitel.length} Kapitel</span>
                     </div>
                     <div class="lernset-card-actions">
+                        <button class="btn btn-secondary btn-sm btn-edit-lernset" data-id="${ls.id}" title="Bearbeiten">&#128221;</button>
                         <button class="btn btn-secondary btn-sm btn-rename-lernset" data-id="${ls.id}" title="Umbenennen">&#9998;</button>
                         <button class="btn btn-secondary btn-sm btn-delete-lernset" data-id="${ls.id}" title="Löschen">&times;</button>
                     </div>
@@ -3428,6 +3547,7 @@ const App = (() => {
                                     <span class="kapitel-name">${escapeHtml(k.name)}</span>
                                     <span class="kapitel-count">${kCount} Vokabeln</span>
                                     <div class="kapitel-actions">
+                                        <button class="btn btn-secondary btn-xs btn-edit-kapitel" data-id="${k.id}" title="Vokabeln bearbeiten">&#128221;</button>
                                         <button class="btn btn-secondary btn-xs btn-move-kapitel" data-id="${k.id}" title="Verschieben">&#8644;</button>
                                         <button class="btn btn-secondary btn-xs btn-copy-kapitel" data-id="${k.id}" title="Kopieren">&#9112;</button>
                                         <button class="btn btn-secondary btn-xs btn-rename-kapitel" data-id="${k.id}" title="Umbenennen">&#9998;</button>
@@ -3561,6 +3681,182 @@ const App = (() => {
                 openMoveCopyModal('copy', kapId, kap.name, vocabCount);
             });
         });
+
+        // Edit lernset (full edit with languages)
+        container.querySelectorAll('.btn-edit-lernset').forEach(btn => {
+            btn.addEventListener('click', e => {
+                e.stopPropagation();
+                openEditLernsetModal(btn.dataset.id);
+            });
+        });
+
+        // Edit kapitel vocabs
+        container.querySelectorAll('.btn-edit-kapitel').forEach(btn => {
+            btn.addEventListener('click', () => {
+                openEditKapitelModal(btn.dataset.id);
+            });
+        });
+    }
+
+    // --- Edit Kapitel (Vokabeln) Modal ---
+    let editingKapitelId = null;
+
+    function openEditKapitelModal(kapitelId) {
+        const kap = vocabSets.find(s => s.id === kapitelId);
+        if (!kap) return;
+        editingKapitelId = kapitelId;
+
+        const ls = lernsets.find(l => l.id === kap.lernsetId);
+        const lsName = ls ? ls.name : '';
+        $('#edit-kapitel-title').textContent = `"${kap.name}"${lsName ? ' (' + lsName + ')' : ''} bearbeiten`;
+
+        const list = $('#edit-vocab-list');
+        list.innerHTML = '';
+
+        const vocabs = allVocabs.filter(v => v.setId === kapitelId);
+        vocabs.forEach(v => addEditVocabRow(v.id, v.word, v.translation));
+        if (vocabs.length === 0) {
+            addEditVocabRow(null, '', '');
+        }
+
+        $('#edit-kapitel-modal').classList.remove('hidden');
+    }
+
+    function addEditVocabRow(vocabId, word, translation) {
+        const list = $('#edit-vocab-list');
+        const row = document.createElement('div');
+        row.className = 'edit-vocab-row';
+        if (vocabId) row.dataset.vocabId = vocabId;
+        row.innerHTML = `
+            <input type="text" class="edit-vocab-word" placeholder="Vokabel">
+            <span class="vocab-arrow">&rarr;</span>
+            <input type="text" class="edit-vocab-translation" placeholder="Übersetzung">
+            <button class="btn-remove-row" title="Entfernen">&times;</button>
+        `;
+        row.querySelector('.edit-vocab-word').value = word || '';
+        row.querySelector('.edit-vocab-translation').value = translation || '';
+        row.querySelector('.btn-remove-row').addEventListener('click', () => {
+            row.remove();
+        });
+        // Enter in translation field adds a new row
+        row.querySelector('.edit-vocab-translation').addEventListener('keydown', e => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addEditVocabRow(null, '', '');
+                list.lastElementChild.querySelector('.edit-vocab-word').focus();
+            }
+        });
+        list.appendChild(row);
+    }
+
+    function saveEditKapitel() {
+        if (!editingKapitelId) return;
+        const kap = vocabSets.find(s => s.id === editingKapitelId);
+        if (!kap) {
+            $('#edit-kapitel-modal').classList.add('hidden');
+            editingKapitelId = null;
+            return;
+        }
+
+        const rows = $$('#edit-vocab-list .edit-vocab-row');
+        const keptIds = new Set();
+
+        rows.forEach(row => {
+            const word = row.querySelector('.edit-vocab-word').value.trim();
+            const translation = row.querySelector('.edit-vocab-translation').value.trim();
+            if (!word || !translation) return;
+
+            const existingId = row.dataset.vocabId;
+            if (existingId) {
+                const vocab = allVocabs.find(v => v.id === existingId);
+                if (vocab) {
+                    vocab.word = word;
+                    vocab.translation = translation;
+                    keptIds.add(existingId);
+                }
+            } else {
+                const newVocab = {
+                    id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+                    word,
+                    translation,
+                    setId: editingKapitelId,
+                    sourceLang: kap.sourceLang || 'Englisch',
+                    targetLang: kap.targetLang || 'Deutsch',
+                    rating: 'new',
+                    correctCount: 0,
+                    wrongCount: 0,
+                    lastSeen: null
+                };
+                allVocabs.push(newVocab);
+                keptIds.add(newVocab.id);
+            }
+        });
+
+        // Remove vocabs of this kapitel that are no longer in the list
+        allVocabs = allVocabs.filter(v => {
+            if (v.setId !== editingKapitelId) return true;
+            return keptIds.has(v.id);
+        });
+
+        save();
+        $('#edit-kapitel-modal').classList.add('hidden');
+        editingKapitelId = null;
+        renderLernsetList();
+        refreshAddDropdowns();
+    }
+
+    // --- Edit Lernset Modal ---
+    let editingLernsetId = null;
+
+    function openEditLernsetModal(lernsetId) {
+        const ls = lernsets.find(l => l.id === lernsetId);
+        if (!ls) return;
+        editingLernsetId = lernsetId;
+
+        $('#edit-lernset-name').value = ls.name || '';
+        $('#edit-lernset-source').value = ls.sourceLang || 'Englisch';
+        $('#edit-lernset-target').value = ls.targetLang || 'Deutsch';
+
+        $('#edit-lernset-modal').classList.remove('hidden');
+    }
+
+    function saveEditLernset() {
+        if (!editingLernsetId) return;
+        const ls = lernsets.find(l => l.id === editingLernsetId);
+        if (!ls) {
+            $('#edit-lernset-modal').classList.add('hidden');
+            editingLernsetId = null;
+            return;
+        }
+
+        const name = $('#edit-lernset-name').value.trim();
+        if (!name) {
+            alert('Bitte einen Namen eingeben.');
+            return;
+        }
+
+        const sourceLang = $('#edit-lernset-source').value;
+        const targetLang = $('#edit-lernset-target').value;
+
+        ls.name = name;
+        ls.sourceLang = sourceLang;
+        ls.targetLang = targetLang;
+
+        // Update kapitel languages and their vocabs to match
+        vocabSets.filter(s => s.lernsetId === editingLernsetId).forEach(k => {
+            k.sourceLang = sourceLang;
+            k.targetLang = targetLang;
+            allVocabs.filter(v => v.setId === k.id).forEach(v => {
+                v.sourceLang = sourceLang;
+                v.targetLang = targetLang;
+            });
+        });
+
+        save();
+        $('#edit-lernset-modal').classList.add('hidden');
+        editingLernsetId = null;
+        renderLernsetList();
+        refreshAddDropdowns();
     }
 
     function openMoveCopyModal(mode, sourceKapitelId, kapitelName, vocabCount) {
@@ -3631,6 +3927,29 @@ const App = (() => {
     }
 
     function initList() {
+        // Edit Kapitel Modal handlers
+        $('#btn-edit-kapitel-cancel').addEventListener('click', () => {
+            $('#edit-kapitel-modal').classList.add('hidden');
+            editingKapitelId = null;
+        });
+        $('#btn-edit-kapitel-save').addEventListener('click', saveEditKapitel);
+        $('#btn-add-edit-vocab-row').addEventListener('click', () => {
+            addEditVocabRow(null, '', '');
+            const list = $('#edit-vocab-list');
+            list.scrollTop = list.scrollHeight;
+            list.lastElementChild?.querySelector('.edit-vocab-word')?.focus();
+        });
+
+        // Edit Lernset Modal handlers
+        $('#btn-edit-lernset-cancel').addEventListener('click', () => {
+            $('#edit-lernset-modal').classList.add('hidden');
+            editingLernsetId = null;
+        });
+        $('#btn-edit-lernset-save').addEventListener('click', saveEditLernset);
+        $('#edit-lernset-name').addEventListener('keydown', e => {
+            if (e.key === 'Enter') saveEditLernset();
+        });
+
         function createNewLernset() {
             const name = prompt('Name des neuen Lernsets (z.B. "Englisch", "Französisch"):');
             if (!name || !name.trim()) return;
