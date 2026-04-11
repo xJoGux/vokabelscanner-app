@@ -3466,6 +3466,31 @@ const App = (() => {
         return allVocabs.filter(v => setIds.includes(v.setId));
     }
 
+    // --- Gewichtete Auswahl: bereits gemeisterte Vokabeln seltener ---
+    // Gewicht basiert auf (correctCount - wrongCount). Je höher, desto seltener.
+    // Keine Duplikate in einer Session: wir ziehen ohne Zurücklegen (Efraimidis-Spirakis).
+    function vocabWeight(v) {
+        const correct = v.correctCount || 0;
+        const wrong = v.wrongCount || 0;
+        const net = Math.max(0, correct - wrong);
+        // Basis 1.0, halbiert sich für jede Netto-richtige Antwort, minimum 0.1
+        return Math.max(0.1, Math.pow(0.6, net));
+    }
+
+    function weightedSampleVocabs(vocabs, count) {
+        if (count >= vocabs.length) {
+            // Alles nehmen, Reihenfolge trotzdem zufaellig
+            return [...vocabs].sort(() => Math.random() - 0.5);
+        }
+        // Efraimidis-Spirakis weighted reservoir sampling ohne Zuruecklegen
+        const keyed = vocabs.map(v => ({
+            v,
+            key: Math.pow(Math.random(), 1 / Math.max(0.0001, vocabWeight(v)))
+        }));
+        keyed.sort((a, b) => b.key - a.key);
+        return keyed.slice(0, count).map(k => k.v);
+    }
+
     // --- Helper: render lernset > kapitel filter dropdowns ---
     function renderFilterDropdowns(lernsetSelect, kapitelSelect, selectedLernset, selectedKapitel) {
         lernsetSelect.innerHTML = '<option value="all">Alle Lernsets</option>';
@@ -3706,13 +3731,10 @@ const App = (() => {
             kapitelId
         );
 
-        currentCards = getFilteredVocabs(lernsetId, kapitelId);
-
-        // Shuffle
-        for (let i = currentCards.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [currentCards[i], currentCards[j]] = [currentCards[j], currentCards[i]];
-        }
+        const filtered = getFilteredVocabs(lernsetId, kapitelId);
+        // Gewichtete Reihenfolge: gemeisterte Vokabeln rutschen nach hinten,
+        // aber jede Vokabel kommt genau einmal vor.
+        currentCards = weightedSampleVocabs(filtered, filtered.length);
 
         currentCardIndex = 0;
         isFlipped = false;
@@ -3854,11 +3876,16 @@ const App = (() => {
         const kapitelId = $('#quiz-kapitel-filter')?.value || 'all';
         const available = getFilteredVocabs(lernsetId, kapitelId);
 
-        const count = Math.min(parseInt($('#quiz-count').value) || 10, available.length);
+        const requested = parseInt($('#quiz-count').value) || 10;
+        if (requested > available.length) {
+            alert(`Du hast nur ${available.length} Vokabel${available.length === 1 ? '' : 'n'} in der Auswahl, aber ${requested} angefragt. Bitte trage mehr Vokabeln ein oder verringere die Anzahl.`);
+            return;
+        }
+        const count = requested;
         const direction = $('#quiz-direction').value;
         const mode = $('#quiz-mode').value;
 
-        const shuffled = [...available].sort(() => Math.random() - 0.5).slice(0, count);
+        const shuffled = weightedSampleVocabs(available, count);
 
         quizState = {
             questions: shuffled,
@@ -4646,10 +4673,15 @@ const App = (() => {
         const kapitelId = $('#test-kapitel-filter')?.value || 'all';
         const available = getFilteredVocabs(lernsetId, kapitelId);
 
-        const count = Math.min(parseInt($('#test-count').value) || 20, available.length);
+        const requested = parseInt($('#test-count').value) || 20;
+        if (requested > available.length) {
+            alert(`Du hast nur ${available.length} Vokabel${available.length === 1 ? '' : 'n'} in der Auswahl, aber ${requested} angefragt. Bitte trage mehr Vokabeln ein oder verringere die Anzahl.`);
+            return;
+        }
+        const count = requested;
         const direction = $('#test-direction').value;
 
-        const shuffled = [...available].sort(() => Math.random() - 0.5).slice(0, count);
+        const shuffled = weightedSampleVocabs(available, count);
 
         testState = {
             questions: shuffled,
@@ -4829,7 +4861,7 @@ const App = (() => {
             $('#write-lernset-filter')?.value || 'all',
             $('#write-kapitel-filter')?.value || 'all'
         );
-        const shuffled = [...vocabs].sort(() => Math.random() - 0.5).slice(0, Math.min(10, vocabs.length));
+        const shuffled = weightedSampleVocabs(vocabs, Math.min(10, vocabs.length));
         writeState = {
             questions: shuffled,
             current: 0,
