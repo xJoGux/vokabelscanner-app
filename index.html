@@ -1270,6 +1270,293 @@ header h1 {
     font-size: 0.9rem;
 }
 
+/* --- Feedback --- */
+.feedback-container {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.feedback-form {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 1.5rem;
+}
+
+.feedback-form h3 {
+    margin: 0 0 0.5rem;
+    color: var(--text);
+    font-size: 1.1rem;
+}
+
+.feedback-form-hint {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+
+.feedback-form-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.feedback-form-row select {
+    padding: 0.55rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background: var(--bg);
+    color: var(--text);
+    flex-shrink: 0;
+}
+
+.feedback-form-row input {
+    flex: 1;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background: var(--bg);
+    color: var(--text);
+    font-family: inherit;
+}
+
+.feedback-form textarea {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background: var(--bg);
+    color: var(--text);
+    font-family: inherit;
+    resize: vertical;
+    min-height: 80px;
+    margin-bottom: 0.75rem;
+}
+
+.feedback-form input:focus,
+.feedback-form select:focus,
+.feedback-form textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.15);
+}
+
+.feedback-form-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.feedback-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.feedback-list-header h3 {
+    margin: 0;
+    color: var(--text);
+    font-size: 1.05rem;
+}
+
+.feedback-list-controls {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.feedback-list-controls select {
+    padding: 0.4rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.85rem;
+    background: var(--surface);
+    color: var(--text);
+}
+
+#btn-refresh-feedback {
+    padding: 0.4rem 0.7rem;
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.feedback-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.feedback-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 1rem 1.1rem;
+    box-shadow: var(--shadow);
+    display: flex;
+    gap: 0.9rem;
+    border-left: 4px solid var(--border);
+}
+
+.feedback-card.type-bug { border-left-color: var(--danger); }
+.feedback-card.type-idea { border-left-color: var(--warning); }
+.feedback-card.type-feature { border-left-color: var(--primary); }
+
+.feedback-likes {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    flex-shrink: 0;
+    min-width: 42px;
+}
+
+.feedback-like-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.feedback-like-btn:hover:not(:disabled) {
+    border-color: var(--danger);
+    color: var(--danger);
+    transform: scale(1.05);
+}
+
+.feedback-like-btn.liked {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: var(--danger);
+    color: var(--danger);
+}
+
+.feedback-like-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.feedback-like-count {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.feedback-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.feedback-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.35rem;
+    flex-wrap: wrap;
+}
+
+.feedback-badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.15rem 0.5rem;
+    border-radius: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.badge-bug {
+    background: rgba(239, 68, 68, 0.12);
+    color: var(--danger);
+}
+
+.badge-idea {
+    background: rgba(245, 158, 11, 0.12);
+    color: var(--warning);
+}
+
+.badge-feature {
+    background: rgba(79, 70, 229, 0.12);
+    color: var(--primary);
+}
+
+.feedback-title {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--text);
+    font-weight: 600;
+    word-wrap: break-word;
+}
+
+.feedback-description {
+    margin: 0.25rem 0 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.feedback-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    flex-wrap: wrap;
+}
+
+.feedback-meta-author {
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.feedback-delete-btn {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    line-height: 1;
+}
+
+.feedback-delete-btn:hover {
+    color: var(--danger);
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.feedback-loading {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+@media (max-width: 600px) {
+    .feedback-form-row {
+        flex-direction: column;
+    }
+    .feedback-card {
+        padding: 0.85rem;
+        gap: 0.65rem;
+    }
+    .feedback-like-btn {
+        width: 34px;
+        height: 34px;
+        font-size: 1rem;
+    }
+}
+
 /* --- Empty State --- */
 .empty-state {
     text-align: center;
@@ -1881,6 +2168,7 @@ header h1 {
             <button class="nav-btn" data-view="quiz">Quiz</button>
             <button class="nav-btn" data-view="test">Test</button>
             <button class="nav-btn" data-view="list">Lernsets</button>
+            <button class="nav-btn" data-view="feedback">Feedback</button>
             <button class="nav-btn" data-view="settings">Einstellungen</button>
         </nav>
 
@@ -2166,6 +2454,30 @@ header h1 {
             </div>
         </section>
 
+        <!-- FEEDBACK VIEW -->
+        <section id="view-feedback" class="view">
+            <div class="feedback-container">
+                <div class="feedback-form">
+                    <h3>Feedback teilen</h3>
+                    <p class="feedback-form-hint">Bugs, Ideen oder neue Features vorschlagen — alle anderen Nutzer können deine Vorschläge sehen und liken.</p>
+                    <div class="feedback-form-row">
+                        <input type="text" id="feedback-title" placeholder="Kurzer Titel" maxlength="100">
+                    </div>
+                    <textarea id="feedback-description" placeholder="Beschreibung — was ist das Problem oder die Idee?" rows="3" maxlength="1000"></textarea>
+                    <div class="feedback-form-actions">
+                        <button id="btn-submit-feedback" class="btn btn-primary">Vorschlag senden</button>
+                    </div>
+                </div>
+                <div class="feedback-list-header">
+                    <h3>Alle Vorschläge</h3>
+                    <div class="feedback-list-controls">
+                        <button id="btn-refresh-feedback" class="btn btn-secondary btn-sm" title="Aktualisieren">⟳</button>
+                    </div>
+                </div>
+                <div id="feedback-list" class="feedback-list"></div>
+            </div>
+        </section>
+
         <!-- SETTINGS VIEW -->
         <section id="view-settings" class="view">
             <div class="settings-form">
@@ -2415,6 +2727,65 @@ const App = (() => {
             return false;
         } catch (e) {
             console.warn('Cloud-Laden fehlgeschlagen:', e);
+            return false;
+        }
+    }
+
+    // --- Cloud: Feedback (shared between all users) ---
+    async function loadFeedbackFromCloud() {
+        if (!cloudAvailable) return [];
+        try {
+            const snapshot = await withTimeout(db.collection('feedback').get());
+            return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        } catch (e) {
+            console.warn('Feedback-Laden fehlgeschlagen:', e);
+            return [];
+        }
+    }
+
+    async function submitFeedbackToCloud(title, description) {
+        if (!cloudAvailable || !currentUser) return false;
+        try {
+            await withTimeout(db.collection('feedback').add({
+                title,
+                description,
+                author: currentUser,
+                createdAt: new Date().toISOString(),
+                likes: []
+            }));
+            return true;
+        } catch (e) {
+            console.warn('Feedback-Senden fehlgeschlagen:', e);
+            return false;
+        }
+    }
+
+    async function toggleFeedbackLike(feedbackId) {
+        if (!cloudAvailable || !currentUser) return false;
+        try {
+            const docRef = db.collection('feedback').doc(feedbackId);
+            const doc = await withTimeout(docRef.get());
+            if (!doc.exists) return false;
+            const data = doc.data();
+            const likes = Array.isArray(data.likes) ? [...data.likes] : [];
+            const idx = likes.indexOf(currentUser);
+            if (idx >= 0) likes.splice(idx, 1);
+            else likes.push(currentUser);
+            await withTimeout(docRef.update({ likes }));
+            return true;
+        } catch (e) {
+            console.warn('Like fehlgeschlagen:', e);
+            return false;
+        }
+    }
+
+    async function deleteFeedbackFromCloud(feedbackId) {
+        if (!cloudAvailable || !currentUser) return false;
+        try {
+            await withTimeout(db.collection('feedback').doc(feedbackId).delete());
+            return true;
+        } catch (e) {
+            console.warn('Feedback loeschen fehlgeschlagen:', e);
             return false;
         }
     }
@@ -2754,6 +3125,7 @@ const App = (() => {
             initQuiz();
             initTest();
             initList();
+            initFeedback();
             initSettings();
             appInitialized = true;
         } else {
@@ -2793,6 +3165,7 @@ const App = (() => {
                 if (view === 'quiz') refreshQuiz();
                 if (view === 'test') refreshTest();
                 if (view === 'list') refreshList();
+                if (view === 'feedback') refreshFeedback();
             });
         });
     }
@@ -4501,6 +4874,181 @@ const App = (() => {
         }
         pwField.type = 'password';
         $('#btn-toggle-password').textContent = 'Anzeigen';
+    }
+
+    // --- Feedback ---
+    let feedbackItems = [];
+    let feedbackLoading = false;
+
+    function feedbackTypeLabel(type) {
+        if (type === 'bug') return '🐛 Bug';
+        if (type === 'idea') return '💡 Idee';
+        if (type === 'feature') return '✨ Feature';
+        return type;
+    }
+
+    function formatFeedbackDate(iso) {
+        if (!iso) return '';
+        try {
+            const d = new Date(iso);
+            const now = new Date();
+            const diffMs = now - d;
+            const diffMin = Math.floor(diffMs / 60000);
+            if (diffMin < 1) return 'gerade eben';
+            if (diffMin < 60) return `vor ${diffMin} Min`;
+            const diffH = Math.floor(diffMin / 60);
+            if (diffH < 24) return `vor ${diffH} Std`;
+            const diffD = Math.floor(diffH / 24);
+            if (diffD < 7) return `vor ${diffD} Tag${diffD === 1 ? '' : 'en'}`;
+            return d.toLocaleDateString('de-DE');
+        } catch (e) {
+            return '';
+        }
+    }
+
+    async function refreshFeedback() {
+        const listEl = $('#feedback-list');
+        if (!listEl) return;
+        if (!cloudAvailable) {
+            listEl.innerHTML = '<div class="feedback-loading">Cloud-Verbindung benötigt, um Feedback zu sehen.</div>';
+            return;
+        }
+        if (feedbackLoading) return;
+        feedbackLoading = true;
+        listEl.innerHTML = '<div class="feedback-loading">Lade Vorschläge…</div>';
+        feedbackItems = await loadFeedbackFromCloud();
+        feedbackLoading = false;
+        renderFeedbackList();
+    }
+
+    function renderFeedbackList() {
+        const listEl = $('#feedback-list');
+        if (!listEl) return;
+
+        let items = feedbackItems.slice();
+
+        // Sort by likes desc, then date desc
+        items.sort((a, b) => {
+            const la = Array.isArray(a.likes) ? a.likes.length : 0;
+            const lb = Array.isArray(b.likes) ? b.likes.length : 0;
+            if (lb !== la) return lb - la;
+            const da = a.createdAt || '';
+            const db_ = b.createdAt || '';
+            return db_.localeCompare(da);
+        });
+
+        if (items.length === 0) {
+            listEl.innerHTML = '<div class="feedback-loading">Noch keine Vorschläge — sei der Erste!</div>';
+            return;
+        }
+
+        listEl.innerHTML = items.map(item => {
+            const likes = Array.isArray(item.likes) ? item.likes : [];
+            const likeCount = likes.length;
+            const liked = likes.includes(currentUser);
+            const isOwn = item.author === currentUser;
+            return `
+                <div class="feedback-card">
+                    <div class="feedback-likes">
+                        <button class="feedback-like-btn ${liked ? 'liked' : ''}" data-id="${escapeHtml(item.id)}" title="${liked ? 'Like entfernen' : 'Liken'}">▲</button>
+                        <span class="feedback-like-count">${likeCount}</span>
+                    </div>
+                    <div class="feedback-content">
+                        <div class="feedback-card-header">
+                            <span class="feedback-title">${escapeHtml(item.title || '')}</span>
+                        </div>
+                        <div class="feedback-description">${escapeHtml(item.description || '')}</div>
+                        <div class="feedback-meta">
+                            <span class="feedback-meta-author">${escapeHtml(item.author || 'Unbekannt')} · ${escapeHtml(formatFeedbackDate(item.createdAt))}</span>
+                            ${isOwn ? `<button class="feedback-delete-btn" data-id="${escapeHtml(item.id)}" title="Löschen">Löschen</button>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        // Wire up like buttons
+        listEl.querySelectorAll('.feedback-like-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const id = btn.dataset.id;
+                if (!id) return;
+                btn.disabled = true;
+                // Optimistic update
+                const item = feedbackItems.find(it => it.id === id);
+                if (item) {
+                    if (!Array.isArray(item.likes)) item.likes = [];
+                    const idx = item.likes.indexOf(currentUser);
+                    if (idx >= 0) item.likes.splice(idx, 1);
+                    else item.likes.push(currentUser);
+                    renderFeedbackList();
+                }
+                const ok = await toggleFeedbackLike(id);
+                if (!ok) {
+                    // Revert
+                    await refreshFeedback();
+                }
+            });
+        });
+
+        // Wire up delete buttons
+        listEl.querySelectorAll('.feedback-delete-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const id = btn.dataset.id;
+                if (!id) return;
+                if (!confirm('Diesen Vorschlag wirklich löschen?')) return;
+                btn.disabled = true;
+                const ok = await deleteFeedbackFromCloud(id);
+                if (ok) {
+                    feedbackItems = feedbackItems.filter(it => it.id !== id);
+                    renderFeedbackList();
+                } else {
+                    alert('Löschen fehlgeschlagen.');
+                    btn.disabled = false;
+                }
+            });
+        });
+    }
+
+    function initFeedback() {
+        const submitBtn = $('#btn-submit-feedback');
+        const refreshBtn = $('#btn-refresh-feedback');
+        const titleEl = $('#feedback-title');
+        const descEl = $('#feedback-description');
+
+        if (submitBtn) {
+            submitBtn.addEventListener('click', async () => {
+                const title = titleEl.value.trim();
+                const description = descEl.value.trim();
+                if (!title) {
+                    alert('Bitte einen Titel eingeben.');
+                    return;
+                }
+                if (!description) {
+                    alert('Bitte eine Beschreibung eingeben.');
+                    return;
+                }
+                if (!cloudAvailable) {
+                    alert('Cloud-Verbindung benötigt, um Feedback zu senden.');
+                    return;
+                }
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Senden…';
+                const ok = await submitFeedbackToCloud(title, description);
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Vorschlag senden';
+                if (ok) {
+                    titleEl.value = '';
+                    descEl.value = '';
+                    await refreshFeedback();
+                } else {
+                    alert('Senden fehlgeschlagen. Bitte erneut versuchen.');
+                }
+            });
+        }
+
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => refreshFeedback());
+        }
     }
 
     function initSettings() {
