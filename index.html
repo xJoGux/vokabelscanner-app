@@ -2070,6 +2070,57 @@ header h1 {
     font-style: italic;
 }
 
+.friend-name-link {
+    cursor: pointer;
+    color: var(--text);
+    font-weight: 600;
+    font-size: 0.95rem;
+    border: none;
+    background: none;
+    padding: 0;
+    text-align: left;
+    text-decoration: none;
+}
+
+.friend-name-link:hover {
+    color: var(--primary);
+    text-decoration: underline;
+}
+
+.friend-profile-dialog {
+    max-width: 520px;
+    width: 92%;
+    position: relative;
+}
+
+.friend-profile-close {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.75rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 0.25rem;
+}
+
+.friend-profile-close:hover {
+    color: var(--danger);
+}
+
+.friend-profile-content {
+    margin: 0.75rem 0;
+    min-height: 120px;
+}
+
+.friend-profile-content .friend-stats {
+    border-top: none;
+    padding-top: 0;
+    margin-top: 0;
+}
+
 /* --- Privacy Settings --- */
 .privacy-section h4 {
     margin: 0 0 0.5rem 0;
@@ -3108,6 +3159,14 @@ header h1 {
                 </div>
 
                 <div class="friends-section">
+                    <div class="friends-section-header">
+                        <h4>Vorschläge <span id="friends-suggestions-count" class="friends-count-badge">0</span></h4>
+                        <button id="btn-refresh-suggestions" class="btn btn-secondary btn-sm" title="Aktualisieren">⟳</button>
+                    </div>
+                    <div id="friends-suggestions" class="friends-list"></div>
+                </div>
+
+                <div class="friends-section">
                     <h4>Eingehende Anfragen <span id="friends-requests-in-count" class="friends-count-badge">0</span></h4>
                     <div id="friends-requests-in" class="friends-list"></div>
                 </div>
@@ -3282,6 +3341,18 @@ header h1 {
                 <button id="btn-edit-lernset-cancel" class="btn btn-secondary">Abbrechen</button>
                 <button id="btn-edit-lernset-save" class="btn btn-primary">Speichern</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Friend Profile Modal -->
+    <div id="friend-profile-modal" class="modal-overlay hidden">
+        <div class="modal-dialog friend-profile-dialog">
+            <button id="btn-friend-profile-close" class="friend-profile-close" title="Schliessen">×</button>
+            <h3 id="friend-profile-name">Profil</h3>
+            <div id="friend-profile-content" class="friend-profile-content">
+                <div class="friends-empty">Lade…</div>
+            </div>
+            <div class="modal-actions" id="friend-profile-actions"></div>
         </div>
     </div>
 
@@ -5658,13 +5729,25 @@ const App = (() => {
 
         const savedPw = localStorage.getItem('vokabel_currentPassword');
         const pwField = $('#settings-password');
+        const toggleBtn = $('#btn-toggle-password');
         if (savedPw) {
             pwField.value = savedPw;
+            pwField.placeholder = '';
+            pwField.type = 'password';
+            if (toggleBtn) {
+                toggleBtn.disabled = false;
+                toggleBtn.textContent = 'Anzeigen';
+            }
         } else {
-            pwField.value = '••••••••';
+            // Kein zwischengespeichertes Passwort — Feld leer, Toggle deaktiviert
+            pwField.value = '';
+            pwField.type = 'text';
+            pwField.placeholder = 'Nicht gespeichert — melde dich neu an, um es anzuzeigen';
+            if (toggleBtn) {
+                toggleBtn.disabled = true;
+                toggleBtn.textContent = 'Anzeigen';
+            }
         }
-        pwField.type = 'password';
-        $('#btn-toggle-password').textContent = 'Anzeigen';
     }
 
     // --- Feedback ---
@@ -6247,6 +6330,32 @@ const App = (() => {
         }
     }
 
+    let friendSuggestions = [];
+
+    async function loadFriendSuggestions() {
+        if (!cloudAvailable || !currentUser) return [];
+        try {
+            const snap = await withTimeout(db.collection('accounts').get());
+            const allUsers = snap.docs.map(d => d.id).filter(u => u && u !== currentUser);
+            // Ausschliessen: schon befreundet oder Anfrage offen
+            const excluded = new Set([
+                ...friendsState.friends,
+                ...friendsState.requestsIn,
+                ...friendsState.requestsOut
+            ]);
+            const candidates = allUsers.filter(u => !excluded.has(u));
+            // Zufaellig mischen, max 8 Vorschlaege
+            for (let i = candidates.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+            }
+            return candidates.slice(0, 8);
+        } catch (e) {
+            console.warn('Suggestions load failed:', e);
+            return [];
+        }
+    }
+
     async function refreshFriends() {
         await loadFriendsState();
         renderFriendsLists();
@@ -6259,6 +6368,9 @@ const App = (() => {
                 }
             });
         }
+        // Load suggestions
+        friendSuggestions = await loadFriendSuggestions();
+        renderFriendsLists();
     }
 
     function renderFriendsLists() {
@@ -6267,9 +6379,45 @@ const App = (() => {
         const listEl = $('#friends-list');
         if (!inEl || !outEl || !listEl) return;
 
+        const sugEl = $('#friends-suggestions');
         $('#friends-requests-in-count').textContent = friendsState.requestsIn.length;
         $('#friends-requests-out-count').textContent = friendsState.requestsOut.length;
         $('#friends-list-count').textContent = friendsState.friends.length;
+        if ($('#friends-suggestions-count')) $('#friends-suggestions-count').textContent = friendSuggestions.length;
+
+        // Suggestions
+        if (sugEl) {
+            if (friendSuggestions.length === 0) {
+                sugEl.innerHTML = '<div class="friends-empty">Keine neuen Vorschlaege.</div>';
+            } else {
+                sugEl.innerHTML = friendSuggestions.map(u => `
+                    <div class="friend-card">
+                        <div class="friend-card-header">
+                            <button class="friend-name-link" data-profile-user="${escapeHtml(u)}">${escapeHtml(u)}</button>
+                            <div class="friend-actions">
+                                <button class="btn-accept" data-user="${escapeHtml(u)}">Anfrage senden</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                sugEl.querySelectorAll('.btn-accept').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        btn.disabled = true;
+                        const result = await sendFriendRequest(btn.dataset.user);
+                        if (result.ok) {
+                            friendSuggestions = friendSuggestions.filter(u => u !== btn.dataset.user);
+                            renderFriendsLists();
+                        } else {
+                            alert(result.msg || 'Fehler.');
+                            btn.disabled = false;
+                        }
+                    });
+                });
+                sugEl.querySelectorAll('.friend-name-link').forEach(btn => {
+                    btn.addEventListener('click', () => openFriendProfileModal(btn.dataset.profileUser));
+                });
+            }
+        }
 
         // Incoming
         if (friendsState.requestsIn.length === 0) {
@@ -6278,7 +6426,7 @@ const App = (() => {
             inEl.innerHTML = friendsState.requestsIn.map(u => `
                 <div class="friend-card">
                     <div class="friend-card-header">
-                        <span class="friend-name">${escapeHtml(u)}</span>
+                        <button class="friend-name-link" data-profile-user="${escapeHtml(u)}">${escapeHtml(u)}</button>
                         <div class="friend-actions">
                             <button class="btn-accept" data-user="${escapeHtml(u)}">Annehmen</button>
                             <button class="btn-decline" data-user="${escapeHtml(u)}">Ablehnen</button>
@@ -6302,6 +6450,9 @@ const App = (() => {
                     else { alert('Fehler.'); btn.disabled = false; }
                 });
             });
+            inEl.querySelectorAll('.friend-name-link').forEach(btn => {
+                btn.addEventListener('click', () => openFriendProfileModal(btn.dataset.profileUser));
+            });
         }
 
         // Outgoing
@@ -6311,7 +6462,7 @@ const App = (() => {
             outEl.innerHTML = friendsState.requestsOut.map(u => `
                 <div class="friend-card">
                     <div class="friend-card-header">
-                        <span class="friend-name">${escapeHtml(u)}</span>
+                        <button class="friend-name-link" data-profile-user="${escapeHtml(u)}">${escapeHtml(u)}</button>
                         <div class="friend-actions">
                             <button class="btn-remove" data-user="${escapeHtml(u)}">Zurückziehen</button>
                         </div>
@@ -6325,6 +6476,9 @@ const App = (() => {
                     if (ok) renderFriendsLists();
                     else { alert('Fehler.'); btn.disabled = false; }
                 });
+            });
+            outEl.querySelectorAll('.friend-name-link').forEach(btn => {
+                btn.addEventListener('click', () => openFriendProfileModal(btn.dataset.profileUser));
             });
         }
 
@@ -6353,7 +6507,7 @@ const App = (() => {
                 return `
                     <div class="friend-card">
                         <div class="friend-card-header">
-                            <span class="friend-name">${escapeHtml(u)}</span>
+                            <button class="friend-name-link" data-profile-user="${escapeHtml(u)}">${escapeHtml(u)}</button>
                             <div class="friend-actions">
                                 <button class="btn-remove" data-user="${escapeHtml(u)}">Entfernen</button>
                             </div>
@@ -6371,6 +6525,91 @@ const App = (() => {
                     else { alert('Fehler.'); btn.disabled = false; }
                 });
             });
+            listEl.querySelectorAll('.friend-name-link').forEach(btn => {
+                btn.addEventListener('click', () => openFriendProfileModal(btn.dataset.profileUser));
+            });
+        }
+    }
+
+    async function openFriendProfileModal(username) {
+        const modal = $('#friend-profile-modal');
+        const nameEl = $('#friend-profile-name');
+        const contentEl = $('#friend-profile-content');
+        const actionsEl = $('#friend-profile-actions');
+        if (!modal || !nameEl || !contentEl) return;
+
+        nameEl.textContent = `@${username}`;
+        contentEl.innerHTML = '<div class="friends-empty">Lade…</div>';
+        actionsEl.innerHTML = '';
+        modal.classList.remove('hidden');
+
+        const stats = await loadFriendPublicStats(username);
+        if (!stats) {
+            contentEl.innerHTML = '<div class="friends-empty">Profil konnte nicht geladen werden.</div>';
+            return;
+        }
+
+        const parts = [];
+        if (stats.totalVocabs != null) parts.push(`<div class="friend-stat"><div class="friend-stat-label">Vokabeln</div><div class="friend-stat-value">${stats.totalVocabs}</div></div>`);
+        if (stats.mastered != null) parts.push(`<div class="friend-stat"><div class="friend-stat-label">Gemeistert</div><div class="friend-stat-value">${stats.mastered}</div></div>`);
+        if (stats.successRate != null) parts.push(`<div class="friend-stat"><div class="friend-stat-label">Quote</div><div class="friend-stat-value">${stats.successRate}%</div></div>`);
+        if (stats.totalCorrect != null) parts.push(`<div class="friend-stat"><div class="friend-stat-label">Richtig</div><div class="friend-stat-value">${stats.totalCorrect}</div></div>`);
+        if (stats.totalWrong != null) parts.push(`<div class="friend-stat"><div class="friend-stat-label">Falsch</div><div class="friend-stat-value">${stats.totalWrong}</div></div>`);
+        if (stats.dailyStreak != null) parts.push(`<div class="friend-stat"><div class="friend-stat-label">Streak</div><div class="friend-stat-value">${stats.dailyStreak}🔥</div></div>`);
+        if (stats.f2nCorrect != null) parts.push(`<div class="friend-stat"><div class="friend-stat-label">Fremd→Dt</div><div class="friend-stat-value">${stats.f2nCorrect}/${stats.f2nCorrect + stats.f2nWrong}</div></div>`);
+        if (stats.n2fCorrect != null) parts.push(`<div class="friend-stat"><div class="friend-stat-label">Dt→Fremd</div><div class="friend-stat-value">${stats.n2fCorrect}/${stats.n2fCorrect + stats.n2fWrong}</div></div>`);
+
+        contentEl.innerHTML = parts.length > 0
+            ? `<div class="friend-stats">${parts.join('')}</div>`
+            : '<div class="friends-empty">Dieser Nutzer teilt keine Statistiken.</div>';
+
+        // Aktion-Button abhaengig vom Beziehungsstatus
+        const isFriend = friendsState.friends.includes(username);
+        const hasOut = friendsState.requestsOut.includes(username);
+        const hasIn = friendsState.requestsIn.includes(username);
+        const isSelf = username === currentUser;
+
+        actionsEl.innerHTML = '<button id="btn-friend-profile-dismiss" class="btn btn-secondary">Schliessen</button>';
+        $('#btn-friend-profile-dismiss').addEventListener('click', () => modal.classList.add('hidden'));
+
+        if (isSelf) return;
+        if (isFriend) {
+            actionsEl.insertAdjacentHTML('afterbegin', '<span style="color:var(--text-secondary);font-size:0.85rem;margin-right:auto;">Ihr seid befreundet ✓</span>');
+        } else if (hasOut) {
+            actionsEl.insertAdjacentHTML('afterbegin', '<span style="color:var(--text-secondary);font-size:0.85rem;margin-right:auto;">Anfrage bereits gesendet</span>');
+        } else if (hasIn) {
+            const acceptBtn = document.createElement('button');
+            acceptBtn.className = 'btn btn-primary';
+            acceptBtn.textContent = 'Anfrage annehmen';
+            acceptBtn.addEventListener('click', async () => {
+                acceptBtn.disabled = true;
+                const ok = await acceptFriendRequest(username);
+                if (ok) {
+                    modal.classList.add('hidden');
+                    renderFriendsLists();
+                } else {
+                    alert('Fehler.');
+                    acceptBtn.disabled = false;
+                }
+            });
+            actionsEl.insertBefore(acceptBtn, actionsEl.firstChild);
+        } else {
+            const sendBtn = document.createElement('button');
+            sendBtn.className = 'btn btn-primary';
+            sendBtn.textContent = 'Freundschaftsanfrage senden';
+            sendBtn.addEventListener('click', async () => {
+                sendBtn.disabled = true;
+                const result = await sendFriendRequest(username);
+                if (result.ok) {
+                    friendSuggestions = friendSuggestions.filter(u => u !== username);
+                    modal.classList.add('hidden');
+                    renderFriendsLists();
+                } else {
+                    alert(result.msg || 'Fehler.');
+                    sendBtn.disabled = false;
+                }
+            });
+            actionsEl.insertBefore(sendBtn, actionsEl.firstChild);
         }
     }
 
@@ -6409,6 +6648,28 @@ const App = (() => {
         }
         if (refreshBtn) {
             refreshBtn.addEventListener('click', () => refreshFriends());
+        }
+
+        const refreshSugBtn = $('#btn-refresh-suggestions');
+        if (refreshSugBtn) {
+            refreshSugBtn.addEventListener('click', async () => {
+                refreshSugBtn.disabled = true;
+                friendSuggestions = await loadFriendSuggestions();
+                refreshSugBtn.disabled = false;
+                renderFriendsLists();
+            });
+        }
+
+        // Friend profile modal close handlers
+        const closeBtn = $('#btn-friend-profile-close');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => $('#friend-profile-modal').classList.add('hidden'));
+        }
+        const modal = $('#friend-profile-modal');
+        if (modal) {
+            modal.addEventListener('click', e => {
+                if (e.target === modal) modal.classList.add('hidden');
+            });
         }
     }
 
