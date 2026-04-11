@@ -1542,6 +1542,114 @@ header h1 {
     font-size: 0.9rem;
 }
 
+.feedback-comments-toggle {
+    background: none;
+    border: none;
+    color: var(--primary);
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 0.25rem 0;
+    margin-top: 0.25rem;
+    text-align: left;
+}
+
+.feedback-comments-toggle:hover {
+    text-decoration: underline;
+}
+
+.feedback-comments {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.feedback-comments.hidden {
+    display: none;
+}
+
+.feedback-comment {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0.5rem 0.65rem;
+    background: var(--bg);
+    border-radius: 6px;
+    border: 1px solid var(--border);
+}
+
+.feedback-comment-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.feedback-comment-author {
+    font-weight: 600;
+    color: var(--text);
+}
+
+.feedback-comment-text {
+    font-size: 0.88rem;
+    color: var(--text);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.feedback-comment-delete {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 0.75rem;
+    padding: 0 0.25rem;
+}
+
+.feedback-comment-delete:hover {
+    color: var(--danger);
+}
+
+.feedback-comment-form {
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-start;
+}
+
+.feedback-comment-form textarea {
+    flex: 1;
+    padding: 0.5rem 0.65rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 0.85rem;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 38px;
+}
+
+.feedback-comment-form textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.feedback-comment-form button {
+    padding: 0.5rem 0.85rem;
+    font-size: 0.85rem;
+}
+
+.feedback-comment-empty {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    padding: 0.25rem 0;
+}
+
 @media (max-width: 600px) {
     .feedback-form-row {
         flex-direction: column;
@@ -1554,6 +1662,9 @@ header h1 {
         width: 34px;
         height: 34px;
         font-size: 1rem;
+    }
+    .feedback-comment-form {
+        flex-direction: column;
     }
 }
 
@@ -2786,6 +2897,46 @@ const App = (() => {
             return true;
         } catch (e) {
             console.warn('Feedback loeschen fehlgeschlagen:', e);
+            return false;
+        }
+    }
+
+    async function addCommentToFeedback(feedbackId, text) {
+        if (!cloudAvailable || !currentUser) return null;
+        try {
+            const docRef = db.collection('feedback').doc(feedbackId);
+            const doc = await withTimeout(docRef.get());
+            if (!doc.exists) return null;
+            const data = doc.data();
+            const comments = Array.isArray(data.comments) ? [...data.comments] : [];
+            const newComment = {
+                id: `c_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+                author: currentUser,
+                text,
+                createdAt: new Date().toISOString()
+            };
+            comments.push(newComment);
+            await withTimeout(docRef.update({ comments }));
+            return newComment;
+        } catch (e) {
+            console.warn('Kommentar senden fehlgeschlagen:', e);
+            return null;
+        }
+    }
+
+    async function deleteCommentFromFeedback(feedbackId, commentId) {
+        if (!cloudAvailable || !currentUser) return false;
+        try {
+            const docRef = db.collection('feedback').doc(feedbackId);
+            const doc = await withTimeout(docRef.get());
+            if (!doc.exists) return false;
+            const data = doc.data();
+            const comments = Array.isArray(data.comments) ? data.comments : [];
+            const filtered = comments.filter(c => !(c.id === commentId && c.author === currentUser));
+            await withTimeout(docRef.update({ comments: filtered }));
+            return true;
+        } catch (e) {
+            console.warn('Kommentar loeschen fehlgeschlagen:', e);
             return false;
         }
     }
@@ -4879,6 +5030,7 @@ const App = (() => {
     // --- Feedback ---
     let feedbackItems = [];
     let feedbackLoading = false;
+    const expandedFeedbackComments = new Set();
 
     function feedbackTypeLabel(type) {
         if (type === 'bug') return '🐛 Bug';
@@ -4947,6 +5099,21 @@ const App = (() => {
             const likeCount = likes.length;
             const liked = likes.includes(currentUser);
             const isOwn = item.author === currentUser;
+            const comments = Array.isArray(item.comments) ? item.comments : [];
+            const commentCount = comments.length;
+            const expanded = expandedFeedbackComments.has(item.id);
+            const commentsHtml = comments.map(c => {
+                const isMine = c.author === currentUser;
+                return `
+                    <div class="feedback-comment">
+                        <div class="feedback-comment-header">
+                            <span class="feedback-comment-author">${escapeHtml(c.author || 'Unbekannt')} · ${escapeHtml(formatFeedbackDate(c.createdAt))}</span>
+                            ${isMine ? `<button class="feedback-comment-delete" data-feedback-id="${escapeHtml(item.id)}" data-comment-id="${escapeHtml(c.id)}" title="Löschen">×</button>` : ''}
+                        </div>
+                        <div class="feedback-comment-text">${escapeHtml(c.text || '')}</div>
+                    </div>
+                `;
+            }).join('');
             return `
                 <div class="feedback-card">
                     <div class="feedback-likes">
@@ -4961,6 +5128,16 @@ const App = (() => {
                         <div class="feedback-meta">
                             <span class="feedback-meta-author">${escapeHtml(item.author || 'Unbekannt')} · ${escapeHtml(formatFeedbackDate(item.createdAt))}</span>
                             ${isOwn ? `<button class="feedback-delete-btn" data-id="${escapeHtml(item.id)}" title="Löschen">Löschen</button>` : ''}
+                        </div>
+                        <button class="feedback-comments-toggle" data-id="${escapeHtml(item.id)}">
+                            ${expanded ? '▾' : '▸'} ${commentCount} Kommentar${commentCount === 1 ? '' : 'e'}
+                        </button>
+                        <div class="feedback-comments ${expanded ? '' : 'hidden'}" data-feedback-id="${escapeHtml(item.id)}">
+                            ${commentsHtml || '<div class="feedback-comment-empty">Noch keine Kommentare.</div>'}
+                            <div class="feedback-comment-form">
+                                <textarea placeholder="Kommentar schreiben…" rows="1" maxlength="500" data-feedback-id="${escapeHtml(item.id)}"></textarea>
+                                <button class="btn btn-primary btn-sm feedback-comment-submit" data-id="${escapeHtml(item.id)}">Senden</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -5000,6 +5177,69 @@ const App = (() => {
                 const ok = await deleteFeedbackFromCloud(id);
                 if (ok) {
                     feedbackItems = feedbackItems.filter(it => it.id !== id);
+                    renderFeedbackList();
+                } else {
+                    alert('Löschen fehlgeschlagen.');
+                    btn.disabled = false;
+                }
+            });
+        });
+
+        // Wire up comment toggle buttons
+        listEl.querySelectorAll('.feedback-comments-toggle').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = btn.dataset.id;
+                if (!id) return;
+                if (expandedFeedbackComments.has(id)) expandedFeedbackComments.delete(id);
+                else expandedFeedbackComments.add(id);
+                renderFeedbackList();
+            });
+        });
+
+        // Wire up comment submit buttons
+        listEl.querySelectorAll('.feedback-comment-submit').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const id = btn.dataset.id;
+                if (!id) return;
+                const textarea = listEl.querySelector(`textarea[data-feedback-id="${id}"]`);
+                if (!textarea) return;
+                const text = textarea.value.trim();
+                if (!text) return;
+                if (!cloudAvailable) {
+                    alert('Cloud-Verbindung benötigt, um zu kommentieren.');
+                    return;
+                }
+                btn.disabled = true;
+                const newComment = await addCommentToFeedback(id, text);
+                btn.disabled = false;
+                if (newComment) {
+                    const item = feedbackItems.find(it => it.id === id);
+                    if (item) {
+                        if (!Array.isArray(item.comments)) item.comments = [];
+                        item.comments.push(newComment);
+                    }
+                    expandedFeedbackComments.add(id);
+                    renderFeedbackList();
+                } else {
+                    alert('Kommentar senden fehlgeschlagen.');
+                }
+            });
+        });
+
+        // Wire up comment delete buttons
+        listEl.querySelectorAll('.feedback-comment-delete').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const feedbackId = btn.dataset.feedbackId;
+                const commentId = btn.dataset.commentId;
+                if (!feedbackId || !commentId) return;
+                if (!confirm('Kommentar löschen?')) return;
+                btn.disabled = true;
+                const ok = await deleteCommentFromFeedback(feedbackId, commentId);
+                if (ok) {
+                    const item = feedbackItems.find(it => it.id === feedbackId);
+                    if (item && Array.isArray(item.comments)) {
+                        item.comments = item.comments.filter(c => c.id !== commentId);
+                    }
                     renderFeedbackList();
                 } else {
                     alert('Löschen fehlgeschlagen.');
