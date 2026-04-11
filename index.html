@@ -1668,6 +1668,452 @@ header h1 {
     }
 }
 
+/* --- Profile View --- */
+.profile-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+.profile-header {
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.profile-header h3 {
+    margin: 0 0 0.25rem 0;
+    color: var(--text);
+}
+
+.profile-username {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+.profile-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.85rem;
+    margin-bottom: 1.5rem;
+}
+
+.profile-stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem;
+    text-align: center;
+}
+
+.profile-stat-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.35rem;
+}
+
+.profile-stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.profile-stat-value.correct { color: var(--success, #10b981); }
+.profile-stat-value.wrong { color: var(--danger); }
+
+.profile-stat-sub {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+}
+
+.profile-section {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.1rem;
+    margin-bottom: 1.25rem;
+}
+
+.profile-section h4 {
+    margin: 0 0 0.85rem 0;
+    color: var(--text);
+    font-size: 1rem;
+}
+
+.profile-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.85rem;
+}
+
+.profile-section-header h4 {
+    margin: 0;
+}
+
+.profile-section-header select {
+    padding: 0.4rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface, var(--bg-card));
+    color: var(--text);
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.profile-direction-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.profile-direction-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.85rem;
+}
+
+.profile-direction-title {
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 0.55rem;
+    color: var(--text);
+}
+
+.profile-direction-bar {
+    width: 100%;
+    height: 10px;
+    background: rgba(239, 68, 68, 0.25);
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 0.45rem;
+}
+
+.profile-direction-fill {
+    height: 100%;
+    background: var(--success, #10b981);
+    width: 0;
+    transition: width 0.3s ease;
+}
+
+.profile-direction-stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.82rem;
+}
+
+.profile-direction-stats .correct { color: var(--success, #10b981); font-weight: 600; }
+.profile-direction-stats .wrong { color: var(--danger); font-weight: 600; }
+
+.profile-vocab-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    max-height: 420px;
+    overflow-y: auto;
+}
+
+.profile-vocab-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto auto auto;
+    gap: 0.75rem;
+    align-items: center;
+    padding: 0.55rem 0.75rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.88rem;
+}
+
+.profile-vocab-row .pv-word {
+    font-weight: 600;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.profile-vocab-row .pv-trans {
+    color: var(--text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.profile-vocab-row .pv-correct {
+    color: var(--success, #10b981);
+    font-weight: 600;
+    white-space: nowrap;
+    min-width: 36px;
+    text-align: right;
+}
+
+.profile-vocab-row .pv-wrong {
+    color: var(--danger);
+    font-weight: 600;
+    white-space: nowrap;
+    min-width: 36px;
+    text-align: right;
+}
+
+.profile-vocab-row .pv-ratio {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    min-width: 42px;
+    text-align: right;
+}
+
+.profile-vocab-empty {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+    padding: 1rem;
+}
+
+/* --- Friends View --- */
+.friends-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+.friends-header {
+    margin-bottom: 1.25rem;
+    text-align: center;
+}
+
+.friends-header h3 {
+    margin: 0 0 0.25rem 0;
+    color: var(--text);
+}
+
+.friends-hint {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.friends-section {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.1rem;
+    margin-bottom: 1rem;
+}
+
+.friends-section h4 {
+    margin: 0 0 0.75rem 0;
+    color: var(--text);
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.friends-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.friends-section-header h4 {
+    margin: 0;
+}
+
+.friends-count-badge {
+    background: var(--primary);
+    color: white;
+    border-radius: 999px;
+    padding: 0.1rem 0.55rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+.friends-add-form {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.friends-add-form input {
+    flex: 1;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface, var(--bg));
+    color: var(--text);
+    font-size: 0.9rem;
+}
+
+.friends-add-form input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.friends-add-msg {
+    margin-top: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+}
+
+.friends-add-msg.success {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--success, #10b981);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.friends-add-msg.error {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--danger);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.friends-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.friend-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem 0.9rem;
+}
+
+.friend-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.friend-name {
+    font-weight: 600;
+    color: var(--text);
+    font-size: 0.95rem;
+}
+
+.friend-actions {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.friend-actions button {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.82rem;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text);
+}
+
+.friend-actions button.btn-accept {
+    background: var(--success, #10b981);
+    color: white;
+    border-color: var(--success, #10b981);
+}
+
+.friend-actions button.btn-decline,
+.friend-actions button.btn-remove {
+    background: transparent;
+    color: var(--danger);
+    border-color: var(--danger);
+}
+
+.friend-actions button:hover {
+    opacity: 0.85;
+}
+
+.friend-stats {
+    margin-top: 0.65rem;
+    padding-top: 0.65rem;
+    border-top: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 0.5rem;
+    font-size: 0.8rem;
+}
+
+.friend-stat {
+    text-align: center;
+}
+
+.friend-stat-label {
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+}
+
+.friend-stat-value {
+    font-weight: 600;
+    color: var(--text);
+    font-size: 0.95rem;
+    margin-top: 0.15rem;
+}
+
+.friends-empty {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    padding: 0.75rem;
+    font-style: italic;
+}
+
+/* --- Privacy Settings --- */
+.privacy-section h4 {
+    margin: 0 0 0.5rem 0;
+}
+
+.privacy-hint {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin: 0 0 0.75rem 0;
+}
+
+.privacy-check {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.4rem 0;
+    cursor: pointer;
+    color: var(--text);
+    font-size: 0.9rem;
+}
+
+.privacy-check input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+@media (max-width: 600px) {
+    .profile-direction-grid {
+        grid-template-columns: 1fr;
+    }
+    .profile-vocab-row {
+        grid-template-columns: 1fr auto auto;
+        font-size: 0.82rem;
+    }
+    .profile-vocab-row .pv-trans,
+    .profile-vocab-row .pv-ratio {
+        display: none;
+    }
+    .friends-add-form {
+        flex-direction: column;
+    }
+}
+
 /* --- Empty State --- */
 .empty-state {
     text-align: center;
@@ -2279,6 +2725,8 @@ header h1 {
             <button class="nav-btn" data-view="quiz">Quiz</button>
             <button class="nav-btn" data-view="test">Test</button>
             <button class="nav-btn" data-view="list">Lernsets</button>
+            <button class="nav-btn" data-view="profile">Profil</button>
+            <button class="nav-btn" data-view="friends">Freunde</button>
             <button class="nav-btn" data-view="feedback">Feedback</button>
             <button class="nav-btn" data-view="settings">Einstellungen</button>
         </nav>
@@ -2565,6 +3013,120 @@ header h1 {
             </div>
         </section>
 
+        <!-- PROFILE VIEW -->
+        <section id="view-profile" class="view">
+            <div class="profile-container">
+                <div class="profile-header">
+                    <h3>Mein Profil</h3>
+                    <p class="profile-username" id="profile-username-label"></p>
+                </div>
+                <div class="profile-stats-grid">
+                    <div class="profile-stat-card">
+                        <div class="profile-stat-label">Vokabeln gesamt</div>
+                        <div class="profile-stat-value" id="profile-total-vocabs">0</div>
+                    </div>
+                    <div class="profile-stat-card">
+                        <div class="profile-stat-label">Gemeistert</div>
+                        <div class="profile-stat-value" id="profile-mastered">0</div>
+                        <div class="profile-stat-sub" id="profile-mastered-sub"></div>
+                    </div>
+                    <div class="profile-stat-card">
+                        <div class="profile-stat-label">Richtig gesamt</div>
+                        <div class="profile-stat-value correct" id="profile-total-correct">0</div>
+                    </div>
+                    <div class="profile-stat-card">
+                        <div class="profile-stat-label">Falsch gesamt</div>
+                        <div class="profile-stat-value wrong" id="profile-total-wrong">0</div>
+                    </div>
+                    <div class="profile-stat-card">
+                        <div class="profile-stat-label">Erfolgsquote</div>
+                        <div class="profile-stat-value" id="profile-success-rate">—</div>
+                    </div>
+                    <div class="profile-stat-card">
+                        <div class="profile-stat-label">Lern-Streak</div>
+                        <div class="profile-stat-value" id="profile-streak">0</div>
+                        <div class="profile-stat-sub">Tage in Folge</div>
+                    </div>
+                </div>
+
+                <div class="profile-section">
+                    <h4>Nach Richtung</h4>
+                    <div class="profile-direction-grid">
+                        <div class="profile-direction-card">
+                            <div class="profile-direction-title">Fremdsprache → Deutsch</div>
+                            <div class="profile-direction-bar">
+                                <div class="profile-direction-fill correct" id="profile-f2n-fill"></div>
+                            </div>
+                            <div class="profile-direction-stats">
+                                <span class="correct" id="profile-f2n-correct">0 richtig</span>
+                                <span class="wrong" id="profile-f2n-wrong">0 falsch</span>
+                            </div>
+                        </div>
+                        <div class="profile-direction-card">
+                            <div class="profile-direction-title">Deutsch → Fremdsprache</div>
+                            <div class="profile-direction-bar">
+                                <div class="profile-direction-fill correct" id="profile-n2f-fill"></div>
+                            </div>
+                            <div class="profile-direction-stats">
+                                <span class="correct" id="profile-n2f-correct">0 richtig</span>
+                                <span class="wrong" id="profile-n2f-wrong">0 falsch</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-section">
+                    <div class="profile-section-header">
+                        <h4>Vokabel-Statistiken</h4>
+                        <select id="profile-vocab-sort">
+                            <option value="wrong-desc">Meiste Fehler</option>
+                            <option value="correct-desc">Meiste Richtig</option>
+                            <option value="ratio-asc">Schlechteste Quote</option>
+                            <option value="recent">Zuletzt gesehen</option>
+                        </select>
+                    </div>
+                    <div id="profile-vocab-list" class="profile-vocab-list"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FRIENDS VIEW -->
+        <section id="view-friends" class="view">
+            <div class="friends-container">
+                <div class="friends-header">
+                    <h3>Freunde</h3>
+                    <p class="friends-hint">Schicke anderen Nutzern Freundschaftsanfragen und sieh ihre Lernstatistiken.</p>
+                </div>
+
+                <div class="friends-section">
+                    <h4>Freund hinzufügen</h4>
+                    <div class="friends-add-form">
+                        <input type="text" id="friends-add-input" placeholder="Benutzername" maxlength="40">
+                        <button id="btn-send-friend-request" class="btn btn-primary">Anfrage senden</button>
+                    </div>
+                    <div id="friends-add-msg" class="friends-add-msg hidden"></div>
+                </div>
+
+                <div class="friends-section">
+                    <h4>Eingehende Anfragen <span id="friends-requests-in-count" class="friends-count-badge">0</span></h4>
+                    <div id="friends-requests-in" class="friends-list"></div>
+                </div>
+
+                <div class="friends-section">
+                    <h4>Gesendete Anfragen <span id="friends-requests-out-count" class="friends-count-badge">0</span></h4>
+                    <div id="friends-requests-out" class="friends-list"></div>
+                </div>
+
+                <div class="friends-section">
+                    <div class="friends-section-header">
+                        <h4>Meine Freunde <span id="friends-list-count" class="friends-count-badge">0</span></h4>
+                        <button id="btn-refresh-friends" class="btn btn-secondary btn-sm" title="Aktualisieren">⟳</button>
+                    </div>
+                    <div id="friends-list" class="friends-list"></div>
+                </div>
+            </div>
+        </section>
+
         <!-- FEEDBACK VIEW -->
         <section id="view-feedback" class="view">
             <div class="feedback-container">
@@ -2623,6 +3185,30 @@ header h1 {
                         <button class="theme-toggle-btn active" data-theme="light">Hell</button>
                         <button class="theme-toggle-btn" data-theme="dark">Dunkel</button>
                     </div>
+                </div>
+                <div class="setting-group privacy-section">
+                    <h4>Privatsphäre für Freunde</h4>
+                    <p class="privacy-hint">Wähle, welche Statistiken deine Freunde in ihrem Freunde-Tab sehen dürfen.</p>
+                    <label class="privacy-check">
+                        <input type="checkbox" id="privacy-total-vocabs" checked>
+                        <span>Anzahl meiner Vokabeln</span>
+                    </label>
+                    <label class="privacy-check">
+                        <input type="checkbox" id="privacy-correct-wrong" checked>
+                        <span>Richtig/Falsch-Statistiken</span>
+                    </label>
+                    <label class="privacy-check">
+                        <input type="checkbox" id="privacy-direction" checked>
+                        <span>Richtungen (Fremdsprache ↔ Deutsch)</span>
+                    </label>
+                    <label class="privacy-check">
+                        <input type="checkbox" id="privacy-streak" checked>
+                        <span>Lern-Streak</span>
+                    </label>
+                    <label class="privacy-check">
+                        <input type="checkbox" id="privacy-mastered" checked>
+                        <span>Gemeisterte Vokabeln</span>
+                    </label>
                 </div>
                 <div class="setting-group danger-zone">
                     <h4>Gefahrenzone</h4>
@@ -2814,7 +3400,7 @@ const App = (() => {
                 vocabSets,
                 allVocabs,
                 lastUpdated: new Date().toISOString()
-            }), 8000);
+            }, { merge: true }), 8000);
         } catch (e) {
             console.warn('Cloud-Sync fehlgeschlagen:', e);
         }
@@ -3262,6 +3848,11 @@ const App = (() => {
         } catch (e) {
             console.warn('Streak-Daten laden fehlgeschlagen:', e);
         }
+        try {
+            await loadFriendsState();
+        } catch (e) {
+            console.warn('Freunde laden fehlgeschlagen:', e);
+        }
         initAppModules();
     }
 
@@ -3276,6 +3867,9 @@ const App = (() => {
             initQuiz();
             initTest();
             initList();
+            initProfile();
+            initFriends();
+            initPrivacySettings();
             initFeedback();
             initSettings();
             appInitialized = true;
@@ -3316,6 +3910,8 @@ const App = (() => {
                 if (view === 'quiz') refreshQuiz();
                 if (view === 'test') refreshTest();
                 if (view === 'list') refreshList();
+                if (view === 'profile') refreshProfile();
+                if (view === 'friends') refreshFriends();
                 if (view === 'feedback') refreshFeedback();
             });
         });
@@ -3464,6 +4060,23 @@ const App = (() => {
             .filter(s => s.lernsetId === lernsetId && (!kapitelId || kapitelId === 'all' || s.id === kapitelId))
             .map(s => s.id);
         return allVocabs.filter(v => setIds.includes(v.setId));
+    }
+
+    // --- Vocab-Statistik-Helper inkl. Richtung ---
+    // reverse = true => Richtung war native-to-foreign (Deutsch -> Fremdsprache)
+    // reverse = false => Richtung war foreign-to-native (Fremdsprache -> Deutsch)
+    function recordVocabAnswer(vocab, isCorrect, reverse) {
+        if (!vocab) return;
+        if (isCorrect) vocab.correctCount = (vocab.correctCount || 0) + 1;
+        else vocab.wrongCount = (vocab.wrongCount || 0) + 1;
+        if (reverse) {
+            if (isCorrect) vocab.n2fCorrect = (vocab.n2fCorrect || 0) + 1;
+            else vocab.n2fWrong = (vocab.n2fWrong || 0) + 1;
+        } else {
+            if (isCorrect) vocab.f2nCorrect = (vocab.f2nCorrect || 0) + 1;
+            else vocab.f2nWrong = (vocab.f2nWrong || 0) + 1;
+        }
+        vocab.lastSeen = new Date().toISOString();
     }
 
     // --- Gewichtete Auswahl: bereits gemeisterte Vokabeln seltener ---
@@ -3991,9 +4604,7 @@ const App = (() => {
 
         const vocab = allVocabs.find(v => v.id === q.id);
         if (vocab) {
-            if (isCorrect) vocab.correctCount++;
-            else vocab.wrongCount++;
-            vocab.lastSeen = new Date().toISOString();
+            recordVocabAnswer(vocab, isCorrect, quizState.currentReverse);
             save();
         }
 
@@ -4752,9 +5363,7 @@ const App = (() => {
         // Vocab-Statistik aktualisieren
         const vocab = allVocabs.find(v => v.id === q.id);
         if (vocab) {
-            if (isCorrect) vocab.correctCount++;
-            else vocab.wrongCount++;
-            vocab.lastSeen = new Date().toISOString();
+            recordVocabAnswer(vocab, isCorrect, isReverse);
             save();
         }
 
@@ -4919,9 +5528,8 @@ const App = (() => {
 
             const vocab = allVocabs.find(v => v.id === q.id);
             if (vocab) {
-                if (firstTryCorrect) vocab.correctCount++;
-                else vocab.wrongCount++;
-                vocab.lastSeen = new Date().toISOString();
+                const writeReverse = getWriteDirection() === 'native-to-foreign';
+                recordVocabAnswer(vocab, firstTryCorrect, writeReverse);
                 save();
             }
 
@@ -5321,6 +5929,506 @@ const App = (() => {
         if (refreshBtn) {
             refreshBtn.addEventListener('click', () => refreshFeedback());
         }
+    }
+
+    // --- Profil ---
+    const DEFAULT_PRIVACY = {
+        shareTotalVocabs: true,
+        shareCorrectWrong: true,
+        shareDirection: true,
+        shareStreak: true,
+        shareMastered: true
+    };
+    let privacySettings = { ...DEFAULT_PRIVACY };
+
+    function computeProfileStats(vocabs) {
+        let totalCorrect = 0, totalWrong = 0;
+        let f2nCorrect = 0, f2nWrong = 0;
+        let n2fCorrect = 0, n2fWrong = 0;
+        let mastered = 0;
+        vocabs.forEach(v => {
+            const c = v.correctCount || 0;
+            const w = v.wrongCount || 0;
+            totalCorrect += c;
+            totalWrong += w;
+            f2nCorrect += v.f2nCorrect || 0;
+            f2nWrong += v.f2nWrong || 0;
+            n2fCorrect += v.n2fCorrect || 0;
+            n2fWrong += v.n2fWrong || 0;
+            // Als gemeistert zählt: mindestens 3 richtige und Netto (richtig - falsch) >= 3
+            if (c >= 3 && (c - w) >= 3) mastered++;
+        });
+        const total = totalCorrect + totalWrong;
+        const successRate = total > 0 ? Math.round((totalCorrect / total) * 100) : null;
+        return {
+            totalVocabs: vocabs.length,
+            mastered,
+            totalCorrect,
+            totalWrong,
+            successRate,
+            f2nCorrect, f2nWrong,
+            n2fCorrect, n2fWrong
+        };
+    }
+
+    function refreshProfile() {
+        const nameEl = $('#profile-username-label');
+        if (nameEl) nameEl.textContent = currentUser ? `@${currentUser}` : '';
+
+        const stats = computeProfileStats(allVocabs);
+
+        $('#profile-total-vocabs').textContent = stats.totalVocabs;
+        $('#profile-mastered').textContent = stats.mastered;
+        const masteredPct = stats.totalVocabs > 0 ? Math.round((stats.mastered / stats.totalVocabs) * 100) : 0;
+        $('#profile-mastered-sub').textContent = `${masteredPct}% gemeistert`;
+        $('#profile-total-correct').textContent = stats.totalCorrect;
+        $('#profile-total-wrong').textContent = stats.totalWrong;
+        $('#profile-success-rate').textContent = stats.successRate == null ? '—' : `${stats.successRate}%`;
+        $('#profile-streak').textContent = (typeof dailyStreak !== 'undefined' ? dailyStreak : 0);
+
+        // Richtungen
+        const f2nTotal = stats.f2nCorrect + stats.f2nWrong;
+        const n2fTotal = stats.n2fCorrect + stats.n2fWrong;
+        const f2nPct = f2nTotal > 0 ? (stats.f2nCorrect / f2nTotal) * 100 : 0;
+        const n2fPct = n2fTotal > 0 ? (stats.n2fCorrect / n2fTotal) * 100 : 0;
+        $('#profile-f2n-fill').style.width = `${f2nPct}%`;
+        $('#profile-n2f-fill').style.width = `${n2fPct}%`;
+        $('#profile-f2n-correct').textContent = `${stats.f2nCorrect} richtig`;
+        $('#profile-f2n-wrong').textContent = `${stats.f2nWrong} falsch`;
+        $('#profile-n2f-correct').textContent = `${stats.n2fCorrect} richtig`;
+        $('#profile-n2f-wrong').textContent = `${stats.n2fWrong} falsch`;
+
+        renderProfileVocabList();
+    }
+
+    function renderProfileVocabList() {
+        const listEl = $('#profile-vocab-list');
+        if (!listEl) return;
+        const sort = $('#profile-vocab-sort')?.value || 'wrong-desc';
+
+        const items = allVocabs.filter(v => (v.correctCount || v.wrongCount || v.lastSeen)).slice();
+        items.sort((a, b) => {
+            const ac = a.correctCount || 0, aw = a.wrongCount || 0;
+            const bc = b.correctCount || 0, bw = b.wrongCount || 0;
+            if (sort === 'wrong-desc') return bw - aw;
+            if (sort === 'correct-desc') return bc - ac;
+            if (sort === 'ratio-asc') {
+                const ar = (ac + aw) > 0 ? ac / (ac + aw) : 1;
+                const br = (bc + bw) > 0 ? bc / (bc + bw) : 1;
+                return ar - br;
+            }
+            if (sort === 'recent') return (b.lastSeen || '').localeCompare(a.lastSeen || '');
+            return 0;
+        });
+
+        if (items.length === 0) {
+            listEl.innerHTML = '<div class="profile-vocab-empty">Noch keine Vokabel-Statistiken. Starte ein Quiz oder einen Test!</div>';
+            return;
+        }
+
+        listEl.innerHTML = items.slice(0, 100).map(v => {
+            const c = v.correctCount || 0, w = v.wrongCount || 0;
+            const total = c + w;
+            const ratio = total > 0 ? Math.round((c / total) * 100) : 0;
+            return `
+                <div class="profile-vocab-row">
+                    <span class="pv-word">${escapeHtml(v.word || '')}</span>
+                    <span class="pv-trans">${escapeHtml(v.translation || '')}</span>
+                    <span class="pv-correct">✓ ${c}</span>
+                    <span class="pv-wrong">✗ ${w}</span>
+                    <span class="pv-ratio">${ratio}%</span>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function initProfile() {
+        const sortEl = $('#profile-vocab-sort');
+        if (sortEl) sortEl.addEventListener('change', renderProfileVocabList);
+    }
+
+    // --- Freunde ---
+    let friendsState = {
+        friends: [],
+        requestsIn: [],
+        requestsOut: []
+    };
+    let friendStatsCache = {};
+
+    async function loadFriendsState() {
+        if (!cloudAvailable || !currentUser) return;
+        try {
+            const doc = await withTimeout(db.collection('userData').doc(currentUser).get());
+            if (doc.exists) {
+                const data = doc.data();
+                friendsState.friends = Array.isArray(data.friends) ? data.friends : [];
+                friendsState.requestsIn = Array.isArray(data.friendRequestsIn) ? data.friendRequestsIn : [];
+                friendsState.requestsOut = Array.isArray(data.friendRequestsOut) ? data.friendRequestsOut : [];
+                if (data.privacy) {
+                    privacySettings = { ...DEFAULT_PRIVACY, ...data.privacy };
+                }
+            }
+        } catch (e) {
+            console.warn('Friends load failed:', e);
+        }
+    }
+
+    async function saveFriendsState() {
+        if (!cloudAvailable || !currentUser) return;
+        try {
+            await withTimeout(db.collection('userData').doc(currentUser).set({
+                friends: friendsState.friends,
+                friendRequestsIn: friendsState.requestsIn,
+                friendRequestsOut: friendsState.requestsOut
+            }, { merge: true }));
+        } catch (e) {
+            console.warn('Friends save failed:', e);
+        }
+    }
+
+    async function savePrivacySettings() {
+        if (!cloudAvailable || !currentUser) return;
+        try {
+            await withTimeout(db.collection('userData').doc(currentUser).set({
+                privacy: privacySettings
+            }, { merge: true }));
+        } catch (e) {
+            console.warn('Privacy save failed:', e);
+        }
+    }
+
+    async function userExistsInCloud(username) {
+        if (!cloudAvailable) return false;
+        try {
+            const doc = await withTimeout(db.collection('accounts').doc(username).get());
+            if (doc.exists) return true;
+            const doc2 = await withTimeout(db.collection('userData').doc(username).get());
+            return doc2.exists;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    async function sendFriendRequest(targetUser) {
+        if (!cloudAvailable || !currentUser) return { ok: false, msg: 'Keine Cloud-Verbindung.' };
+        if (!targetUser) return { ok: false, msg: 'Benutzername fehlt.' };
+        if (targetUser === currentUser) return { ok: false, msg: 'Du kannst dir nicht selbst eine Anfrage schicken.' };
+        if (friendsState.friends.includes(targetUser)) return { ok: false, msg: 'Ihr seid bereits befreundet.' };
+        if (friendsState.requestsOut.includes(targetUser)) return { ok: false, msg: 'Anfrage wurde bereits gesendet.' };
+        if (friendsState.requestsIn.includes(targetUser)) return { ok: false, msg: 'Diese Person hat dir bereits eine Anfrage geschickt — akzeptiere sie einfach.' };
+
+        const exists = await userExistsInCloud(targetUser);
+        if (!exists) return { ok: false, msg: `Benutzer "${targetUser}" existiert nicht.` };
+
+        try {
+            // Add to target's requestsIn
+            const targetRef = db.collection('userData').doc(targetUser);
+            const targetDoc = await withTimeout(targetRef.get());
+            const targetData = targetDoc.exists ? targetDoc.data() : {};
+            const targetIn = Array.isArray(targetData.friendRequestsIn) ? [...targetData.friendRequestsIn] : [];
+            if (!targetIn.includes(currentUser)) targetIn.push(currentUser);
+            await withTimeout(targetRef.set({ friendRequestsIn: targetIn }, { merge: true }));
+
+            // Add to own requestsOut
+            friendsState.requestsOut.push(targetUser);
+            await saveFriendsState();
+            return { ok: true, msg: `Anfrage an ${targetUser} gesendet.` };
+        } catch (e) {
+            console.warn('Send request failed:', e);
+            return { ok: false, msg: 'Senden fehlgeschlagen.' };
+        }
+    }
+
+    async function acceptFriendRequest(fromUser) {
+        if (!cloudAvailable || !currentUser) return false;
+        try {
+            // Add both to friends, remove from requests
+            const fromRef = db.collection('userData').doc(fromUser);
+            const fromDoc = await withTimeout(fromRef.get());
+            const fromData = fromDoc.exists ? fromDoc.data() : {};
+            const fromFriends = Array.isArray(fromData.friends) ? [...fromData.friends] : [];
+            const fromOut = Array.isArray(fromData.friendRequestsOut) ? fromData.friendRequestsOut.filter(u => u !== currentUser) : [];
+            if (!fromFriends.includes(currentUser)) fromFriends.push(currentUser);
+            await withTimeout(fromRef.set({ friends: fromFriends, friendRequestsOut: fromOut }, { merge: true }));
+
+            if (!friendsState.friends.includes(fromUser)) friendsState.friends.push(fromUser);
+            friendsState.requestsIn = friendsState.requestsIn.filter(u => u !== fromUser);
+            await saveFriendsState();
+            return true;
+        } catch (e) {
+            console.warn('Accept failed:', e);
+            return false;
+        }
+    }
+
+    async function declineFriendRequest(fromUser) {
+        if (!cloudAvailable || !currentUser) return false;
+        try {
+            const fromRef = db.collection('userData').doc(fromUser);
+            const fromDoc = await withTimeout(fromRef.get());
+            const fromData = fromDoc.exists ? fromDoc.data() : {};
+            const fromOut = Array.isArray(fromData.friendRequestsOut) ? fromData.friendRequestsOut.filter(u => u !== currentUser) : [];
+            await withTimeout(fromRef.set({ friendRequestsOut: fromOut }, { merge: true }));
+
+            friendsState.requestsIn = friendsState.requestsIn.filter(u => u !== fromUser);
+            await saveFriendsState();
+            return true;
+        } catch (e) {
+            console.warn('Decline failed:', e);
+            return false;
+        }
+    }
+
+    async function cancelFriendRequest(toUser) {
+        if (!cloudAvailable || !currentUser) return false;
+        try {
+            const toRef = db.collection('userData').doc(toUser);
+            const toDoc = await withTimeout(toRef.get());
+            const toData = toDoc.exists ? toDoc.data() : {};
+            const toIn = Array.isArray(toData.friendRequestsIn) ? toData.friendRequestsIn.filter(u => u !== currentUser) : [];
+            await withTimeout(toRef.set({ friendRequestsIn: toIn }, { merge: true }));
+
+            friendsState.requestsOut = friendsState.requestsOut.filter(u => u !== toUser);
+            await saveFriendsState();
+            return true;
+        } catch (e) {
+            console.warn('Cancel failed:', e);
+            return false;
+        }
+    }
+
+    async function removeFriend(username) {
+        if (!cloudAvailable || !currentUser) return false;
+        try {
+            const otherRef = db.collection('userData').doc(username);
+            const otherDoc = await withTimeout(otherRef.get());
+            const otherData = otherDoc.exists ? otherDoc.data() : {};
+            const otherFriends = Array.isArray(otherData.friends) ? otherData.friends.filter(u => u !== currentUser) : [];
+            await withTimeout(otherRef.set({ friends: otherFriends }, { merge: true }));
+
+            friendsState.friends = friendsState.friends.filter(u => u !== username);
+            delete friendStatsCache[username];
+            await saveFriendsState();
+            return true;
+        } catch (e) {
+            console.warn('Remove friend failed:', e);
+            return false;
+        }
+    }
+
+    async function loadFriendPublicStats(username) {
+        if (!cloudAvailable) return null;
+        try {
+            const doc = await withTimeout(db.collection('userData').doc(username).get());
+            if (!doc.exists) return null;
+            const data = doc.data();
+            const privacy = { ...DEFAULT_PRIVACY, ...(data.privacy || {}) };
+            const allV = Array.isArray(data.allVocabs) ? data.allVocabs : [];
+            const stats = computeProfileStats(allV);
+            const result = { username };
+            if (privacy.shareTotalVocabs) result.totalVocabs = stats.totalVocabs;
+            if (privacy.shareCorrectWrong) {
+                result.totalCorrect = stats.totalCorrect;
+                result.totalWrong = stats.totalWrong;
+                result.successRate = stats.successRate;
+            }
+            if (privacy.shareDirection) {
+                result.f2nCorrect = stats.f2nCorrect;
+                result.f2nWrong = stats.f2nWrong;
+                result.n2fCorrect = stats.n2fCorrect;
+                result.n2fWrong = stats.n2fWrong;
+            }
+            if (privacy.shareMastered) result.mastered = stats.mastered;
+            if (privacy.shareStreak) result.dailyStreak = data.dailyStreak || 0;
+            return result;
+        } catch (e) {
+            console.warn('Load friend stats failed:', e);
+            return null;
+        }
+    }
+
+    async function refreshFriends() {
+        await loadFriendsState();
+        renderFriendsLists();
+        // Preload friend stats
+        for (const f of friendsState.friends) {
+            loadFriendPublicStats(f).then(stats => {
+                if (stats) {
+                    friendStatsCache[f] = stats;
+                    renderFriendsLists();
+                }
+            });
+        }
+    }
+
+    function renderFriendsLists() {
+        const inEl = $('#friends-requests-in');
+        const outEl = $('#friends-requests-out');
+        const listEl = $('#friends-list');
+        if (!inEl || !outEl || !listEl) return;
+
+        $('#friends-requests-in-count').textContent = friendsState.requestsIn.length;
+        $('#friends-requests-out-count').textContent = friendsState.requestsOut.length;
+        $('#friends-list-count').textContent = friendsState.friends.length;
+
+        // Incoming
+        if (friendsState.requestsIn.length === 0) {
+            inEl.innerHTML = '<div class="friends-empty">Keine eingehenden Anfragen.</div>';
+        } else {
+            inEl.innerHTML = friendsState.requestsIn.map(u => `
+                <div class="friend-card">
+                    <div class="friend-card-header">
+                        <span class="friend-name">${escapeHtml(u)}</span>
+                        <div class="friend-actions">
+                            <button class="btn-accept" data-user="${escapeHtml(u)}">Annehmen</button>
+                            <button class="btn-decline" data-user="${escapeHtml(u)}">Ablehnen</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            inEl.querySelectorAll('.btn-accept').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    btn.disabled = true;
+                    const ok = await acceptFriendRequest(btn.dataset.user);
+                    if (ok) renderFriendsLists();
+                    else { alert('Fehler beim Annehmen.'); btn.disabled = false; }
+                });
+            });
+            inEl.querySelectorAll('.btn-decline').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    btn.disabled = true;
+                    const ok = await declineFriendRequest(btn.dataset.user);
+                    if (ok) renderFriendsLists();
+                    else { alert('Fehler.'); btn.disabled = false; }
+                });
+            });
+        }
+
+        // Outgoing
+        if (friendsState.requestsOut.length === 0) {
+            outEl.innerHTML = '<div class="friends-empty">Keine gesendeten Anfragen.</div>';
+        } else {
+            outEl.innerHTML = friendsState.requestsOut.map(u => `
+                <div class="friend-card">
+                    <div class="friend-card-header">
+                        <span class="friend-name">${escapeHtml(u)}</span>
+                        <div class="friend-actions">
+                            <button class="btn-remove" data-user="${escapeHtml(u)}">Zurückziehen</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            outEl.querySelectorAll('.btn-remove').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    btn.disabled = true;
+                    const ok = await cancelFriendRequest(btn.dataset.user);
+                    if (ok) renderFriendsLists();
+                    else { alert('Fehler.'); btn.disabled = false; }
+                });
+            });
+        }
+
+        // Friends
+        if (friendsState.friends.length === 0) {
+            listEl.innerHTML = '<div class="friends-empty">Noch keine Freunde.</div>';
+        } else {
+            listEl.innerHTML = friendsState.friends.map(u => {
+                const stats = friendStatsCache[u];
+                let statsHtml = '';
+                if (stats) {
+                    const parts = [];
+                    if (stats.totalVocabs != null) parts.push(`<div class="friend-stat"><div class="friend-stat-label">Vokabeln</div><div class="friend-stat-value">${stats.totalVocabs}</div></div>`);
+                    if (stats.mastered != null) parts.push(`<div class="friend-stat"><div class="friend-stat-label">Gemeistert</div><div class="friend-stat-value">${stats.mastered}</div></div>`);
+                    if (stats.successRate != null) parts.push(`<div class="friend-stat"><div class="friend-stat-label">Quote</div><div class="friend-stat-value">${stats.successRate}%</div></div>`);
+                    if (stats.totalCorrect != null) parts.push(`<div class="friend-stat"><div class="friend-stat-label">Richtig</div><div class="friend-stat-value">${stats.totalCorrect}</div></div>`);
+                    if (stats.totalWrong != null) parts.push(`<div class="friend-stat"><div class="friend-stat-label">Falsch</div><div class="friend-stat-value">${stats.totalWrong}</div></div>`);
+                    if (stats.dailyStreak != null) parts.push(`<div class="friend-stat"><div class="friend-stat-label">Streak</div><div class="friend-stat-value">${stats.dailyStreak}🔥</div></div>`);
+                    if (stats.f2nCorrect != null) parts.push(`<div class="friend-stat"><div class="friend-stat-label">Fremd→Dt</div><div class="friend-stat-value">${stats.f2nCorrect}/${stats.f2nCorrect + stats.f2nWrong}</div></div>`);
+                    if (stats.n2fCorrect != null) parts.push(`<div class="friend-stat"><div class="friend-stat-label">Dt→Fremd</div><div class="friend-stat-value">${stats.n2fCorrect}/${stats.n2fCorrect + stats.n2fWrong}</div></div>`);
+                    if (parts.length > 0) statsHtml = `<div class="friend-stats">${parts.join('')}</div>`;
+                    else statsHtml = `<div class="friend-stats"><div class="friends-empty">Dieser Freund teilt keine Statistiken.</div></div>`;
+                } else {
+                    statsHtml = '<div class="friend-stats"><div class="friends-empty">Lade Statistiken…</div></div>';
+                }
+                return `
+                    <div class="friend-card">
+                        <div class="friend-card-header">
+                            <span class="friend-name">${escapeHtml(u)}</span>
+                            <div class="friend-actions">
+                                <button class="btn-remove" data-user="${escapeHtml(u)}">Entfernen</button>
+                            </div>
+                        </div>
+                        ${statsHtml}
+                    </div>
+                `;
+            }).join('');
+            listEl.querySelectorAll('.btn-remove').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    if (!confirm(`Freundschaft mit ${btn.dataset.user} beenden?`)) return;
+                    btn.disabled = true;
+                    const ok = await removeFriend(btn.dataset.user);
+                    if (ok) renderFriendsLists();
+                    else { alert('Fehler.'); btn.disabled = false; }
+                });
+            });
+        }
+    }
+
+    function initFriends() {
+        const addBtn = $('#btn-send-friend-request');
+        const addInput = $('#friends-add-input');
+        const msgEl = $('#friends-add-msg');
+        const refreshBtn = $('#btn-refresh-friends');
+
+        function showMsg(text, type) {
+            if (!msgEl) return;
+            msgEl.textContent = text;
+            msgEl.className = `friends-add-msg ${type}`;
+            msgEl.classList.remove('hidden');
+            setTimeout(() => { msgEl.classList.add('hidden'); }, 4000);
+        }
+
+        if (addBtn) {
+            addBtn.addEventListener('click', async () => {
+                const target = addInput.value.trim();
+                if (!target) return;
+                addBtn.disabled = true;
+                const result = await sendFriendRequest(target);
+                addBtn.disabled = false;
+                showMsg(result.msg, result.ok ? 'success' : 'error');
+                if (result.ok) {
+                    addInput.value = '';
+                    renderFriendsLists();
+                }
+            });
+        }
+        if (addInput) {
+            addInput.addEventListener('keydown', e => {
+                if (e.key === 'Enter') addBtn?.click();
+            });
+        }
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => refreshFriends());
+        }
+    }
+
+    function initPrivacySettings() {
+        const fields = [
+            { id: 'privacy-total-vocabs', key: 'shareTotalVocabs' },
+            { id: 'privacy-correct-wrong', key: 'shareCorrectWrong' },
+            { id: 'privacy-direction', key: 'shareDirection' },
+            { id: 'privacy-streak', key: 'shareStreak' },
+            { id: 'privacy-mastered', key: 'shareMastered' }
+        ];
+        fields.forEach(f => {
+            const el = $(`#${f.id}`);
+            if (!el) return;
+            el.checked = privacySettings[f.key] !== false;
+            el.addEventListener('change', () => {
+                privacySettings[f.key] = el.checked;
+                savePrivacySettings();
+            });
+        });
     }
 
     function initSettings() {
