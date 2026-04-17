@@ -3420,8 +3420,16 @@ const App = (() => {
     let bestAnswerStreak = 0;
 
     // --- Auth: Password Hashing ---
-    async function hashPassword(password) {
-        // crypto.subtle nur in sicheren Kontexten (HTTPS, localhost, file://)
+    function hashFnv1a(password) {
+        let h = 0x811c9dc5;
+        for (let i = 0; i < password.length; i++) {
+            h ^= password.charCodeAt(i);
+            h = Math.imul(h, 0x01000193);
+        }
+        return 'fb' + (h >>> 0).toString(16).padStart(8, '0') + password.length.toString(16).padStart(2, '0');
+    }
+
+    async function hashSha256(password) {
         if (typeof crypto !== 'undefined' && crypto.subtle) {
             try {
                 const encoder = new TextEncoder();
@@ -3430,16 +3438,23 @@ const App = (() => {
                 const hashArray = Array.from(new Uint8Array(hashBuffer));
                 return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
             } catch (e) {
-                console.warn('crypto.subtle fehlgeschlagen:', e);
+                return null;
             }
         }
-        // Fallback: einfacher Hash fuer unsichere Kontexte (HTTP)
-        let h = 0x811c9dc5;
-        for (let i = 0; i < password.length; i++) {
-            h ^= password.charCodeAt(i);
-            h = Math.imul(h, 0x01000193);
-        }
-        return 'fb' + (h >>> 0).toString(16).padStart(8, '0') + password.length.toString(16).padStart(2, '0');
+        return null;
+    }
+
+    async function hashPassword(password) {
+        const sha = await hashSha256(password);
+        if (sha) return sha;
+        return hashFnv1a(password);
+    }
+
+    async function verifyPassword(password, storedHash) {
+        const sha = await hashSha256(password);
+        if (sha && sha === storedHash) return true;
+        if (hashFnv1a(password) === storedHash) return true;
+        return false;
     }
 
     // --- Cloud: Account-Funktionen ---
@@ -3690,13 +3705,17 @@ const App = (() => {
 
                 // Fallback: Cloud prüfen (mit Timeout)
                 if (cloudAvailable) {
-                    const cloudAccount = await getAccountFromCloud(savedUser);
-                    if (cloudAccount) {
-                        localAccounts[savedUser] = cloudAccount;
-                        saveAccounts(localAccounts);
-                        currentUser = savedUser;
-                        showApp();
-                        return;
+                    try {
+                        const cloudAccount = await getAccountFromCloud(savedUser);
+                        if (cloudAccount) {
+                            localAccounts[savedUser] = cloudAccount;
+                            saveAccounts(localAccounts);
+                            currentUser = savedUser;
+                            showApp();
+                            return;
+                        }
+                    } catch (e) {
+                        console.warn('Cloud auto-login fehlgeschlagen:', e);
                     }
                 }
             }
@@ -3729,10 +3748,11 @@ const App = (() => {
             // Zuerst LOKAL pruefen, dann Cloud (mit Timeout)
             const localAccounts = getAccounts();
             let account = localAccounts[loginKey] || null;
+            let cloudError = false;
 
             if (!account && cloudAvailable) {
                 try {
-                    const doc = await withTimeout(db.collection('accounts').doc(loginKey).get());
+                    const doc = await withTimeout(db.collection('accounts').doc(loginKey).get(), 8000);
                     if (doc.exists) {
                         account = doc.data();
                         localAccounts[loginKey] = account;
@@ -3740,20 +3760,34 @@ const App = (() => {
                     }
                 } catch (e) {
                     console.warn('Cloud-Login fehlgeschlagen:', e);
+                    cloudError = true;
                 }
             }
 
             if (!account) {
-                errorEl.textContent = 'Benutzername nicht gefunden.';
+                if (cloudError) {
+                    errorEl.textContent = 'Cloud nicht erreichbar — falls du dich zuvor auf einem anderen Gerät registriert hast, versuche es in ein paar Minuten erneut.';
+                } else {
+                    errorEl.textContent = 'Benutzername nicht gefunden.';
+                }
                 errorEl.classList.remove('hidden');
                 return;
             }
 
-            const hash = await hashPassword(password);
-            if (hash !== account.passwordHash) {
+            const passwordOk = await verifyPassword(password, account.passwordHash);
+            if (!passwordOk) {
                 errorEl.textContent = 'Falsches Passwort.';
                 errorEl.classList.remove('hidden');
                 return;
+            }
+
+            // Hash auf aktuellen Algorithmus migrieren falls noetig
+            const currentHash = await hashPassword(password);
+            if (currentHash !== account.passwordHash) {
+                account.passwordHash = currentHash;
+                if (cloudAvailable) {
+                    withTimeout(db.collection('accounts').doc(loginKey).update({ passwordHash: currentHash })).catch(() => {});
+                }
             }
 
             // Account lokal cachen
@@ -3915,7 +3949,7 @@ const App = (() => {
             allVocabs = JSON.parse(localStorage.getItem(userKey('allVocabs')) || '[]');
         }
         try {
-            loadStreakData();
+            await loadStreakData();
         } catch (e) {
             console.warn('Streak-Daten laden fehlgeschlagen:', e);
         }
@@ -3930,19 +3964,14 @@ const App = (() => {
     let appInitialized = false;
     function initAppModules() {
         if (!appInitialized) {
-            migrateData();
-            initNav();
-            initManualAdd();
-            initCards();
-            initWrite();
-            initQuiz();
-            initTest();
-            initList();
-            initProfile();
-            initFriends();
-            initPrivacySettings();
-            initFeedback();
-            initSettings();
+            const inits = [
+                migrateData, initNav, initManualAdd, initCards, initWrite,
+                initQuiz, initTest, initList, initProfile, initFriends,
+                initPrivacySettings, initFeedback, initSettings
+            ];
+            inits.forEach(fn => {
+                try { fn(); } catch (e) { console.warn(`Init ${fn.name} fehlgeschlagen:`, e); }
+            });
             appInitialized = true;
         } else {
             migrateData();
