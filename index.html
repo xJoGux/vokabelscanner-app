@@ -3786,7 +3786,7 @@ const App = (() => {
             if (currentHash !== account.passwordHash) {
                 account.passwordHash = currentHash;
                 if (cloudAvailable) {
-                    withTimeout(db.collection('accounts').doc(loginKey).update({ passwordHash: currentHash })).catch(() => {});
+                    withTimeout(db.collection('accounts').doc(loginKey).set({ passwordHash: currentHash }, { merge: true })).catch(() => {});
                 }
             }
 
@@ -3885,11 +3885,13 @@ const App = (() => {
             localAccounts[userKeyName] = accountData;
             saveAccounts(localAccounts);
 
-            // Cloud speichern (im Hintergrund)
+            // Cloud speichern — warten bis es klappt
             if (cloudAvailable) {
-                withTimeout(db.collection('accounts').doc(userKeyName).set(accountData)).catch(e => {
+                try {
+                    await withTimeout(db.collection('accounts').doc(userKeyName).set(accountData), 10000);
+                } catch (e) {
                     console.warn('Cloud-Registrierung fehlgeschlagen:', e);
-                });
+                }
             }
 
             currentUser = userKeyName;
@@ -6791,18 +6793,31 @@ const App = (() => {
             const newHash = await hashPassword(newPw);
             account.passwordHash = newHash;
 
-            localAccounts[currentUser] = account;
-            saveAccounts(localAccounts);
-
+            // Cloud ZUERST — warten bis es wirklich gespeichert ist
+            let cloudSaved = false;
             if (cloudAvailable) {
-                withTimeout(db.collection('accounts').doc(currentUser).update({ passwordHash: newHash })).catch(() => {});
+                try {
+                    await withTimeout(db.collection('accounts').doc(currentUser).set({ passwordHash: newHash }, { merge: true }), 10000);
+                    cloudSaved = true;
+                } catch (e) {
+                    console.warn('Cloud-Passwort-Update fehlgeschlagen:', e);
+                }
             }
 
+            // Dann lokal speichern
+            localAccounts[currentUser] = account;
+            saveAccounts(localAccounts);
             localStorage.setItem('vokabel_currentPassword', newPw);
+
             $('#password-change-form').classList.add('hidden');
             errorEl.classList.add('hidden');
             loadAccountInfo();
-            alert('Passwort erfolgreich geändert!');
+
+            if (cloudSaved) {
+                alert('Passwort erfolgreich geändert!');
+            } else {
+                alert('Passwort lokal geändert, aber Cloud-Sync fehlgeschlagen. Auf anderen Geräten gilt noch das alte Passwort — versuche es später erneut mit WLAN.');
+            }
         });
 
         $$('.theme-toggle-btn').forEach(btn => {
