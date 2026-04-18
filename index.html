@@ -6972,20 +6972,27 @@ const App = (() => {
                    status === 'offline' ? 'Firebase Cloud nicht erreichbar' : 'Prüfe Cloud-Verbindung...';
     }
 
-    async function checkCloudConnection() {
+    async function checkCloudConnection(retries) {
         if (!cloudAvailable) {
             updateCloudStatus('offline', 'Offline');
             return false;
         }
         updateCloudStatus('checking', '...');
-        try {
-            await withTimeout(db.collection('accounts').doc('__ping__').get(), 5000);
-            updateCloudStatus('online', 'Cloud');
-            return true;
-        } catch (e) {
-            updateCloudStatus('offline', 'Offline');
-            return false;
+        const maxRetries = retries || 3;
+        for (let i = 0; i < maxRetries; i++) {
+            try {
+                const docId = currentUser || '__ping__';
+                await withTimeout(db.collection('accounts').doc(docId).get(), 8000);
+                updateCloudStatus('online', 'Cloud');
+                return true;
+            } catch (e) {
+                if (i < maxRetries - 1) {
+                    await new Promise(r => setTimeout(r, 1500));
+                }
+            }
         }
+        updateCloudStatus('offline', 'Offline');
+        return false;
     }
 
     function initCloudTest() {
