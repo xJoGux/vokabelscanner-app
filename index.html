@@ -189,6 +189,59 @@ body {
     font-weight: 500;
 }
 
+.cloud-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+    cursor: default;
+}
+
+.cloud-status.online {
+    color: var(--success);
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.cloud-status.offline {
+    color: var(--danger);
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.cloud-status.checking {
+    color: var(--warning);
+    background: rgba(245, 158, 11, 0.1);
+}
+
+.cloud-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.cloud-test-section {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--bg);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+}
+
+.cloud-test-section h4 {
+    margin-bottom: 0.5rem;
+}
+
+.cloud-test-result {
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
 header {
     padding: 0;
 }
@@ -2763,6 +2816,10 @@ header h1 {
                     </div>
                 </div>
                 <div class="header-user">
+                    <span id="cloud-status" class="cloud-status checking" title="Cloud-Status wird geprüft...">
+                        <span class="cloud-status-dot"></span>
+                        <span id="cloud-status-text">...</span>
+                    </span>
                     <span id="current-user" class="current-user-name"></span>
                     <button id="btn-logout" class="btn btn-secondary btn-sm">Abmelden</button>
                 </div>
@@ -3269,6 +3326,12 @@ header h1 {
                         <span>Gemeisterte Vokabeln</span>
                     </label>
                 </div>
+                <div class="setting-group cloud-test-section">
+                    <h4>Cloud-Status</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Teste ob die Firebase-Verbindung funktioniert.</p>
+                    <button id="btn-test-cloud" class="btn btn-secondary btn-small">Cloud-Verbindung testen</button>
+                    <div id="cloud-test-result" class="cloud-test-result hidden"></div>
+                </div>
                 <div class="setting-group danger-zone">
                     <h4>Gefahrenzone</h4>
                     <button id="btn-clear-all" class="btn btn-danger">Alle Vokabeln löschen</button>
@@ -3695,15 +3758,23 @@ const App = (() => {
         try {
             const savedUser = localStorage.getItem('vokabel_currentUser');
             if (savedUser) {
-                // Prüfe zuerst LOKAL
                 const localAccounts = getAccounts();
                 if (localAccounts[savedUser]) {
                     currentUser = savedUser;
                     showApp();
+                    // Im Hintergrund Cloud-Account synchronisieren (z.B. geändertes Passwort)
+                    if (cloudAvailable) {
+                        getAccountFromCloud(savedUser).then(cloudAcc => {
+                            if (cloudAcc) {
+                                const la = getAccounts();
+                                la[savedUser] = cloudAcc;
+                                saveAccounts(la);
+                            }
+                        }).catch(() => {});
+                    }
                     return;
                 }
 
-                // Fallback: Cloud prüfen (mit Timeout)
                 if (cloudAvailable) {
                     try {
                         const cloudAccount = await getAccountFromCloud(savedUser);
@@ -3737,31 +3808,35 @@ const App = (() => {
             return;
         }
 
-        // Visuelles Feedback
         loginBtn.disabled = true;
         loginBtn.textContent = 'Anmelden...';
         errorEl.classList.add('hidden');
 
         try {
             const loginKey = username.toLowerCase();
-
-            // Zuerst LOKAL pruefen, dann Cloud (mit Timeout)
             const localAccounts = getAccounts();
             let account = localAccounts[loginKey] || null;
+            let cloudAccount = null;
             let cloudError = false;
 
-            if (!account && cloudAvailable) {
+            // IMMER Cloud prüfen für aktuellsten Stand (z.B. Passwort auf anderem Gerät geändert)
+            if (cloudAvailable) {
                 try {
                     const doc = await withTimeout(db.collection('accounts').doc(loginKey).get(), 8000);
                     if (doc.exists) {
-                        account = doc.data();
-                        localAccounts[loginKey] = account;
-                        saveAccounts(localAccounts);
+                        cloudAccount = doc.data();
                     }
                 } catch (e) {
                     console.warn('Cloud-Login fehlgeschlagen:', e);
                     cloudError = true;
                 }
+            }
+
+            // Cloud hat Vorrang (enthält neueste Daten, z.B. geändertes Passwort)
+            if (cloudAccount) {
+                account = cloudAccount;
+                localAccounts[loginKey] = account;
+                saveAccounts(localAccounts);
             }
 
             if (!account) {
@@ -3774,23 +3849,33 @@ const App = (() => {
                 return;
             }
 
-            const passwordOk = await verifyPassword(password, account.passwordHash);
+            // Passwort prüfen (versucht SHA-256 und FNV-1a)
+            let passwordOk = await verifyPassword(password, account.passwordHash);
+
+            // Falls Cloud nicht erreichbar war und lokaler Check fehlschlägt, Hinweis geben
+            if (!passwordOk && cloudError) {
+                errorEl.textContent = 'Falsches Passwort. Cloud nicht erreichbar — falls du das Passwort auf einem anderen Gerät geändert hast, prüfe deine Internetverbindung und versuche es erneut.';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
             if (!passwordOk) {
                 errorEl.textContent = 'Falsches Passwort.';
                 errorEl.classList.remove('hidden');
                 return;
             }
 
-            // Hash auf aktuellen Algorithmus migrieren falls noetig
+            // Hash auf aktuellen Algorithmus migrieren falls nötig
             const currentHash = await hashPassword(password);
             if (currentHash !== account.passwordHash) {
                 account.passwordHash = currentHash;
+                localAccounts[loginKey] = account;
+                saveAccounts(localAccounts);
                 if (cloudAvailable) {
                     withTimeout(db.collection('accounts').doc(loginKey).set({ passwordHash: currentHash }, { merge: true })).catch(() => {});
                 }
             }
 
-            // Account lokal cachen
             localAccounts[loginKey] = account;
             saveAccounts(localAccounts);
 
@@ -3799,13 +3884,9 @@ const App = (() => {
             localStorage.setItem('vokabel_currentPassword', password);
             showApp();
 
-            // Cloud-Sync im Hintergrund (nicht blockierend)
-            if (cloudAvailable) {
-                withTimeout(db.collection('accounts').doc(loginKey).get()).then(cloudDoc => {
-                    if (!cloudDoc.exists) {
-                        db.collection('accounts').doc(loginKey).set(account).catch(() => {});
-                    }
-                }).catch(() => {});
+            // Account in Cloud anlegen falls noch nicht vorhanden
+            if (cloudAvailable && !cloudAccount) {
+                db.collection('accounts').doc(loginKey).set(account).catch(() => {});
             }
         } catch (e) {
             console.error('Login-Fehler:', e);
@@ -3961,6 +4042,7 @@ const App = (() => {
             console.warn('Freunde laden fehlgeschlagen:', e);
         }
         initAppModules();
+        checkCloudConnection();
     }
 
     let appInitialized = false;
@@ -3969,7 +4051,7 @@ const App = (() => {
             const inits = [
                 migrateData, initNav, initManualAdd, initCards, initWrite,
                 initQuiz, initTest, initList, initProfile, initFriends,
-                initPrivacySettings, initFeedback, initSettings
+                initPrivacySettings, initFeedback, initSettings, initCloudTest
             ];
             inits.forEach(fn => {
                 try { fn(); } catch (e) { console.warn(`Init ${fn.name} fehlgeschlagen:`, e); }
@@ -6877,6 +6959,102 @@ const App = (() => {
 
             alert('Dein Account wurde vollständig gelöscht.');
             location.reload();
+        });
+    }
+
+    function updateCloudStatus(status, text) {
+        const el = $('#cloud-status');
+        const textEl = $('#cloud-status-text');
+        if (!el || !textEl) return;
+        el.className = 'cloud-status ' + status;
+        textEl.textContent = text;
+        el.title = status === 'online' ? 'Firebase Cloud verbunden' :
+                   status === 'offline' ? 'Firebase Cloud nicht erreichbar' : 'Prüfe Cloud-Verbindung...';
+    }
+
+    async function checkCloudConnection() {
+        if (!cloudAvailable) {
+            updateCloudStatus('offline', 'Offline');
+            return false;
+        }
+        updateCloudStatus('checking', '...');
+        try {
+            await withTimeout(db.collection('accounts').doc('__ping__').get(), 5000);
+            updateCloudStatus('online', 'Cloud');
+            return true;
+        } catch (e) {
+            updateCloudStatus('offline', 'Offline');
+            return false;
+        }
+    }
+
+    function initCloudTest() {
+        const btn = $('#btn-test-cloud');
+        if (!btn) return;
+        btn.addEventListener('click', async () => {
+            const resultEl = $('#cloud-test-result');
+            resultEl.classList.remove('hidden');
+            resultEl.style.background = 'rgba(245, 158, 11, 0.1)';
+            resultEl.style.color = 'var(--warning)';
+            resultEl.textContent = 'Teste Verbindung...';
+            btn.disabled = true;
+
+            const results = [];
+            const t0 = Date.now();
+
+            // Test 1: Firebase SDK geladen?
+            results.push('Firebase SDK: ' + (typeof firebase !== 'undefined' ? 'OK' : 'FEHLT'));
+            results.push('cloudAvailable: ' + cloudAvailable);
+            results.push('db: ' + (db ? 'OK' : 'NULL'));
+
+            if (!cloudAvailable || !db) {
+                resultEl.style.background = 'rgba(239, 68, 68, 0.1)';
+                resultEl.style.color = 'var(--danger)';
+                resultEl.textContent = results.join('\n') + '\n\nFirebase ist nicht initialisiert!';
+                btn.disabled = false;
+                return;
+            }
+
+            // Test 2: Lesen
+            try {
+                const doc = await withTimeout(db.collection('accounts').doc(currentUser).get(), 8000);
+                results.push('Cloud-Lesen: OK (' + (Date.now() - t0) + 'ms)');
+                if (doc.exists) {
+                    const d = doc.data();
+                    results.push('Account in Cloud: JA');
+                    results.push('Cloud-Hash: ' + (d.passwordHash ? d.passwordHash.substring(0, 12) + '...' : 'FEHLT'));
+                } else {
+                    results.push('Account in Cloud: NEIN (nicht gefunden!)');
+                }
+            } catch (e) {
+                results.push('Cloud-Lesen: FEHLER — ' + e.message);
+            }
+
+            // Test 3: Lokaler Hash-Vergleich
+            const localAccounts = getAccounts();
+            const localAcc = localAccounts[currentUser];
+            if (localAcc) {
+                results.push('Lokal-Hash: ' + (localAcc.passwordHash ? localAcc.passwordHash.substring(0, 12) + '...' : 'FEHLT'));
+            } else {
+                results.push('Lokaler Account: FEHLT');
+            }
+
+            // Test 4: Schreiben
+            try {
+                const t1 = Date.now();
+                await withTimeout(db.collection('accounts').doc(currentUser).set({ lastTest: new Date().toISOString() }, { merge: true }), 8000);
+                results.push('Cloud-Schreiben: OK (' + (Date.now() - t1) + 'ms)');
+            } catch (e) {
+                results.push('Cloud-Schreiben: FEHLER — ' + e.message);
+            }
+
+            const allOk = !results.some(r => r.includes('FEHLER') || r.includes('FEHLT') || r.includes('NULL'));
+            resultEl.style.background = allOk ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)';
+            resultEl.style.color = allOk ? 'var(--success)' : 'var(--danger)';
+            resultEl.textContent = results.join('\n');
+            btn.disabled = false;
+
+            checkCloudConnection();
         });
     }
 
