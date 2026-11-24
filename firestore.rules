@@ -1,0 +1,134 @@
+rules_version = '2';
+// Sicherheitsregeln für MemoryDeck
+// Grundsatz: Jeder darf nur seine eigenen Daten lesen und ändern.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+    // Benutzername des angemeldeten Kontos (aus der internen Login-Adresse)
+    function myName() {
+      return request.auth.token.email.split('@')[0];
+    }
+    function emailIs(name) {
+      return signedIn() && request.auth.token.email == name + '@memorydeck.app';
+    }
+    // Gehört der Benutzername "name" dem angemeldeten Konto? (Login-Adresse UND fest verknüpfter Name)
+    function owns(name) {
+      return emailIs(name)
+        && exists(/databases/$(database)/documents/usernames/$(name))
+        && get(/databases/$(database)/documents/usernames/$(name)).data.uid == request.auth.uid;
+    }
+    function legacyExists(name) {
+      return exists(/databases/$(database)/documents/accounts/$(name));
+    }
+    function isAdmin() {
+      return signedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+    function pair(a, b) {
+      return a < b ? a + '_' + b : b + '_' + a;
+    }
+
+    // Benutzername -> Konto. Einmal vergeben, nicht übertragbar.
+    match /usernames/{name} {
+      allow get: if signedIn();
+      allow create: if emailIs(name)
+        && request.resource.data.keys().hasOnly(['uid'])
+        && request.resource.data.uid == request.auth.uid
+        && (
+          // neues Konto
+          (!legacyExists(name) && name != 'admin' && name.matches('^[a-z0-9._-]{3,20}$'))
+          // altes Konto, dessen Passwort beim Umzug bewiesen wurde
+          || (exists(/databases/$(database)/documents/migrations/$(name))
+              && get(/databases/$(database)/documents/migrations/$(name)).data.uid == request.auth.uid)
+        );
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+    }
+
+    // Admin-Liste: wird nur in der Firebase-Konsole gepflegt
+    match /admins/{uid} {
+      allow get: if signedIn() && request.auth.uid == uid;
+    }
+
+    // Öffentliche Profile (nur Name + Erstellungsdatum) für Freundesvorschläge
+    match /profiles/{name} {
+      allow read: if signedIn();
+      allow create, update: if owns(name) && request.resource.data.keys().hasOnly(['created']);
+      allow delete: if owns(name);
+    }
+
+    // Zuletzt online: schreiben nur selbst, lesen nur Admin
+    match /presence/{name} {
+      allow read: if isAdmin();
+      allow write: if owns(name) && request.resource.data.keys().hasOnly(['lastSeen']);
+      allow delete: if owns(name);
+    }
+
+    // Eigene Vokabeln, Streaks, Einstellungen: nur der Besitzer
+    match /userData/{name} {
+      allow read, write: if owns(name);
+    }
+
+    // Freigegebene Statistik: Besitzer schreibt, Freunde lesen
+    match /publicStats/{name} {
+      allow write: if owns(name);
+      allow read: if owns(name)
+        || (signedIn() && exists(/databases/$(database)/documents/friendships/$(pair(name, myName()))));
+    }
+
+    // Freundschaftsanfragen: Dokument-ID = von_an
+    match /friendRequests/{id} {
+      allow read: if signedIn()
+        && (resource.data.fromUid == request.auth.uid || resource.data.toUid == request.auth.uid);
+      allow create: if owns(request.resource.data.from)
+        && id == request.resource.data.from + '_' + request.resource.data.to
+        && request.resource.data.fromUid == request.auth.uid
+        && exists(/databases/$(database)/documents/usernames/$(request.resource.data.to))
+        && get(/databases/$(database)/documents/usernames/$(request.resource.data.to)).data.uid == request.resource.data.toUid;
+      allow delete: if signedIn()
+        && (resource.data.fromUid == request.auth.uid || resource.data.toUid == request.auth.uid);
+    }
+
+    // Freundschaften: nur der Empfänger einer offenen Anfrage darf sie anlegen
+    match /friendships/{id} {
+      allow read: if signedIn() && request.auth.uid in resource.data.memberUids;
+      allow create: if signedIn()
+        && request.auth.uid in request.resource.data.memberUids
+        && exists(/databases/$(database)/documents/friendRequests/$(request.resource.data.requestId))
+        && get(/databases/$(database)/documents/friendRequests/$(request.resource.data.requestId)).data.toUid == request.auth.uid
+        && get(/databases/$(database)/documents/friendRequests/$(request.resource.data.requestId)).data.fromUid in request.resource.data.memberUids
+        && get(/databases/$(database)/documents/friendRequests/$(request.resource.data.requestId)).data.from in request.resource.data.members
+        && get(/databases/$(database)/documents/friendRequests/$(request.resource.data.requestId)).data.to in request.resource.data.members
+        && request.resource.data.members.size() == 2
+        && id == pair(request.resource.data.members[0], request.resource.data.members[1]);
+      allow delete: if signedIn() && request.auth.uid in resource.data.memberUids;
+    }
+
+    // Feedback: alle Angemeldeten lesen, eigenes anlegen und löschen,
+    // bei fremden Beiträgen nur Likes und Kommentare ändern
+    match /feedback/{id} {
+      allow read: if signedIn();
+      allow create: if owns(request.resource.data.author);
+      allow update: if signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes', 'comments']);
+      allow delete: if owns(resource.data.author) || isAdmin();
+    }
+
+    // Umzug alter Konten: nur wer das alte Passwort kennt, kann den Beweis anlegen.
+    // Niemand kann diese Sammlung lesen.
+    match /migrations/{name} {
+      allow create: if emailIs(name)
+        && legacyExists(name)
+        && request.resource.data.keys().hasOnly(['uid', 'proof'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.proof == get(/databases/$(database)/documents/accounts/$(name)).data.passwordHash;
+    }
+
+    // Alte Sammlung mit Passwort-Daten: niemand kann lesen,
+    // nur der umgezogene Besitzer darf seinen alten Eintrag löschen
+    match /accounts/{name} {
+      allow delete: if owns(name);
+    }
+  }
+}

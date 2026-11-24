@@ -439,6 +439,7 @@ header h1 {
 .manual-vocab-row .vocab-word,
 .manual-vocab-row .vocab-translation {
     flex: 1;
+    min-width: 0;
     padding: 0.5rem 0.75rem;
     border: 1px solid var(--border);
     border-radius: 8px;
@@ -2647,6 +2648,42 @@ header h1 {
     font-style: italic;
 }
 
+/* --- Admin --- */
+.admin-summary {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin: 0.5rem 0 1rem;
+}
+.admin-stat {
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    min-width: 120px;
+}
+.admin-stat b {
+    display: block;
+    font-size: 1.5rem;
+}
+.admin-list {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+.admin-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.6rem 0.75rem;
+    background: var(--bg);
+    border-radius: 8px;
+}
+.admin-row .admin-online {
+    color: var(--success);
+    font-weight: 600;
+}
+
 /* --- Utility --- */
 .hidden {
     display: none !important;
@@ -2662,9 +2699,21 @@ header h1 {
         font-size: 1.4rem;
     }
 
+    #main-nav {
+        -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent);
+        mask-image: linear-gradient(90deg, #000 85%, transparent);
+        scrollbar-width: none;
+    }
+
+    #main-nav::-webkit-scrollbar {
+        display: none;
+    }
+
     .nav-btn {
-        font-size: 0.75rem;
-        padding: 0.5rem 0.25rem;
+        flex: none;
+        font-size: 0.95rem;
+        padding: 0.75rem 0.9rem;
+        min-height: 44px;
     }
 
     .card-word {
@@ -2770,6 +2819,10 @@ header h1 {
                     <label for="login-password">Passwort</label>
                     <input type="password" id="login-password" placeholder="Passwort eingeben" autocomplete="current-password">
                 </div>
+                <div id="login-newpw-wrap" class="auth-field hidden">
+                    <label for="login-newpw">Neues Passwort (mindestens 6 Zeichen)</label>
+                    <input type="password" id="login-newpw" placeholder="Neues Passwort wählen" autocomplete="new-password">
+                </div>
                 <div id="login-error" class="auth-error hidden"></div>
                 <button id="btn-login" class="btn btn-primary auth-btn">Anmelden</button>
                 <p class="auth-switch">Noch kein Konto? <a href="#" id="show-register">Registrieren</a></p>
@@ -2837,6 +2890,7 @@ header h1 {
             <button class="nav-btn" data-view="friends">Freunde</button>
             <button class="nav-btn" data-view="feedback">Feedback</button>
             <button class="nav-btn" data-view="settings">Einstellungen</button>
+            <button class="nav-btn hidden" data-view="admin">Admin</button>
         </nav>
 
         <!-- ADD VOCAB VIEW -->
@@ -3267,6 +3321,16 @@ header h1 {
             </div>
         </section>
 
+        <!-- ADMIN VIEW (nur für das Admin-Konto sichtbar) -->
+        <section id="view-admin" class="view">
+            <div class="settings-form">
+                <h3>Nutzerübersicht</h3>
+                <div id="admin-summary" class="admin-summary"></div>
+                <button id="btn-admin-refresh" class="btn btn-secondary btn-small">Aktualisieren</button>
+                <div id="admin-list" class="admin-list"></div>
+            </div>
+        </section>
+
         <!-- SETTINGS VIEW -->
         <section id="view-settings" class="view">
             <div class="settings-form">
@@ -3279,13 +3343,14 @@ header h1 {
                     </div>
                     <div class="account-detail">
                         <label>Passwort:</label>
-                        <input type="password" id="settings-password" class="account-value-password" value="" readonly>
-                        <button id="btn-toggle-password" class="btn btn-small">Anzeigen</button>
+                        <span class="account-value">••••••</span>
                         <button id="btn-change-password" class="btn btn-small">Ändern</button>
                     </div>
                     <div id="password-change-form" class="hidden">
+                        <label>Aktuelles Passwort:</label>
+                        <input type="password" id="settings-current-password" placeholder="Aktuelles Passwort" autocomplete="current-password">
                         <label>Neues Passwort:</label>
-                        <input type="password" id="settings-new-password" placeholder="Neues Passwort (min. 4 Zeichen)">
+                        <input type="password" id="settings-new-password" placeholder="Neues Passwort (min. 6 Zeichen)" autocomplete="new-password">
                         <label>Neues Passwort bestätigen:</label>
                         <input type="password" id="settings-new-password-confirm" placeholder="Neues Passwort bestätigen">
                         <div id="password-change-error" class="error-msg hidden"></div>
@@ -3421,6 +3486,7 @@ header h1 {
 
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script>
 // ============================================================
 // MemoryDeck - Main Application
@@ -3452,12 +3518,14 @@ const App = (() => {
     };
 
     let db = null;
+    let auth = null;
     let cloudAvailable = false;
 
     try {
         if (typeof firebase !== 'undefined' && firebaseConfig.apiKey !== 'DEIN_API_KEY') {
             firebase.initializeApp(firebaseConfig);
             db = firebase.firestore();
+            auth = firebase.auth();
             cloudAvailable = true;
         }
     } catch (e) {
@@ -3482,8 +3550,80 @@ const App = (() => {
     let answerStreak = 0;
     let bestAnswerStreak = 0;
 
-    // --- Auth: Password Hashing ---
-    function hashFnv1a(password) {
+    // --- Auth: Hilfsfunktionen (Firebase Authentication) ---
+    // Benutzernamen werden intern als E-Mail-Adresse an Firebase gegeben.
+    // Die Adresse existiert nicht und bekommt nie Post.
+    const AUTH_EMAIL_DOMAIN = 'memorydeck.app';
+    const ADMIN_NAME = 'admin';
+    let isAdminSession = false;
+
+    function usernameToEmail(name) {
+        return `${name.toLowerCase()}@${AUTH_EMAIL_DOMAIN}`;
+    }
+
+    function emailToUsername(email) {
+        return (email || '').split('@')[0].toLowerCase();
+    }
+
+    // Nur Kleinbuchstaben, Zahlen, Punkt, Unterstrich, Bindestrich (3 bis 20 Zeichen)
+    function isValidUsername(name) {
+        return /^[a-z0-9._-]{3,20}$/.test(name);
+    }
+
+    function authErrorText(e) {
+        const code = (e && e.code) || '';
+        if (code.includes('invalid-credential') || code.includes('wrong-password') || code.includes('user-not-found') || code.includes('invalid-login-credentials')) {
+            return 'Benutzername oder Passwort ist falsch.';
+        }
+        if (code.includes('email-already-in-use')) return 'Benutzername ist bereits vergeben.';
+        if (code.includes('weak-password')) return 'Passwort muss mindestens 6 Zeichen lang sein.';
+        if (code.includes('too-many-requests')) return 'Zu viele Versuche. Bitte warte kurz und versuche es dann erneut.';
+        if (code.includes('network-request-failed')) return 'Keine Internetverbindung. Bitte prüfe dein WLAN.';
+        if (code.includes('requires-recent-login')) return 'Bitte melde dich kurz ab und wieder an und versuche es dann erneut.';
+        return 'Ein Fehler ist aufgetreten. Bitte versuche es erneut.';
+    }
+
+    // Zuletzt-online-Zeit für den Admin-Bereich (nur der Admin kann sie lesen)
+    function touchPresence() {
+        if (!cloudAvailable || !currentUser || isAdminSession) return;
+        db.collection('presence').doc(currentUser).set({
+            lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true }).catch(() => {});
+    }
+
+    // Öffentliche Freundes-Statistik: enthält nur, was in den Privatsphäre-Einstellungen freigegeben ist
+    function publishPublicStats() {
+        if (!cloudAvailable || !currentUser || isAdminSession) return;
+        try {
+            const privacy = { ...DEFAULT_PRIVACY, ...privacySettings };
+            const stats = computeProfileStats(allVocabs);
+            const out = { updated: new Date().toISOString() };
+            if (privacy.shareTotalVocabs) out.totalVocabs = stats.totalVocabs;
+            if (privacy.shareCorrectWrong) {
+                out.totalCorrect = stats.totalCorrect;
+                out.totalWrong = stats.totalWrong;
+                out.successRate = stats.successRate;
+            }
+            if (privacy.shareDirection) {
+                out.f2nCorrect = stats.f2nCorrect;
+                out.f2nWrong = stats.f2nWrong;
+                out.n2fCorrect = stats.n2fCorrect;
+                out.n2fWrong = stats.n2fWrong;
+            }
+            if (privacy.shareMastered) out.mastered = stats.mastered;
+            if (privacy.shareStreak) out.dailyStreak = dailyStreak || 0;
+            db.collection('publicStats').doc(currentUser).set(out).catch(() => {});
+        } catch (e) {
+            console.warn('Statistik veröffentlichen fehlgeschlagen:', e);
+        }
+    }
+
+    function pairId(a, b) {
+        return a < b ? `${a}_${b}` : `${b}_${a}`;
+    }
+
+    // Alte Passwort-Prüfsummen (nur für den einmaligen Umzug alter Konten)
+    function legacyHashFnv1a(password) {
         let h = 0x811c9dc5;
         for (let i = 0; i < password.length; i++) {
             h ^= password.charCodeAt(i);
@@ -3492,54 +3632,14 @@ const App = (() => {
         return 'fb' + (h >>> 0).toString(16).padStart(8, '0') + password.length.toString(16).padStart(2, '0');
     }
 
-    async function hashSha256(password) {
-        if (typeof crypto !== 'undefined' && crypto.subtle) {
-            try {
-                const encoder = new TextEncoder();
-                const data = encoder.encode(password);
-                const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-                const hashArray = Array.from(new Uint8Array(hashBuffer));
-                return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-            } catch (e) {
-                return null;
-            }
-        }
-        return null;
+    async function legacyHashSha256(password) {
+        const data = new TextEncoder().encode(password);
+        const buf = await crypto.subtle.digest('SHA-256', data);
+        return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
-    async function hashPassword(password) {
-        const sha = await hashSha256(password);
-        if (sha) return sha;
-        return hashFnv1a(password);
-    }
-
-    async function verifyPassword(password, storedHash) {
-        const sha = await hashSha256(password);
-        if (sha && sha === storedHash) return true;
-        if (hashFnv1a(password) === storedHash) return true;
-        return false;
-    }
-
-    // --- Cloud: Account-Funktionen ---
-    async function getAccountFromCloud(username) {
-        if (!cloudAvailable) return null;
-        try {
-            const doc = await withTimeout(db.collection('accounts').doc(username).get());
-            return doc.exists ? doc.data() : null;
-        } catch (e) {
-            console.warn('Cloud-Abfrage fehlgeschlagen:', e);
-            return null;
-        }
-    }
-
-    async function saveAccountToCloud(username, accountData) {
-        if (!cloudAvailable) return;
-        try {
-            await db.collection('accounts').doc(username).set(accountData);
-        } catch (e) {
-            console.warn('Cloud-Speicherung fehlgeschlagen:', e);
-        }
-    }
+    // Während Registrierung oder Umzug öffnet die App sich erst, wenn alles fertig ist
+    let authBusy = false;
 
     async function saveToCloud() {
         if (!cloudAvailable || !currentUser) return;
@@ -3550,6 +3650,7 @@ const App = (() => {
                 allVocabs,
                 lastUpdated: new Date().toISOString()
             }, { merge: true }), 8000);
+            publishPublicStats();
         } catch (e) {
             console.warn('Cloud-Sync fehlgeschlagen:', e);
         }
@@ -3676,14 +3777,11 @@ const App = (() => {
         }
     }
 
-    // --- Local Account-Funktionen (Fallback) ---
-    function getAccounts() {
-        return JSON.parse(localStorage.getItem('vokabel_accounts') || '{}');
-    }
-
-    function saveAccounts(accounts) {
-        localStorage.setItem('vokabel_accounts', JSON.stringify(accounts));
-    }
+    // Alte lokale Konten (mit Passwort-Daten) werden nicht mehr benutzt und entfernt
+    try {
+        localStorage.removeItem('vokabel_accounts');
+        localStorage.removeItem('vokabel_currentPassword');
+    } catch (e) {}
 
     // --- Auth: User-scoped storage keys ---
     function userKey(key) {
@@ -3754,235 +3852,177 @@ const App = (() => {
 
         $('#btn-logout').addEventListener('click', handleLogout);
 
-        // Check if already logged in
-        try {
-            const savedUser = localStorage.getItem('vokabel_currentUser');
-            if (savedUser) {
-                const localAccounts = getAccounts();
-                if (localAccounts[savedUser]) {
-                    currentUser = savedUser;
-                    showApp();
-                    // Im Hintergrund Cloud-Account synchronisieren (z.B. geändertes Passwort)
-                    if (cloudAvailable) {
-                        getAccountFromCloud(savedUser).then(cloudAcc => {
-                            if (cloudAcc) {
-                                const la = getAccounts();
-                                la[savedUser] = cloudAcc;
-                                saveAccounts(la);
-                            }
-                        }).catch(() => {});
-                    }
-                    return;
-                }
-
-                if (cloudAvailable) {
-                    try {
-                        const cloudAccount = await getAccountFromCloud(savedUser);
-                        if (cloudAccount) {
-                            localAccounts[savedUser] = cloudAccount;
-                            saveAccounts(localAccounts);
-                            currentUser = savedUser;
-                            showApp();
-                            return;
-                        }
-                    } catch (e) {
-                        console.warn('Cloud auto-login fehlgeschlagen:', e);
-                    }
-                }
-            }
-        } catch (e) {
-            console.warn('Auto-Login fehlgeschlagen:', e);
+        // Angemeldet bleiben übernimmt Firebase selbst
+        if (!cloudAvailable || !auth) {
+            showAuth();
+            $('#login-error').textContent = 'Keine Verbindung zum Server. Bitte lade die Seite neu, sobald du Internet hast.';
+            $('#login-error').classList.remove('hidden');
+            return;
         }
-        showAuth();
+        auth.onAuthStateChanged(user => {
+            if (authBusy) return;
+            if (user) {
+                const name = emailToUsername(user.email);
+                if (currentUser === name && !$('#app').classList.contains('hidden')) return;
+                currentUser = name;
+                isAdminSession = (name === ADMIN_NAME);
+                localStorage.setItem('vokabel_currentUser', currentUser);
+                showApp();
+            } else {
+                currentUser = null;
+                showAuth();
+            }
+        });
+    }
+
+    function openSession(user) {
+        const name = emailToUsername(user.email);
+        currentUser = name;
+        isAdminSession = (name === ADMIN_NAME);
+        localStorage.setItem('vokabel_currentUser', currentUser);
+        showApp();
     }
 
     async function handleLogin() {
-        const username = $('#login-username').value.trim();
+        const username = $('#login-username').value.trim().toLowerCase();
         const password = $('#login-password').value;
+        const newPwWrap = $('#login-newpw-wrap');
+        const newPw = newPwWrap.classList.contains('hidden') ? '' : $('#login-newpw').value;
         const errorEl = $('#login-error');
         const loginBtn = $('#btn-login');
+        const fail = msg => { errorEl.textContent = msg; errorEl.classList.remove('hidden'); };
 
-        if (!username || !password) {
-            errorEl.textContent = 'Bitte Benutzername und Passwort eingeben.';
-            errorEl.classList.remove('hidden');
-            return;
-        }
+        if (!username || !password) return fail('Bitte Benutzername und Passwort eingeben.');
+        if (!cloudAvailable || !auth) return fail('Keine Verbindung zum Server. Bitte prüfe dein Internet.');
 
         loginBtn.disabled = true;
         loginBtn.textContent = 'Anmelden...';
         errorEl.classList.add('hidden');
 
         try {
-            const loginKey = username.toLowerCase();
-            const localAccounts = getAccounts();
-            let account = localAccounts[loginKey] || null;
-            let cloudAccount = null;
-            let cloudError = false;
-
-            // IMMER Cloud prüfen für aktuellsten Stand (z.B. Passwort auf anderem Gerät geändert)
-            if (cloudAvailable) {
-                try {
-                    const doc = await withTimeout(db.collection('accounts').doc(loginKey).get(), 8000);
-                    if (doc.exists) {
-                        cloudAccount = doc.data();
-                    }
-                } catch (e) {
-                    console.warn('Cloud-Login fehlgeschlagen:', e);
-                    cloudError = true;
-                }
-            }
-
-            // Cloud hat Vorrang (enthält neueste Daten, z.B. geändertes Passwort)
-            if (cloudAccount) {
-                account = cloudAccount;
-                localAccounts[loginKey] = account;
-                saveAccounts(localAccounts);
-            }
-
-            if (!account) {
-                if (cloudError) {
-                    errorEl.textContent = 'Cloud nicht erreichbar — falls du dich zuvor auf einem anderen Gerät registriert hast, versuche es in ein paar Minuten erneut.';
-                } else {
-                    errorEl.textContent = 'Benutzername nicht gefunden.';
-                }
-                errorEl.classList.remove('hidden');
-                return;
-            }
-
-            // Passwort prüfen (versucht SHA-256 und FNV-1a)
-            let passwordOk = await verifyPassword(password, account.passwordHash);
-
-            // Falls Cloud nicht erreichbar war und lokaler Check fehlschlägt, Hinweis geben
-            if (!passwordOk && cloudError) {
-                errorEl.textContent = 'Falsches Passwort. Cloud nicht erreichbar — falls du das Passwort auf einem anderen Gerät geändert hast, prüfe deine Internetverbindung und versuche es erneut.';
-                errorEl.classList.remove('hidden');
-                return;
-            }
-
-            if (!passwordOk) {
-                errorEl.textContent = 'Falsches Passwort.';
-                errorEl.classList.remove('hidden');
-                return;
-            }
-
-            // Hash auf aktuellen Algorithmus migrieren falls nötig
-            const currentHash = await hashPassword(password);
-            if (currentHash !== account.passwordHash) {
-                account.passwordHash = currentHash;
-                localAccounts[loginKey] = account;
-                saveAccounts(localAccounts);
-                if (cloudAvailable) {
-                    withTimeout(db.collection('accounts').doc(loginKey).set({ passwordHash: currentHash }, { merge: true })).catch(() => {});
-                }
-            }
-
-            localAccounts[loginKey] = account;
-            saveAccounts(localAccounts);
-
-            currentUser = loginKey;
-            localStorage.setItem('vokabel_currentUser', currentUser);
-            localStorage.setItem('vokabel_currentPassword', password);
-            showApp();
-
-            // Account in Cloud anlegen falls noch nicht vorhanden
-            if (cloudAvailable && !cloudAccount) {
-                db.collection('accounts').doc(loginKey).set(account).catch(() => {});
-            }
+            await auth.signInWithEmailAndPassword(usernameToEmail(username), password);
+            // onAuthStateChanged öffnet die App
         } catch (e) {
-            console.error('Login-Fehler:', e);
-            errorEl.textContent = 'Ein Fehler ist aufgetreten. Bitte versuche es erneut.';
-            errorEl.classList.remove('hidden');
+            const code = (e && e.code) || '';
+            const notFound = code.includes('invalid-credential') || code.includes('user-not-found') || code.includes('invalid-login-credentials') || code.includes('wrong-password');
+            if (!notFound) {
+                fail(authErrorText(e));
+            } else {
+                // Vielleicht ein altes Konto: einmalig umziehen
+                const res = await migrateLegacyAccount(username, password, newPw);
+                if (res === 'needNewPw') {
+                    newPwWrap.classList.remove('hidden');
+                    fail('Willkommen zurück! Dein altes Passwort ist für das neue, sichere Login zu kurz. Bitte wähle unten ein neues mit mindestens 6 Zeichen und drück nochmal auf Anmelden.');
+                    $('#login-newpw').focus();
+                } else if (res === 'shortNewPw') {
+                    fail('Das neue Passwort muss mindestens 6 Zeichen lang sein.');
+                } else if (res !== 'ok') {
+                    fail('Benutzername oder Passwort ist falsch.');
+                } else {
+                    newPwWrap.classList.add('hidden');
+                    $('#login-newpw').value = '';
+                }
+            }
         } finally {
             loginBtn.disabled = false;
             loginBtn.textContent = 'Anmelden';
         }
     }
 
+    // Altes Konto (vor dem Sicherheits-Update) auf das neue Login umziehen.
+    // Die Datenbank-Regeln prüfen dabei selbst, ob das alte Passwort stimmt.
+    async function migrateLegacyAccount(username, password, newPw) {
+        if (password.length < 6 && !newPw) return 'needNewPw';
+        if (newPw && newPw.length < 6) return 'shortNewPw';
+        const finalPw = newPw || password;
+        const candidates = [];
+        try { candidates.push(await legacyHashSha256(password)); } catch (e) {}
+        candidates.push(legacyHashFnv1a(password));
+
+        authBusy = true;
+        let cred = null;
+        try {
+            cred = await auth.createUserWithEmailAndPassword(usernameToEmail(username), finalPw);
+        } catch (e) {
+            authBusy = false;
+            return 'fail';
+        }
+        const uid = cred.user.uid;
+        let proven = false;
+        for (const proof of candidates) {
+            try {
+                await db.collection('migrations').doc(username).set({ uid, proof });
+                proven = true;
+                break;
+            } catch (e) {}
+        }
+        if (!proven) {
+            try { await cred.user.delete(); } catch (e) { await auth.signOut().catch(() => {}); }
+            authBusy = false;
+            return 'fail';
+        }
+        try {
+            await db.collection('usernames').doc(username).set({ uid });
+            await db.collection('profiles').doc(username).set({ created: new Date().toISOString() });
+            // Alte Freunde wieder verbinden: Anfragen an alle, die schon umgezogen sind
+            try {
+                const ud = await db.collection('userData').doc(username).get();
+                const oldFriends = ud.exists && Array.isArray(ud.data().friends) ? ud.data().friends : [];
+                for (const f of oldFriends) {
+                    const fUid = await getUidForUsername(f);
+                    if (!fUid) continue;
+                    await db.collection('friendRequests').doc(`${username}_${f}`).set({
+                        from: username, to: f, fromUid: uid, toUid: fUid, created: new Date().toISOString()
+                    }).catch(() => {});
+                }
+            } catch (e) {}
+            await db.collection('accounts').doc(username).delete().catch(() => {});
+        } catch (e) {
+            console.warn('Umzug unvollständig:', e);
+        }
+        authBusy = false;
+        openSession(cred.user);
+        return 'ok';
+    }
+
     async function handleRegister() {
-        const username = $('#register-username').value.trim();
+        const username = $('#register-username').value.trim().toLowerCase();
         const password = $('#register-password').value;
         const passwordConfirm = $('#register-password-confirm').value;
         const errorEl = $('#register-error');
         const registerBtn = $('#btn-register');
 
-        if (!username || !password) {
-            errorEl.textContent = 'Bitte alle Felder ausfüllen.';
-            errorEl.classList.remove('hidden');
-            return;
-        }
+        const fail = msg => { errorEl.textContent = msg; errorEl.classList.remove('hidden'); };
 
-        if (username.length < 3) {
-            errorEl.textContent = 'Benutzername muss mindestens 3 Zeichen lang sein.';
-            errorEl.classList.remove('hidden');
-            return;
-        }
+        if (!username || !password) return fail('Bitte alle Felder ausfüllen.');
+        if (!isValidUsername(username)) return fail('Benutzername: 3 bis 20 Zeichen, nur Kleinbuchstaben, Zahlen, Punkt, Unterstrich oder Bindestrich.');
+        if (username === ADMIN_NAME) return fail('Benutzername ist bereits vergeben.');
+        if (password.length < 6) return fail('Passwort muss mindestens 6 Zeichen lang sein.');
+        if (password !== passwordConfirm) return fail('Passwörter stimmen nicht überein.');
+        if (!cloudAvailable || !auth) return fail('Keine Verbindung zum Server. Bitte prüfe dein Internet.');
 
-        if (password.length < 4) {
-            errorEl.textContent = 'Passwort muss mindestens 4 Zeichen lang sein.';
-            errorEl.classList.remove('hidden');
-            return;
-        }
-
-        if (password !== passwordConfirm) {
-            errorEl.textContent = 'Passwörter stimmen nicht überein.';
-            errorEl.classList.remove('hidden');
-            return;
-        }
-
-        // Visuelles Feedback
         registerBtn.disabled = true;
         registerBtn.textContent = 'Konto wird erstellt...';
         errorEl.classList.add('hidden');
 
+        let cred = null;
+        authBusy = true;
         try {
-            const userKeyName = username.toLowerCase();
-
-            // Zuerst LOKAL pruefen
-            const localAccounts = getAccounts();
-            if (localAccounts[userKeyName]) {
-                errorEl.textContent = 'Benutzername ist bereits vergeben.';
-                errorEl.classList.remove('hidden');
-                return;
-            }
-
-            // Dann Cloud pruefen (mit Timeout, nicht blockierend falls offline)
-            if (cloudAvailable) {
-                const cloudAccount = await getAccountFromCloud(userKeyName);
-                if (cloudAccount) {
-                    errorEl.textContent = 'Benutzername ist bereits vergeben.';
-                    errorEl.classList.remove('hidden');
-                    return;
-                }
-            }
-
-            const hash = await hashPassword(password);
-            const accountData = {
-                username: username,
-                passwordHash: hash,
-                created: new Date().toISOString()
-            };
-
-            // Lokal speichern (sofort)
-            localAccounts[userKeyName] = accountData;
-            saveAccounts(localAccounts);
-
-            // Cloud speichern — warten bis es klappt
-            if (cloudAvailable) {
-                try {
-                    await withTimeout(db.collection('accounts').doc(userKeyName).set(accountData), 10000);
-                } catch (e) {
-                    console.warn('Cloud-Registrierung fehlgeschlagen:', e);
-                }
-            }
-
-            currentUser = userKeyName;
-            localStorage.setItem('vokabel_currentUser', currentUser);
-            localStorage.setItem('vokabel_currentPassword', password);
-            showApp();
+            cred = await auth.createUserWithEmailAndPassword(usernameToEmail(username), password);
+            const uid = cred.user.uid;
+            // Benutzernamen fest an dieses Konto binden
+            await db.collection('usernames').doc(username).set({ uid });
+            await db.collection('profiles').doc(username).set({ created: new Date().toISOString() });
+            authBusy = false;
+            openSession(cred.user);
         } catch (e) {
-            console.error('Registrierung-Fehler:', e);
-            errorEl.textContent = 'Ein Fehler ist aufgetreten. Bitte versuche es erneut.';
-            errorEl.classList.remove('hidden');
+            authBusy = false;
+            console.warn('Registrierung fehlgeschlagen:', e);
+            // Halb angelegtes Konto wieder entfernen
+            if (cred && cred.user) {
+                try { await cred.user.delete(); } catch (e2) {}
+            }
+            fail(String((e && e.code) || '').includes('permission-denied') ? 'Benutzername ist bereits vergeben.' : authErrorText(e));
         } finally {
             registerBtn.disabled = false;
             registerBtn.textContent = 'Konto erstellen';
@@ -3990,9 +4030,10 @@ const App = (() => {
     }
 
     function handleLogout() {
+        if (auth) auth.signOut().catch(() => {});
         currentUser = null;
+        isAdminSession = false;
         localStorage.removeItem('vokabel_currentUser');
-        localStorage.removeItem('vokabel_currentPassword');
         lernsets = [];
         vocabSets = [];
         allVocabs = [];
@@ -4018,10 +4059,17 @@ const App = (() => {
         $('#auth-screen').classList.add('hidden');
         $('#app').classList.remove('hidden');
 
-        // Username anzeigen - zuerst lokal (sofort)
-        const localAccounts = getAccounts();
-        const localAccount = localAccounts[currentUser];
-        $('#current-user').textContent = localAccount?.username || currentUser;
+        $('#current-user').textContent = currentUser;
+
+        if (isAdminSession) {
+            showAdminOnly();
+            return;
+        }
+        $$('.nav-btn').forEach(b => b.classList.remove('hidden'));
+        const adminBtn = $('.nav-btn[data-view="admin"]');
+        if (adminBtn) adminBtn.classList.add('hidden');
+        if ($('.header-streaks')) $('.header-streaks').classList.remove('hidden');
+        touchPresence();
 
         try {
             await loadUserData();
@@ -4044,6 +4092,71 @@ const App = (() => {
         initAppModules();
         checkCloudConnection();
     }
+
+    // --- Admin-Bereich ---
+    let adminInitialized = false;
+    function showAdminOnly() {
+        $$('.nav-btn').forEach(b => b.classList.toggle('hidden', b.dataset.view !== 'admin'));
+        $$('.view').forEach(v => v.classList.remove('active'));
+        $('#view-admin').classList.add('active');
+        $$('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.view === 'admin'));
+        $('.header-streaks') && $('.header-streaks').classList.add('hidden');
+        if (!adminInitialized) {
+            $('#btn-admin-refresh').addEventListener('click', loadAdminOverview);
+            adminInitialized = true;
+        }
+        loadAdminOverview();
+        checkCloudConnection();
+    }
+
+    function timeAgo(date) {
+        if (!date) return 'noch nie';
+        const min = Math.floor((Date.now() - date.getTime()) / 60000);
+        if (min < 5) return 'gerade online';
+        if (min < 60) return `vor ${min} Min.`;
+        const h = Math.floor(min / 60);
+        if (h < 24) return `vor ${h} Std.`;
+        const d = Math.floor(h / 24);
+        return d === 1 ? 'gestern' : `vor ${d} Tagen`;
+    }
+
+    async function loadAdminOverview() {
+        const sumEl = $('#admin-summary');
+        const listEl = $('#admin-list');
+        listEl.innerHTML = '<div class="friends-empty">Lade…</div>';
+        try {
+            const [profiles, presence] = await Promise.all([
+                withTimeout(db.collection('profiles').get(), 10000),
+                withTimeout(db.collection('presence').get(), 10000)
+            ]);
+            const last = {};
+            presence.docs.forEach(d => { const t = d.data().lastSeen; last[d.id] = t && t.toDate ? t.toDate() : null; });
+            const users = profiles.docs.map(d => d.id).filter(u => u !== ADMIN_NAME)
+                .map(u => ({ u, t: last[u] || null }))
+                .sort((a, b) => (b.t ? b.t.getTime() : 0) - (a.t ? a.t.getTime() : 0));
+            const now = Date.now();
+            const online = users.filter(x => x.t && now - x.t.getTime() < 5 * 60000).length;
+            const today = users.filter(x => x.t && now - x.t.getTime() < 24 * 3600000).length;
+            const week = users.filter(x => x.t && now - x.t.getTime() < 7 * 24 * 3600000).length;
+            sumEl.innerHTML = `
+                <div class="admin-stat"><b>${users.length}</b>Nutzer gesamt</div>
+                <div class="admin-stat"><b>${online}</b>gerade online</div>
+                <div class="admin-stat"><b>${today}</b>heute aktiv</div>
+                <div class="admin-stat"><b>${week}</b>diese Woche aktiv</div>`;
+            listEl.innerHTML = users.length ? users.map(x => `
+                <div class="admin-row">
+                    <span>${escapeHtml(x.u)}</span>
+                    <span class="${x.t && now - x.t.getTime() < 5 * 60000 ? 'admin-online' : ''}" title="${x.t ? escapeHtml(x.t.toLocaleString('de-DE')) : ''}">${escapeHtml(timeAgo(x.t))}</span>
+                </div>`).join('') : '<div class="friends-empty">Noch keine Nutzer.</div>';
+        } catch (e) {
+            console.warn('Admin-Übersicht fehlgeschlagen:', e);
+            listEl.innerHTML = '<div class="friends-empty">Konnte nicht geladen werden. Bist du als Admin angemeldet?</div>';
+        }
+    }
+
+    // Zuletzt-online regelmäßig aktualisieren, solange die App offen ist
+    setInterval(() => { if (document.visibilityState === 'visible') touchPresence(); }, 2 * 60000);
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') touchPresence(); });
 
     let appInitialized = false;
     function initAppModules() {
@@ -4086,6 +4199,7 @@ const App = (() => {
                 const view = btn.dataset.view;
                 $$('.nav-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
+                btn.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
                 $$('.view').forEach(v => v.classList.remove('active'));
                 $(`#view-${view}`).classList.add('active');
 
@@ -4159,6 +4273,7 @@ const App = (() => {
                 answerStreak,
                 bestAnswerStreak
             }, { merge: true })).catch(() => {});
+            publishPublicStats();
         }
     }
 
@@ -5836,31 +5951,7 @@ const App = (() => {
 
     // --- Settings ---
     async function loadAccountInfo() {
-        const localAccounts = getAccounts();
-        let account = localAccounts[currentUser];
-        $('#settings-username').textContent = account?.username || currentUser;
-
-        const savedPw = localStorage.getItem('vokabel_currentPassword');
-        const pwField = $('#settings-password');
-        const toggleBtn = $('#btn-toggle-password');
-        if (savedPw) {
-            pwField.value = savedPw;
-            pwField.placeholder = '';
-            pwField.type = 'password';
-            if (toggleBtn) {
-                toggleBtn.disabled = false;
-                toggleBtn.textContent = 'Anzeigen';
-            }
-        } else {
-            // Kein zwischengespeichertes Passwort — Feld leer, Toggle deaktiviert
-            pwField.value = '';
-            pwField.type = 'text';
-            pwField.placeholder = 'Nicht gespeichert — melde dich neu an, um es anzuzeigen';
-            if (toggleBtn) {
-                toggleBtn.disabled = true;
-                toggleBtn.textContent = 'Anzeigen';
-            }
-        }
+        $('#settings-username').textContent = currentUser || '';
     }
 
     // --- Feedback ---
@@ -6252,34 +6343,36 @@ const App = (() => {
     let friendStatsCache = {};
 
     async function loadFriendsState() {
-        if (!cloudAvailable || !currentUser) return;
+        if (!cloudAvailable || !currentUser || !auth || !auth.currentUser) return;
+        const uid = auth.currentUser.uid;
         try {
             const doc = await withTimeout(db.collection('userData').doc(currentUser).get());
-            if (doc.exists) {
-                const data = doc.data();
-                friendsState.friends = Array.isArray(data.friends) ? data.friends : [];
-                friendsState.requestsIn = Array.isArray(data.friendRequestsIn) ? data.friendRequestsIn : [];
-                friendsState.requestsOut = Array.isArray(data.friendRequestsOut) ? data.friendRequestsOut : [];
-                if (data.privacy) {
-                    privacySettings = { ...DEFAULT_PRIVACY, ...data.privacy };
-                }
+            if (doc.exists && doc.data().privacy) {
+                privacySettings = { ...DEFAULT_PRIVACY, ...doc.data().privacy };
             }
+        } catch (e) {
+            console.warn('Privacy load failed:', e);
+        }
+        try {
+            const [fs, inc, out] = await Promise.all([
+                withTimeout(db.collection('friendships').where('memberUids', 'array-contains', uid).get()),
+                withTimeout(db.collection('friendRequests').where('toUid', '==', uid).get()),
+                withTimeout(db.collection('friendRequests').where('fromUid', '==', uid).get())
+            ]);
+            friendsState.friends = fs.docs.map(d => (d.data().members || []).find(m => m !== currentUser)).filter(Boolean);
+            friendsState.requestsIn = inc.docs.map(d => d.data().from).filter(u => u && !friendsState.friends.includes(u));
+            friendsState.requestsOut = out.docs.map(d => d.data().to).filter(u => u && !friendsState.friends.includes(u));
+            // Angenommene Anfragen von mir aufräumen
+            out.docs.forEach(d => {
+                if (friendsState.friends.includes(d.data().to)) d.ref.delete().catch(() => {});
+            });
         } catch (e) {
             console.warn('Friends load failed:', e);
         }
     }
 
     async function saveFriendsState() {
-        if (!cloudAvailable || !currentUser) return;
-        try {
-            await withTimeout(db.collection('userData').doc(currentUser).set({
-                friends: friendsState.friends,
-                friendRequestsIn: friendsState.requestsIn,
-                friendRequestsOut: friendsState.requestsOut
-            }, { merge: true }));
-        } catch (e) {
-            console.warn('Friends save failed:', e);
-        }
+        // Freundschaften liegen jetzt in eigenen Sammlungen (friendships, friendRequests)
     }
 
     async function savePrivacySettings() {
@@ -6288,46 +6381,43 @@ const App = (() => {
             await withTimeout(db.collection('userData').doc(currentUser).set({
                 privacy: privacySettings
             }, { merge: true }));
+            publishPublicStats();
         } catch (e) {
             console.warn('Privacy save failed:', e);
         }
     }
 
-    async function userExistsInCloud(username) {
-        if (!cloudAvailable) return false;
+    async function getUidForUsername(username) {
+        if (!cloudAvailable) return null;
         try {
-            const doc = await withTimeout(db.collection('accounts').doc(username).get());
-            if (doc.exists) return true;
-            const doc2 = await withTimeout(db.collection('userData').doc(username).get());
-            return doc2.exists;
+            const doc = await withTimeout(db.collection('usernames').doc(username).get());
+            return doc.exists ? doc.data().uid : null;
         } catch (e) {
-            return false;
+            return null;
         }
     }
 
     async function sendFriendRequest(targetUser) {
         if (!cloudAvailable || !currentUser) return { ok: false, msg: 'Keine Cloud-Verbindung.' };
+        targetUser = (targetUser || '').trim().toLowerCase();
         if (!targetUser) return { ok: false, msg: 'Benutzername fehlt.' };
         if (targetUser === currentUser) return { ok: false, msg: 'Du kannst dir nicht selbst eine Anfrage schicken.' };
         if (friendsState.friends.includes(targetUser)) return { ok: false, msg: 'Ihr seid bereits befreundet.' };
         if (friendsState.requestsOut.includes(targetUser)) return { ok: false, msg: 'Anfrage wurde bereits gesendet.' };
-        if (friendsState.requestsIn.includes(targetUser)) return { ok: false, msg: 'Diese Person hat dir bereits eine Anfrage geschickt — akzeptiere sie einfach.' };
+        if (friendsState.requestsIn.includes(targetUser)) return { ok: false, msg: 'Diese Person hat dir bereits eine Anfrage geschickt. Nimm sie einfach an.' };
 
-        const exists = await userExistsInCloud(targetUser);
-        if (!exists) return { ok: false, msg: `Benutzer "${targetUser}" existiert nicht.` };
+        const targetUid = (targetUser === ADMIN_NAME) ? null : await getUidForUsername(targetUser);
+        if (!targetUid) return { ok: false, msg: `Benutzer "${targetUser}" existiert nicht.` };
 
         try {
-            // Add to target's requestsIn
-            const targetRef = db.collection('userData').doc(targetUser);
-            const targetDoc = await withTimeout(targetRef.get());
-            const targetData = targetDoc.exists ? targetDoc.data() : {};
-            const targetIn = Array.isArray(targetData.friendRequestsIn) ? [...targetData.friendRequestsIn] : [];
-            if (!targetIn.includes(currentUser)) targetIn.push(currentUser);
-            await withTimeout(targetRef.set({ friendRequestsIn: targetIn }, { merge: true }));
-
-            // Add to own requestsOut
+            await withTimeout(db.collection('friendRequests').doc(`${currentUser}_${targetUser}`).set({
+                from: currentUser,
+                to: targetUser,
+                fromUid: auth.currentUser.uid,
+                toUid: targetUid,
+                created: new Date().toISOString()
+            }));
             friendsState.requestsOut.push(targetUser);
-            await saveFriendsState();
             return { ok: true, msg: `Anfrage an ${targetUser} gesendet.` };
         } catch (e) {
             console.warn('Send request failed:', e);
@@ -6338,18 +6428,17 @@ const App = (() => {
     async function acceptFriendRequest(fromUser) {
         if (!cloudAvailable || !currentUser) return false;
         try {
-            // Add both to friends, remove from requests
-            const fromRef = db.collection('userData').doc(fromUser);
-            const fromDoc = await withTimeout(fromRef.get());
-            const fromData = fromDoc.exists ? fromDoc.data() : {};
-            const fromFriends = Array.isArray(fromData.friends) ? [...fromData.friends] : [];
-            const fromOut = Array.isArray(fromData.friendRequestsOut) ? fromData.friendRequestsOut.filter(u => u !== currentUser) : [];
-            if (!fromFriends.includes(currentUser)) fromFriends.push(currentUser);
-            await withTimeout(fromRef.set({ friends: fromFriends, friendRequestsOut: fromOut }, { merge: true }));
-
+            const fromUid = await getUidForUsername(fromUser);
+            if (!fromUid) return false;
+            await withTimeout(db.collection('friendships').doc(pairId(currentUser, fromUser)).set({
+                members: [currentUser, fromUser],
+                memberUids: [auth.currentUser.uid, fromUid],
+                requestId: `${fromUser}_${currentUser}`,
+                created: new Date().toISOString()
+            }));
+            await withTimeout(db.collection('friendRequests').doc(`${fromUser}_${currentUser}`).delete());
             if (!friendsState.friends.includes(fromUser)) friendsState.friends.push(fromUser);
             friendsState.requestsIn = friendsState.requestsIn.filter(u => u !== fromUser);
-            await saveFriendsState();
             return true;
         } catch (e) {
             console.warn('Accept failed:', e);
@@ -6360,14 +6449,8 @@ const App = (() => {
     async function declineFriendRequest(fromUser) {
         if (!cloudAvailable || !currentUser) return false;
         try {
-            const fromRef = db.collection('userData').doc(fromUser);
-            const fromDoc = await withTimeout(fromRef.get());
-            const fromData = fromDoc.exists ? fromDoc.data() : {};
-            const fromOut = Array.isArray(fromData.friendRequestsOut) ? fromData.friendRequestsOut.filter(u => u !== currentUser) : [];
-            await withTimeout(fromRef.set({ friendRequestsOut: fromOut }, { merge: true }));
-
+            await withTimeout(db.collection('friendRequests').doc(`${fromUser}_${currentUser}`).delete());
             friendsState.requestsIn = friendsState.requestsIn.filter(u => u !== fromUser);
-            await saveFriendsState();
             return true;
         } catch (e) {
             console.warn('Decline failed:', e);
@@ -6378,14 +6461,8 @@ const App = (() => {
     async function cancelFriendRequest(toUser) {
         if (!cloudAvailable || !currentUser) return false;
         try {
-            const toRef = db.collection('userData').doc(toUser);
-            const toDoc = await withTimeout(toRef.get());
-            const toData = toDoc.exists ? toDoc.data() : {};
-            const toIn = Array.isArray(toData.friendRequestsIn) ? toData.friendRequestsIn.filter(u => u !== currentUser) : [];
-            await withTimeout(toRef.set({ friendRequestsIn: toIn }, { merge: true }));
-
+            await withTimeout(db.collection('friendRequests').doc(`${currentUser}_${toUser}`).delete());
             friendsState.requestsOut = friendsState.requestsOut.filter(u => u !== toUser);
-            await saveFriendsState();
             return true;
         } catch (e) {
             console.warn('Cancel failed:', e);
@@ -6396,15 +6473,9 @@ const App = (() => {
     async function removeFriend(username) {
         if (!cloudAvailable || !currentUser) return false;
         try {
-            const otherRef = db.collection('userData').doc(username);
-            const otherDoc = await withTimeout(otherRef.get());
-            const otherData = otherDoc.exists ? otherDoc.data() : {};
-            const otherFriends = Array.isArray(otherData.friends) ? otherData.friends.filter(u => u !== currentUser) : [];
-            await withTimeout(otherRef.set({ friends: otherFriends }, { merge: true }));
-
+            await withTimeout(db.collection('friendships').doc(pairId(currentUser, username)).delete());
             friendsState.friends = friendsState.friends.filter(u => u !== username);
             delete friendStatsCache[username];
-            await saveFriendsState();
             return true;
         } catch (e) {
             console.warn('Remove friend failed:', e);
@@ -6415,27 +6486,12 @@ const App = (() => {
     async function loadFriendPublicStats(username) {
         if (!cloudAvailable) return null;
         try {
-            const doc = await withTimeout(db.collection('userData').doc(username).get());
-            if (!doc.exists) return null;
-            const data = doc.data();
-            const privacy = { ...DEFAULT_PRIVACY, ...(data.privacy || {}) };
-            const allV = Array.isArray(data.allVocabs) ? data.allVocabs : [];
-            const stats = computeProfileStats(allV);
+            const doc = await withTimeout(db.collection('publicStats').doc(username).get());
             const result = { username };
-            if (privacy.shareTotalVocabs) result.totalVocabs = stats.totalVocabs;
-            if (privacy.shareCorrectWrong) {
-                result.totalCorrect = stats.totalCorrect;
-                result.totalWrong = stats.totalWrong;
-                result.successRate = stats.successRate;
-            }
-            if (privacy.shareDirection) {
-                result.f2nCorrect = stats.f2nCorrect;
-                result.f2nWrong = stats.f2nWrong;
-                result.n2fCorrect = stats.n2fCorrect;
-                result.n2fWrong = stats.n2fWrong;
-            }
-            if (privacy.shareMastered) result.mastered = stats.mastered;
-            if (privacy.shareStreak) result.dailyStreak = data.dailyStreak || 0;
+            if (!doc.exists) return result;
+            const d = doc.data();
+            ['totalVocabs', 'totalCorrect', 'totalWrong', 'successRate', 'f2nCorrect', 'f2nWrong', 'n2fCorrect', 'n2fWrong', 'mastered', 'dailyStreak']
+                .forEach(k => { if (d[k] !== undefined) result[k] = d[k]; });
             return result;
         } catch (e) {
             console.warn('Load friend stats failed:', e);
@@ -6448,8 +6504,8 @@ const App = (() => {
     async function loadFriendSuggestions() {
         if (!cloudAvailable || !currentUser) return [];
         try {
-            const snap = await withTimeout(db.collection('accounts').get());
-            const allUsers = snap.docs.map(d => d.id).filter(u => u && u !== currentUser);
+            const snap = await withTimeout(db.collection('profiles').limit(200).get());
+            const allUsers = snap.docs.map(d => d.id).filter(u => u && u !== currentUser && u !== ADMIN_NAME);
             // Ausschliessen: schon befreundet oder Anfrage offen
             const excluded = new Set([
                 ...friendsState.friends,
@@ -6812,22 +6868,10 @@ const App = (() => {
         // Account-Info anzeigen
         loadAccountInfo();
 
-        // Passwort anzeigen/verbergen
-        $('#btn-toggle-password').addEventListener('click', () => {
-            const pwField = $('#settings-password');
-            const btn = $('#btn-toggle-password');
-            if (pwField.type === 'password') {
-                pwField.type = 'text';
-                btn.textContent = 'Verbergen';
-            } else {
-                pwField.type = 'password';
-                btn.textContent = 'Anzeigen';
-            }
-        });
-
         // Passwort ändern
         $('#btn-change-password').addEventListener('click', () => {
             $('#password-change-form').classList.toggle('hidden');
+            $('#settings-current-password').value = '';
             $('#settings-new-password').value = '';
             $('#settings-new-password-confirm').value = '';
             $('#password-change-error').classList.add('hidden');
@@ -6838,67 +6882,27 @@ const App = (() => {
         });
 
         $('#btn-save-password').addEventListener('click', async () => {
+            const curPw = $('#settings-current-password').value;
             const newPw = $('#settings-new-password').value;
             const newPwConfirm = $('#settings-new-password-confirm').value;
             const errorEl = $('#password-change-error');
+            const fail = msg => { errorEl.textContent = msg; errorEl.classList.remove('hidden'); };
 
-            if (!newPw || !newPwConfirm) {
-                errorEl.textContent = 'Bitte alle Felder ausfüllen.';
-                errorEl.classList.remove('hidden');
-                return;
-            }
+            if (!curPw || !newPw || !newPwConfirm) return fail('Bitte alle Felder ausfüllen.');
+            if (newPw.length < 6) return fail('Neues Passwort muss mindestens 6 Zeichen lang sein.');
+            if (newPw !== newPwConfirm) return fail('Neue Passwörter stimmen nicht überein.');
+            if (!auth || !auth.currentUser) return fail('Keine Verbindung zum Server.');
 
-            if (newPw.length < 4) {
-                errorEl.textContent = 'Neues Passwort muss mindestens 4 Zeichen lang sein.';
-                errorEl.classList.remove('hidden');
-                return;
-            }
-
-            if (newPw !== newPwConfirm) {
-                errorEl.textContent = 'Neue Passwörter stimmen nicht überein.';
-                errorEl.classList.remove('hidden');
-                return;
-            }
-
-            const localAccounts = getAccounts();
-            let account = localAccounts[currentUser];
-            if (!account) {
-                account = await getAccountFromCloud(currentUser);
-            }
-            if (!account) {
-                errorEl.textContent = 'Account nicht gefunden.';
-                errorEl.classList.remove('hidden');
-                return;
-            }
-
-            // Neues Passwort speichern
-            const newHash = await hashPassword(newPw);
-            account.passwordHash = newHash;
-
-            // Cloud ZUERST — warten bis es wirklich gespeichert ist
-            let cloudSaved = false;
-            if (cloudAvailable) {
-                try {
-                    await withTimeout(db.collection('accounts').doc(currentUser).set({ passwordHash: newHash }, { merge: true }), 10000);
-                    cloudSaved = true;
-                } catch (e) {
-                    console.warn('Cloud-Passwort-Update fehlgeschlagen:', e);
-                }
-            }
-
-            // Dann lokal speichern
-            localAccounts[currentUser] = account;
-            saveAccounts(localAccounts);
-            localStorage.setItem('vokabel_currentPassword', newPw);
-
-            $('#password-change-form').classList.add('hidden');
-            errorEl.classList.add('hidden');
-            loadAccountInfo();
-
-            if (cloudSaved) {
-                alert('Passwort erfolgreich geändert!');
-            } else {
-                alert('Passwort lokal geändert, aber Cloud-Sync fehlgeschlagen. Auf anderen Geräten gilt noch das alte Passwort — versuche es später erneut mit WLAN.');
+            try {
+                const cred = firebase.auth.EmailAuthProvider.credential(auth.currentUser.email, curPw);
+                await auth.currentUser.reauthenticateWithCredential(cred);
+                await auth.currentUser.updatePassword(newPw);
+                $('#password-change-form').classList.add('hidden');
+                errorEl.classList.add('hidden');
+                showNotice('Passwort geändert.');
+            } catch (e) {
+                console.warn('Passwort ändern fehlgeschlagen:', e);
+                fail(authErrorText(e));
             }
         });
 
@@ -6933,26 +6937,36 @@ const App = (() => {
             }
 
             const deletedUser = currentUser;
+            const user = auth && auth.currentUser;
+            if (!user) { alert('Keine Verbindung zum Server.'); return; }
+            const uid = user.uid;
+
+            try {
+                // Cloud-Daten löschen
+                const [fs, inc, out] = await Promise.all([
+                    db.collection('friendships').where('memberUids', 'array-contains', uid).get(),
+                    db.collection('friendRequests').where('toUid', '==', uid).get(),
+                    db.collection('friendRequests').where('fromUid', '==', uid).get()
+                ]);
+                await Promise.all([...fs.docs, ...inc.docs, ...out.docs].map(d => d.ref.delete().catch(() => {})));
+                await Promise.all(['userData', 'publicStats', 'presence', 'profiles'].map(c =>
+                    db.collection(c).doc(deletedUser).delete().catch(() => {})));
+                await db.collection('usernames').doc(deletedUser).delete().catch(() => {});
+                await user.delete();
+            } catch (e) {
+                console.warn('Account löschen fehlgeschlagen:', e);
+                alert(authErrorText(e));
+                return;
+            }
 
             // Lokale Daten löschen
             localStorage.removeItem(userKey('lernsets'));
             localStorage.removeItem(userKey('vocabSets'));
             localStorage.removeItem(userKey('allVocabs'));
 
-            const localAccounts = getAccounts();
-            delete localAccounts[deletedUser];
-            saveAccounts(localAccounts);
-
-            // Cloud-Daten löschen (nicht blockierend)
-            if (cloudAvailable) {
-                withTimeout(db.collection('userData').doc(deletedUser).delete()).catch(() => {});
-                withTimeout(db.collection('accounts').doc(deletedUser).delete()).catch(() => {});
-            }
-
             // Ausloggen
             currentUser = null;
             localStorage.removeItem('vokabel_currentUser');
-            localStorage.removeItem('vokabel_currentPassword');
             lernsets = [];
             vocabSets = [];
             allVocabs = [];
@@ -6981,8 +6995,11 @@ const App = (() => {
         const maxRetries = retries || 3;
         for (let i = 0; i < maxRetries; i++) {
             try {
-                const docId = currentUser || '__ping__';
-                await withTimeout(db.collection('accounts').doc(docId).get(), 8000);
+                if (isAdminSession) {
+                    await withTimeout(db.collection('presence').limit(1).get(), 8000);
+                } else {
+                    await withTimeout(db.collection('userData').doc(currentUser).get(), 8000);
+                }
                 updateCloudStatus('online', 'Cloud');
                 return true;
             } catch (e) {
@@ -7022,34 +7039,21 @@ const App = (() => {
                 return;
             }
 
-            // Test 2: Lesen
+            // Test 2: Angemeldet?
+            results.push('Angemeldet: ' + (auth && auth.currentUser ? 'JA' : 'NEIN'));
+
+            // Test 3: Lesen
             try {
-                const doc = await withTimeout(db.collection('accounts').doc(currentUser).get(), 8000);
+                await withTimeout(db.collection('userData').doc(currentUser).get(), 8000);
                 results.push('Cloud-Lesen: OK (' + (Date.now() - t0) + 'ms)');
-                if (doc.exists) {
-                    const d = doc.data();
-                    results.push('Account in Cloud: JA');
-                    results.push('Cloud-Hash: ' + (d.passwordHash ? d.passwordHash.substring(0, 12) + '...' : 'FEHLT'));
-                } else {
-                    results.push('Account in Cloud: NEIN (nicht gefunden!)');
-                }
             } catch (e) {
                 results.push('Cloud-Lesen: FEHLER — ' + e.message);
-            }
-
-            // Test 3: Lokaler Hash-Vergleich
-            const localAccounts = getAccounts();
-            const localAcc = localAccounts[currentUser];
-            if (localAcc) {
-                results.push('Lokal-Hash: ' + (localAcc.passwordHash ? localAcc.passwordHash.substring(0, 12) + '...' : 'FEHLT'));
-            } else {
-                results.push('Lokaler Account: FEHLT');
             }
 
             // Test 4: Schreiben
             try {
                 const t1 = Date.now();
-                await withTimeout(db.collection('accounts').doc(currentUser).set({ lastTest: new Date().toISOString() }, { merge: true }), 8000);
+                await withTimeout(db.collection('userData').doc(currentUser).set({ lastTest: new Date().toISOString() }, { merge: true }), 8000);
                 results.push('Cloud-Schreiben: OK (' + (Date.now() - t1) + 'ms)');
             } catch (e) {
                 results.push('Cloud-Schreiben: FEHLER — ' + e.message);
