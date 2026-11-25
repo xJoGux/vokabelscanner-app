@@ -415,6 +415,52 @@ header h1 {
     font-size: 0.85rem;
 }
 
+/* --- Auswahl-Baum (Picker) --- */
+.picker { margin-bottom: 1rem; position: relative; }
+.picker-empty { max-width: 520px; margin: 0 auto 1rem; }
+.picker-btn { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: .5rem; padding: .75rem .9rem; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius); font: inherit; font-weight: 600; cursor: pointer; text-align: left; min-height: 44px; }
+.picker-btn .picker-sum { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.picker-label { font-size: .8rem; color: var(--text-secondary); margin: 0 0 .35rem; }
+.picker-panel { margin-top: .4rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-lg); padding: .35rem; max-height: 60vh; overflow: auto; }
+.picker-panel.hidden { display: none; }
+.pk-row { display: flex; align-items: center; gap: .55rem; padding: .5rem .4rem; border-radius: 8px; cursor: pointer; min-height: 40px; }
+.pk-row:hover { background: var(--bg); }
+.pk-arrow { width: 18px; flex: none; color: var(--text-secondary); font-size: .75rem; text-align: center; background: none; border: 0; cursor: pointer; padding: 0; }
+.pk-box { width: 20px; height: 20px; border: 2px solid var(--border); border-radius: 5px; flex: none; display: grid; place-items: center; color: #fff; font-size: .75rem; line-height: 1; }
+.pk-box.on { background: var(--primary); border-color: var(--primary); }
+.pk-box.half { background: var(--primary-light); border-color: var(--primary-light); }
+.pk-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pk-name.folder { font-weight: 600; }
+.pk-count { color: var(--text-secondary); font-size: .8rem; }
+.pk-tools { display: flex; gap: .5rem; padding: .4rem .4rem .2rem; border-top: 1px solid var(--border); margin-top: .3rem; flex-wrap: wrap; }
+.pk-tools button { font: inherit; font-size: .8rem; background: none; border: 0; color: var(--primary); cursor: pointer; padding: .3rem .2rem; }
+.picker .pk-only-wrong, .quiz-setup .pk-only-wrong { display: flex !important; flex-direction: row !important; align-items: center; gap: .5rem; font-size: .85rem; color: var(--text-secondary); margin: .55rem 0 0 !important; cursor: pointer; }
+.picker .pk-only-wrong input, .quiz-setup .pk-only-wrong input { width: 18px !important; height: 18px; flex: none; margin: 0 !important; padding: 0 !important; accent-color: var(--primary); }
+@media (max-width: 600px) {
+    .kapitel-row, .folder-row { flex-wrap: wrap; row-gap: .35rem; }
+    .kapitel-row .kapitel-name { flex: 1 1 auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .kapitel-row .kapitel-actions, .folder-row .kapitel-actions { flex-basis: 100%; justify-content: flex-end; }
+}
+/* --- Akzent-Tasten --- */
+.accent-bar { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .6rem; }
+.accent-bar.hidden { display: none; }
+.accent-bar button { min-width: 38px; min-height: 38px; border: 1px solid var(--border); background: var(--surface); color: var(--text); border-radius: 8px; font-size: 1rem; cursor: pointer; }
+.accent-bar button:active { background: var(--primary); color: #fff; }
+/* --- Korrigieren-Knopf --- */
+.btn-fix-vocab { display: block; margin: .4rem auto 0; background: none; border: 0; color: var(--text-secondary); font: inherit; font-size: .8rem; cursor: pointer; padding: .3rem .5rem; }
+.btn-fix-vocab:hover { color: var(--primary); }
+#fix-vocab-modal input { width: 100%; padding: .5rem .75rem; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; background: var(--bg); color: var(--text); box-sizing: border-box; }
+/* --- Ordner in der Liste --- */
+.folder-block { border-left: 2px solid var(--border); margin: .35rem 0 .35rem .3rem; padding-left: .6rem; }
+.folder-row { display: flex; align-items: center; gap: .5rem; padding: .45rem .2rem; cursor: pointer; flex-wrap: wrap; }
+.folder-row .folder-name { font-weight: 600; flex: 1; min-width: 0; }
+.folder-row .folder-arrow { width: 16px; color: var(--text-secondary); font-size: .75rem; }
+.folder-body.hidden { display: none; }
+.list-add-row { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .4rem; }
+.folder-pick-list { display: grid; gap: .35rem; max-height: 50vh; overflow: auto; }
+.folder-pick-list button { text-align: left; padding: .6rem .75rem; border: 1px solid var(--border); background: var(--bg); color: var(--text); border-radius: 8px; font: inherit; cursor: pointer; }
+.folder-pick-list button:hover { border-color: var(--primary); }
+
 /* --- Manual Add --- */
 .manual-add-area {
     background: var(--surface);
@@ -2952,19 +2998,15 @@ header h1 {
         <!-- FLASHCARD VIEW -->
         <section id="view-cards" class="view">
             <div id="cards-empty" class="empty-state">
+                <div class="picker picker-empty" id="cards-picker-empty"></div>
                 <p>Noch keine Vokabeln vorhanden.</p>
                 <p>Gib zuerst Vokabeln ein!</p>
             </div>
             <div id="cards-container" class="cards-container hidden">
+                <div class="picker" id="cards-picker"></div>
                 <div class="cards-header">
                     <span id="cards-progress">1 / 10</span>
                     <div class="cards-filters">
-                        <select id="cards-lernset-filter">
-                            <option value="all">Alle Lernsets</option>
-                        </select>
-                        <select id="cards-kapitel-filter" disabled>
-                            <option value="all">Alle Kapitel</option>
-                        </select>
                         <select id="cards-direction">
                             <option value="foreign-to-native">Fremdsprache → Deutsch</option>
                             <option value="native-to-foreign">Deutsch → Fremdsprache</option>
@@ -2983,6 +3025,7 @@ header h1 {
                         </div>
                     </div>
                 </div>
+                <button class="btn-fix-vocab" data-mode="cards" title="Vokabel korrigieren">&#9998; Korrigieren</button>
                 <div class="card-controls">
                     <button id="btn-card-prev" class="btn btn-secondary">Zurück</button>
                     <button id="btn-card-flip" class="btn btn-primary">Umdrehen</button>
@@ -3002,17 +3045,13 @@ header h1 {
         <!-- WRITE MODE VIEW -->
         <section id="view-write" class="view">
             <div id="write-empty" class="empty-state">
+                <div class="picker picker-empty" id="write-picker-empty"></div>
                 <p>Noch keine Vokabeln vorhanden.</p>
                 <p>Gib zuerst Vokabeln ein!</p>
             </div>
             <div id="write-container" class="write-container hidden">
+                <div class="picker" id="write-picker"></div>
                 <div class="filter-bar">
-                    <select id="write-lernset-filter">
-                        <option value="all">Alle Lernsets</option>
-                    </select>
-                    <select id="write-kapitel-filter" disabled>
-                        <option value="all">Alle Kapitel</option>
-                    </select>
                     <select id="write-direction">
                         <option value="foreign-to-native">Fremdsprache → Deutsch</option>
                         <option value="native-to-foreign">Deutsch → Fremdsprache</option>
@@ -3026,10 +3065,12 @@ header h1 {
                 <div class="write-card">
                     <div class="write-prompt-label">Übersetze:</div>
                     <div id="write-prompt-word" class="write-prompt-word"></div>
+                    <button class="btn-fix-vocab" data-mode="write" title="Vokabel korrigieren">&#9998; Korrigieren</button>
                     <div class="write-input-area">
                         <input type="text" id="write-input" placeholder="Übersetzung eintippen..." autocomplete="off">
                         <button id="btn-write-check" class="btn btn-primary">Prüfen</button>
                     </div>
+                    <div class="accent-bar" data-for="write-input"></div>
                     <div id="write-feedback" class="write-feedback"></div>
                 </div>
                 <div id="write-results" class="quiz-results hidden">
@@ -3044,19 +3085,13 @@ header h1 {
         <!-- QUIZ VIEW -->
         <section id="view-quiz" class="view">
             <div id="quiz-empty" class="empty-state">
+                <div class="picker picker-empty" id="quiz-picker-empty"></div>
                 <p>Noch keine Vokabeln zum Testen.</p>
                 <p>Gib zuerst mindestens 4 Vokabeln ein!</p>
             </div>
             <div id="quiz-setup" class="quiz-setup hidden">
                 <h3>Quiz starten</h3>
-                <div class="filter-bar">
-                    <select id="quiz-lernset-filter">
-                        <option value="all">Alle Lernsets</option>
-                    </select>
-                    <select id="quiz-kapitel-filter" disabled>
-                        <option value="all">Alle Kapitel</option>
-                    </select>
-                </div>
+                <div class="picker" id="quiz-picker"></div>
                 <label>Anzahl Fragen:
                     <input type="number" id="quiz-count" value="10" min="1" max="50">
                 </label>
@@ -3083,11 +3118,13 @@ header h1 {
                 </div>
                 <div class="quiz-question">
                     <p id="quiz-prompt" class="quiz-prompt"></p>
+                    <button class="btn-fix-vocab" data-mode="quiz" title="Vokabel korrigieren">&#9998; Korrigieren</button>
                     <div id="quiz-choices" class="quiz-choices"></div>
                     <div id="quiz-typing" class="quiz-typing hidden">
                         <input type="text" id="quiz-answer-input" placeholder="Übersetzung eingeben..." autocomplete="off">
                         <button id="btn-check-answer" class="btn btn-primary">Prüfen</button>
                     </div>
+                    <div class="accent-bar" data-for="quiz-answer-input"></div>
                     <div id="quiz-feedback" class="quiz-feedback hidden"></div>
                     <button id="btn-next-question" class="btn btn-secondary hidden">Nächste Frage</button>
                 </div>
@@ -3103,20 +3140,14 @@ header h1 {
         <!-- TEST (SCHULTEST) VIEW -->
         <section id="view-test" class="view">
             <div id="test-empty" class="empty-state">
+                <div class="picker picker-empty" id="test-picker-empty"></div>
                 <p>Noch keine Vokabeln zum Testen.</p>
                 <p>Gib zuerst mindestens 4 Vokabeln ein!</p>
             </div>
             <div id="test-setup" class="quiz-setup hidden">
                 <h3>Vokabeltest</h3>
                 <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:1rem;">Wie in der Schule: Schreibe die Übersetzung — am Ende gibt es eine Note von 1 bis 6.</p>
-                <div class="filter-bar">
-                    <select id="test-lernset-filter">
-                        <option value="all">Alle Lernsets</option>
-                    </select>
-                    <select id="test-kapitel-filter" disabled>
-                        <option value="all">Alle Kapitel</option>
-                    </select>
-                </div>
+                <div class="picker" id="test-picker"></div>
                 <label>Anzahl Fragen:
                     <input type="number" id="test-count" value="20" min="4" max="100">
                 </label>
@@ -3144,6 +3175,7 @@ header h1 {
                         <input type="text" id="test-input" placeholder="Übersetzung eingeben..." autocomplete="off">
                         <button id="btn-test-next" class="btn btn-primary">Weiter</button>
                     </div>
+                    <div class="accent-bar" data-for="test-input"></div>
                 </div>
             </div>
             <div id="test-results" class="quiz-results hidden">
@@ -3441,6 +3473,34 @@ header h1 {
     </div>
 
     <!-- Edit Lernset Modal -->
+    <div id="fix-vocab-modal" class="modal-overlay hidden">
+        <div class="modal-dialog">
+            <h3>Vokabel korrigieren</h3>
+            <div class="modal-field">
+                <label for="fix-vocab-word">Vokabel (Fremdsprache):</label>
+                <input type="text" id="fix-vocab-word" class="edit-lernset-input" autocomplete="off">
+            </div>
+            <div class="modal-field">
+                <label for="fix-vocab-translation">Bedeutung (Deutsch):</label>
+                <input type="text" id="fix-vocab-translation" class="edit-lernset-input" autocomplete="off">
+            </div>
+            <div class="modal-actions">
+                <button id="btn-fix-vocab-cancel" class="btn btn-secondary">Abbrechen</button>
+                <button id="btn-fix-vocab-save" class="btn btn-primary">Speichern</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="folder-pick-modal" class="modal-overlay hidden">
+        <div class="modal-dialog">
+            <h3 id="folder-pick-title">In Ordner verschieben</h3>
+            <div id="folder-pick-list" class="folder-pick-list"></div>
+            <div class="modal-actions">
+                <button id="btn-folder-pick-cancel" class="btn btn-secondary">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+
     <div id="edit-lernset-modal" class="modal-overlay hidden">
         <div class="modal-dialog">
             <h3>Lernset bearbeiten</h3>
@@ -3539,6 +3599,8 @@ const App = (() => {
     let lernsets = [];
     let vocabSets = [];
     let allVocabs = [];
+    let folders = [];   // {id, lernsetId, parentId|null, name}
+    let prefs = {};     // gemerkte Einstellungen: {sel:{mode:[kapitelIds]}, val:{elementId:wert}, onlyWrong:{mode:bool}, open:{nodeId:true}}
     let currentCardIndex = 0;
     let currentCards = [];
     let isFlipped = false;
@@ -3648,6 +3710,8 @@ const App = (() => {
                 lernsets,
                 vocabSets,
                 allVocabs,
+                folders,
+                prefs,
                 lastUpdated: new Date().toISOString()
             }, { merge: true }), 8000);
             publishPublicStats();
@@ -3665,7 +3729,11 @@ const App = (() => {
                 lernsets = data.lernsets || [];
                 vocabSets = data.vocabSets || [];
                 allVocabs = data.allVocabs || [];
+                folders = data.folders || [];
+                prefs = data.prefs || {};
                 // Cache lokal
+                localStorage.setItem(userKey('folders'), JSON.stringify(folders));
+                localStorage.setItem(userKey('prefs'), JSON.stringify(prefs));
                 localStorage.setItem(userKey('lernsets'), JSON.stringify(lernsets));
                 localStorage.setItem(userKey('vocabSets'), JSON.stringify(vocabSets));
                 localStorage.setItem(userKey('allVocabs'), JSON.stringify(allVocabs));
@@ -3797,6 +3865,7 @@ const App = (() => {
             lernsets = JSON.parse(localStorage.getItem(userKey('lernsets')) || '[]');
             vocabSets = JSON.parse(localStorage.getItem(userKey('vocabSets')) || '[]');
             allVocabs = JSON.parse(localStorage.getItem(userKey('allVocabs')) || '[]');
+            loadLocalExtras();
 
             // Migrate old unscoped data to first user who logs in
             if (lernsets.length === 0 && vocabSets.length === 0 && allVocabs.length === 0) {
@@ -4078,6 +4147,7 @@ const App = (() => {
             lernsets = JSON.parse(localStorage.getItem(userKey('lernsets')) || '[]');
             vocabSets = JSON.parse(localStorage.getItem(userKey('vocabSets')) || '[]');
             allVocabs = JSON.parse(localStorage.getItem(userKey('allVocabs')) || '[]');
+            loadLocalExtras();
         }
         try {
             await loadStreakData();
@@ -4162,8 +4232,8 @@ const App = (() => {
     function initAppModules() {
         if (!appInitialized) {
             const inits = [
-                migrateData, initNav, initManualAdd, initCards, initWrite,
-                initQuiz, initTest, initList, initProfile, initFriends,
+                migrateData, initNav, initPickers, initAccentBars, initFixVocab, initManualAdd, initCards, initWrite,
+                initQuiz, initTest, initRemember, initList, initProfile, initFriends,
                 initPrivacySettings, initFeedback, initSettings, initCloudTest
             ];
             inits.forEach(fn => {
@@ -4172,6 +4242,7 @@ const App = (() => {
             appInitialized = true;
         } else {
             migrateData();
+            restoreRemembered();
             refreshAddDropdowns();
             refreshCards();
         }
@@ -4216,7 +4287,24 @@ const App = (() => {
     }
 
     // --- Storage ---
+    function loadLocalExtras() {
+        try { folders = JSON.parse(localStorage.getItem(userKey('folders')) || '[]'); } catch (e) { folders = []; }
+        try { prefs = JSON.parse(localStorage.getItem(userKey('prefs')) || '{}'); } catch (e) { prefs = {}; }
+    }
+
+    // Einstellungen speichern: lokal sofort, Cloud gebündelt
+    let prefsTimer = null;
+    function savePrefs() {
+        try { localStorage.setItem(userKey('prefs'), JSON.stringify(prefs)); } catch (e) {}
+        clearTimeout(prefsTimer);
+        prefsTimer = setTimeout(() => {
+            if (!cloudAvailable || !currentUser) return;
+            db.collection('userData').doc(currentUser).set({ prefs }, { merge: true }).catch(() => {});
+        }, 1500);
+    }
+
     function save() {
+        localStorage.setItem(userKey('folders'), JSON.stringify(folders));
         localStorage.setItem(userKey('lernsets'), JSON.stringify(lernsets));
         localStorage.setItem(userKey('vocabSets'), JSON.stringify(vocabSets));
         localStorage.setItem(userKey('allVocabs'), JSON.stringify(allVocabs));
@@ -4633,17 +4721,9 @@ const App = (() => {
 
     // --- Flashcards ---
     function refreshCards() {
-        const lernsetId = $('#cards-lernset-filter')?.value || 'all';
-        const kapitelId = $('#cards-kapitel-filter')?.value || 'all';
+        renderPicker('cards');
 
-        renderFilterDropdowns(
-            $('#cards-lernset-filter'),
-            $('#cards-kapitel-filter'),
-            lernsetId,
-            kapitelId
-        );
-
-        const filtered = getFilteredVocabs(lernsetId, kapitelId);
+        const filtered = pickedVocabs('cards');
         // Gewichtete Reihenfolge: gemeisterte Vokabeln rutschen nach hinten,
         // aber jede Vokabel kommt genau einmal vor.
         currentCards = weightedSampleVocabs(filtered, filtered.length);
@@ -4713,17 +4793,13 @@ const App = (() => {
                 }
             });
         });
-
-        $('#cards-lernset-filter').addEventListener('change', () => {
-            $('#cards-kapitel-filter').value = 'all';
-            refreshCards();
-        });
-        $('#cards-kapitel-filter').addEventListener('change', () => refreshCards());
         $('#cards-direction').addEventListener('change', () => showCard());
 
         // Keyboard shortcuts
         document.addEventListener('keydown', e => {
             if (!$('#view-cards').classList.contains('active')) return;
+            if (e.target && /^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(e.target.tagName)) return;
+            if (document.querySelector('.modal-overlay:not(.hidden)')) return;
             if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flipCard(); }
             if (e.key === 'ArrowLeft') { e.preventDefault(); $('#btn-card-prev').click(); }
             if (e.key === 'ArrowRight') { e.preventDefault(); $('#btn-card-next').click(); }
@@ -4738,19 +4814,306 @@ const App = (() => {
         $('#flashcard').classList.toggle('flipped', isFlipped);
     }
 
+    // ===================== Ordner, Auswahl-Baum, Komfort =====================
+    function childFolders(lsId, parentId) {
+        return folders.filter(f => f.lernsetId === lsId && (f.parentId || null) === (parentId || null))
+            .sort((a, b) => a.name.localeCompare(b.name, 'de', { numeric: true }));
+    }
+    function kapitelIn(lsId, folderId) {
+        const valid = new Set(folders.map(f => f.id));
+        return vocabSets.filter(k => k.lernsetId === lsId &&
+            ((k.folderId && valid.has(k.folderId)) ? k.folderId : null) === (folderId || null));
+    }
+    function kapitelUnderFolder(folderId) {
+        const f = folders.find(x => x.id === folderId);
+        if (!f) return [];
+        let out = kapitelIn(f.lernsetId, f.id);
+        childFolders(f.lernsetId, f.id).forEach(c => { out = out.concat(kapitelUnderFolder(c.id)); });
+        return out;
+    }
+    function vocabsUnderFolder(folderId) {
+        const ids = new Set(kapitelUnderFolder(folderId).map(k => k.id));
+        return allVocabs.filter(v => ids.has(v.setId));
+    }
+    function isFolderDescendant(folderId, ancestorId) {
+        let f = folders.find(x => x.id === folderId);
+        while (f) { if (f.id === ancestorId) return true; f = folders.find(x => x.id === f.parentId); }
+        return false;
+    }
+
+    // Ordner-Auswahl-Fenster (für Verschieben)
+    function openFolderPick(title, lsId, excludeFolderId, onPick) {
+        $('#folder-pick-title').textContent = title;
+        const list = $('#folder-pick-list');
+        list.innerHTML = '';
+        const add = (label, id, depth) => {
+            const b = document.createElement('button');
+            b.style.paddingLeft = (0.75 + depth * 1.1) + 'rem';
+            b.textContent = label;
+            b.addEventListener('click', () => { $('#folder-pick-modal').classList.add('hidden'); onPick(id); });
+            list.appendChild(b);
+        };
+        const ls = lernsets.find(l => l.id === lsId);
+        add((ls ? ls.name : 'Lernset') + ' (oberste Ebene)', null, 0);
+        const walk = (parentId, depth) => childFolders(lsId, parentId).forEach(f => {
+            if (excludeFolderId && isFolderDescendant(f.id, excludeFolderId)) return;
+            add(f.name, f.id, depth); walk(f.id, depth + 1);
+        });
+        walk(null, 1);
+        $('#folder-pick-modal').classList.remove('hidden');
+    }
+
+    // --- Auswahl pro Lernmodus ---
+    const MODE_REFRESH = { cards: () => refreshCards(), write: () => refreshWrite(), quiz: () => refreshQuiz(), test: () => refreshTest() };
+    function selectedKapitelIds(mode) {
+        prefs.sel = prefs.sel || {};
+        const valid = new Set(vocabSets.map(k => k.id));
+        if (!Array.isArray(prefs.sel[mode])) return vocabSets.map(k => k.id); // Standard: alles
+        return prefs.sel[mode].filter(id => valid.has(id));
+    }
+    function isOftenWrong(v) {
+        const w = v.wrongCount || 0, c = v.correctCount || 0;
+        return w > 0 && w >= c;
+    }
+    function pickedVocabs(mode) {
+        const ids = new Set(selectedKapitelIds(mode));
+        let list = allVocabs.filter(v => ids.has(v.setId));
+        if (prefs.onlyWrong && prefs.onlyWrong[mode]) list = list.filter(isOftenWrong);
+        return list;
+    }
+    function nodeKapitel(node) {
+        if (node.type === 'ls') return vocabSets.filter(k => k.lernsetId === node.id);
+        if (node.type === 'f') return kapitelUnderFolder(node.id);
+        return vocabSets.filter(k => k.id === node.id);
+    }
+    function pickerSummary(mode) {
+        const sel = selectedKapitelIds(mode);
+        const n = pickedVocabs(mode).length;
+        const wrong = prefs.onlyWrong && prefs.onlyWrong[mode] ? ', nur falsche' : '';
+        if (sel.length === 0) return 'Nichts ausgewählt';
+        if (sel.length === vocabSets.length) return `Alles (${n} Vokabeln${wrong})`;
+        // ganze Lernsets und Ordner zusammenfassen
+        const names = [];
+        const covered = new Set();
+        const selSet = new Set(sel);
+        const full = arr => arr.length > 0 && arr.every(k => selSet.has(k.id));
+        lernsets.forEach(ls => {
+            const ks = vocabSets.filter(k => k.lernsetId === ls.id);
+            if (full(ks)) { names.push(ls.name); ks.forEach(k => covered.add(k.id)); return; }
+            const walk = parentId => {
+                childFolders(ls.id, parentId).forEach(f => {
+                    const fk = kapitelUnderFolder(f.id);
+                    if (full(fk)) { names.push(f.name); fk.forEach(k => covered.add(k.id)); }
+                    else walk(f.id);
+                });
+            };
+            walk(null);
+        });
+        vocabSets.forEach(k => { if (selSet.has(k.id) && !covered.has(k.id)) names.push(k.name); });
+        const shown = names.length > 3 ? names.slice(0, 3).join(', ') + ` +${names.length - 3}` : names.join(', ');
+        return `${shown} (${n} Vokabeln${wrong})`;
+    }
+    function renderPicker(mode) {
+        const targets = [$('#' + mode + '-picker'), $('#' + mode + '-picker-empty')];
+        prefs.open = prefs.open || {};
+        const selSet = new Set(selectedKapitelIds(mode));
+        const state = node => {
+            const ks = nodeKapitel(node);
+            if (ks.length === 0) return 'none';
+            const c = ks.filter(k => selSet.has(k.id)).length;
+            return c === 0 ? 'none' : (c === ks.length ? 'on' : 'half');
+        };
+        const box = st => `<span class="pk-box ${st === 'none' ? '' : st}">${st === 'on' ? '&#10003;' : (st === 'half' ? '&ndash;' : '')}</span>`;
+        const count = ks => { const ids = new Set(ks.map(k => k.id)); return allVocabs.filter(v => ids.has(v.setId)).length; };
+        let rows = '';
+        const row = (node, depth, hasKids, label, isFolder) => {
+            const key = node.type + '_' + node.id;
+            const open = !!prefs.open['pk_' + key];
+            rows += `<div class="pk-row" data-type="${node.type}" data-id="${node.id}" style="padding-left:${0.4 + depth * 1.2}rem">
+                <button class="pk-arrow" data-toggle="${key}" aria-label="Auf- oder zuklappen">${hasKids ? (open ? '&#9660;' : '&#9654;') : ''}</button>
+                ${box(state(node))}
+                <span class="pk-name ${isFolder ? 'folder' : ''}">${escapeHtml(label)}</span>
+                <span class="pk-count">${count(nodeKapitel(node))}</span></div>`;
+            return open;
+        };
+        const walk = (lsId, parentId, depth) => {
+            childFolders(lsId, parentId).forEach(f => {
+                const kids = childFolders(lsId, f.id).length + kapitelIn(lsId, f.id).length > 0;
+                if (row({ type: 'f', id: f.id }, depth, kids, f.name, true)) walk(lsId, f.id, depth + 1);
+            });
+            kapitelIn(lsId, parentId).forEach(k => row({ type: 'k', id: k.id }, depth, false, k.name, false));
+        };
+        lernsets.forEach(ls => {
+            const kids = vocabSets.some(k => k.lernsetId === ls.id);
+            if (row({ type: 'ls', id: ls.id }, 0, kids, ls.name, true)) walk(ls.id, null, 1);
+        });
+        const panelOpen = !!(prefs.pickerOpen && prefs.pickerOpen[mode]);
+        const onlyWrong = !!(prefs.onlyWrong && prefs.onlyWrong[mode]);
+        const html = `
+            <p class="picker-label">Was willst du lernen?</p>
+            <button class="picker-btn" data-mode="${mode}" aria-expanded="${panelOpen}"><span class="picker-sum">${escapeHtml(pickerSummary(mode))}</span><span>${panelOpen ? '&#9650;' : '&#9660;'}</span></button>
+            <div class="picker-panel ${panelOpen ? '' : 'hidden'}" data-mode="${mode}">
+                ${rows || '<div class="pk-row">Noch keine Lernsets</div>'}
+                <div class="pk-tools"><button data-all="1">Alles auswählen</button><button data-none="1">Nichts auswählen</button><button data-close="1">Fertig</button></div>
+            </div>
+            <label class="pk-only-wrong"><input type="checkbox" data-wrong="${mode}" ${onlyWrong ? 'checked' : ''}> Nur Vokabeln, die du öfter falsch hattest</label>`;
+        targets.forEach(t => { if (t) t.innerHTML = html; });
+    }
+    function setSelection(mode, ids) {
+        prefs.sel = prefs.sel || {};
+        prefs.sel[mode] = Array.from(new Set(ids));
+        savePrefs();
+    }
+    function initPickers() {
+        document.addEventListener('click', e => {
+            const pk = e.target.closest('.picker');
+            if (!pk) return;
+            const mode = pk.id.replace('-picker-empty', '').replace('-picker', '');
+            if (!MODE_REFRESH[mode]) return;
+            prefs.pickerOpen = prefs.pickerOpen || {};
+            if (e.target.closest('.picker-btn')) {
+                prefs.pickerOpen[mode] = !prefs.pickerOpen[mode]; savePrefs(); renderPicker(mode); return;
+            }
+            const tog = e.target.closest('[data-toggle]');
+            if (tog) {
+                prefs.open = prefs.open || {};
+                prefs.open['pk_' + tog.dataset.toggle] = !prefs.open['pk_' + tog.dataset.toggle];
+                savePrefs(); renderPicker(mode); return;
+            }
+            if (e.target.closest('[data-close]')) { prefs.pickerOpen[mode] = false; savePrefs(); MODE_REFRESH[mode](); return; }
+            if (e.target.closest('[data-all]')) { setSelection(mode, vocabSets.map(k => k.id)); MODE_REFRESH[mode](); return; }
+            if (e.target.closest('[data-none]')) { setSelection(mode, []); MODE_REFRESH[mode](); return; }
+            const r = e.target.closest('.pk-row');
+            if (r && r.dataset.type) {
+                const ks = nodeKapitel({ type: r.dataset.type, id: r.dataset.id }).map(k => k.id);
+                const cur = new Set(selectedKapitelIds(mode));
+                const allOn = ks.length > 0 && ks.every(id => cur.has(id));
+                ks.forEach(id => allOn ? cur.delete(id) : cur.add(id));
+                setSelection(mode, [...cur]);
+                MODE_REFRESH[mode]();
+            }
+        });
+        document.addEventListener('change', e => {
+            const m = e.target.dataset && e.target.dataset.wrong;
+            if (!m) return;
+            prefs.onlyWrong = prefs.onlyWrong || {};
+            prefs.onlyWrong[m] = e.target.checked;
+            savePrefs();
+            MODE_REFRESH[m]();
+        });
+        $('#btn-folder-pick-cancel').addEventListener('click', () => $('#folder-pick-modal').classList.add('hidden'));
+    }
+
+    // --- Einstellungen merken (Richtung, Anzahl, Modus) ---
+    const REMEMBER_IDS = ['cards-direction', 'write-direction', 'quiz-direction', 'quiz-mode', 'quiz-count', 'test-direction', 'test-count'];
+    function restoreRemembered() {
+        prefs.val = prefs.val || {};
+        REMEMBER_IDS.forEach(id => {
+            const el = $('#' + id);
+            if (el && prefs.val[id] !== undefined) el.value = prefs.val[id];
+        });
+    }
+    function initRemember() {
+        REMEMBER_IDS.forEach(id => {
+            const el = $('#' + id);
+            if (!el) return;
+            el.addEventListener('change', () => { prefs.val = prefs.val || {}; prefs.val[id] = el.value; savePrefs(); });
+        });
+        restoreRemembered();
+    }
+
+    // --- Akzent-Tasten ---
+    const ACCENTS = {
+        'Französisch': ['é', 'è', 'ê', 'ë', 'à', 'â', 'ç', 'î', 'ï', 'ô', 'û', 'ù', 'œ', '«', '»'],
+        'Spanisch': ['á', 'é', 'í', 'ó', 'ú', 'ñ', 'ü', '¿', '¡'],
+        'Italienisch': ['à', 'è', 'é', 'ì', 'ò', 'ù'],
+        'Latein': ['ā', 'ē', 'ī', 'ō', 'ū']
+    };
+    function updateAccentBar(inputId, vocab, typingForeign) {
+        const bar = document.querySelector(`.accent-bar[data-for="${inputId}"]`);
+        if (!bar) return;
+        let chars = null;
+        if (typingForeign && vocab) {
+            const k = vocabSets.find(x => x.id === vocab.setId);
+            const ls = k && lernsets.find(l => l.id === k.lernsetId);
+            const lang = (k && k.sourceLang) || (ls && ls.sourceLang) || '';
+            chars = ACCENTS[lang] || (/[^\x00-\x7F]/.test(vocab.word || '') ? ACCENTS['Französisch'] : null);
+        }
+        if (!chars) { bar.classList.add('hidden'); bar.innerHTML = ''; return; }
+        bar.classList.remove('hidden');
+        bar.innerHTML = chars.map(c => `<button type="button" tabindex="-1" data-ch="${c}">${c}</button>`).join('');
+    }
+    function initAccentBars() {
+        document.addEventListener('mousedown', e => { if (e.target.closest('.accent-bar button')) e.preventDefault(); });
+        document.addEventListener('click', e => {
+            const b = e.target.closest('.accent-bar button');
+            if (!b) return;
+            const input = $('#' + b.parentElement.dataset.for);
+            if (!input || input.disabled) return;
+            const st = input.selectionStart ?? input.value.length, en = input.selectionEnd ?? input.value.length;
+            input.value = input.value.slice(0, st) + b.dataset.ch + input.value.slice(en);
+            input.focus();
+            input.setSelectionRange(st + b.dataset.ch.length, st + b.dataset.ch.length);
+        });
+    }
+
+    // --- Vokabel beim Lernen korrigieren ---
+    let fixVocabTarget = null;
+    function currentVocabFor(mode) {
+        if (mode === 'cards') return currentCards[currentCardIndex];
+        if (mode === 'write') return writeState && writeState.questions[writeState.current];
+        if (mode === 'quiz') return quizState && quizState.questions[quizState.current];
+        return null;
+    }
+    function initFixVocab() {
+        document.addEventListener('click', e => {
+            const b = e.target.closest('.btn-fix-vocab');
+            if (!b) return;
+            const v = currentVocabFor(b.dataset.mode);
+            if (!v) return;
+            fixVocabTarget = { mode: b.dataset.mode, vocab: v };
+            $('#fix-vocab-word').value = v.word || '';
+            $('#fix-vocab-translation').value = v.translation || '';
+            $('#fix-vocab-modal').classList.remove('hidden');
+            $('#fix-vocab-word').focus();
+        });
+        const close = () => { $('#fix-vocab-modal').classList.add('hidden'); fixVocabTarget = null; };
+        $('#btn-fix-vocab-cancel').addEventListener('click', close);
+        const doSave = () => {
+            if (!fixVocabTarget) return;
+            const w = $('#fix-vocab-word').value.trim(), t = $('#fix-vocab-translation').value.trim();
+            if (!w || !t) { alert('Bitte beide Felder ausfüllen.'); return; }
+            const v = fixVocabTarget.vocab;
+            const real = allVocabs.find(x => x.id === v.id) || v;
+            real.word = w; real.translation = t; v.word = w; v.translation = t;
+            save();
+            const mode = fixVocabTarget.mode;
+            close();
+            if (mode === 'cards') showCard();
+            if (mode === 'write') {
+                const typed = $('#write-input').value;
+                const answered = $('#write-input').disabled;
+                if (!answered) { showWriteQuestion(); $('#write-input').value = typed; }
+                else { $('#write-prompt-word').textContent = getWriteDirection() === 'native-to-foreign' ? t : w; }
+            }
+            if (mode === 'quiz') {
+                $('#quiz-prompt').textContent = quizState.currentReverse ? t : w;
+                quizState.currentAnswer = quizState.currentReverse ? w : t;
+            }
+            showNotice('Vokabel gespeichert.');
+        };
+        $('#btn-fix-vocab-save').addEventListener('click', doSave);
+        ['fix-vocab-word', 'fix-vocab-translation'].forEach(id => $('#' + id).addEventListener('keydown', e => {
+            if (e.key === 'Enter') { e.preventDefault(); doSave(); }
+            if (e.key === 'Escape') close();
+        }));
+    }
+
     // --- Quiz ---
     function refreshQuiz() {
-        const lernsetId = $('#quiz-lernset-filter')?.value || 'all';
-        const kapitelId = $('#quiz-kapitel-filter')?.value || 'all';
+        renderPicker('quiz');
 
-        renderFilterDropdowns(
-            $('#quiz-lernset-filter'),
-            $('#quiz-kapitel-filter'),
-            lernsetId,
-            kapitelId
-        );
-
-        const available = getFilteredVocabs(lernsetId, kapitelId);
+        const available = pickedVocabs('quiz');
 
         if (available.length < 4) {
             $('#quiz-empty').classList.remove('hidden');
@@ -4773,33 +5136,37 @@ const App = (() => {
         $('#btn-restart-quiz').addEventListener('click', () => refreshQuiz());
 
         $('#quiz-answer-input').addEventListener('keydown', e => {
-            if (e.key === 'Enter') checkTypedAnswer();
+            if (e.key !== 'Enter') return;
+            e.preventDefault();
+            if (!$('#btn-next-question').classList.contains('hidden')) nextQuestion();
+            else checkTypedAnswer();
         });
-
-        $('#quiz-lernset-filter').addEventListener('change', () => {
-            $('#quiz-kapitel-filter').value = 'all';
-            refreshQuiz();
+        document.addEventListener('keydown', e => {
+            if (!$('#view-quiz').classList.contains('active') || !quizState) return;
+            if ($('#quiz-active').classList.contains('hidden')) return;
+            if (!$('#fix-vocab-modal').classList.contains('hidden')) return;
+            if (e.target && e.target.id === 'quiz-answer-input') return;
+            const nextVisible = !$('#btn-next-question').classList.contains('hidden');
+            if (e.key === 'Enter' && nextVisible) { e.preventDefault(); nextQuestion(); return; }
+            if (!nextVisible && quizState.mode === 'multiple-choice' && /^[1-4]$/.test(e.key)) {
+                const b = $$('.quiz-choice-btn')[+e.key - 1];
+                if (b && !b.disabled) b.click();
+            }
         });
-        $('#quiz-kapitel-filter').addEventListener('change', () => refreshQuiz());
     }
 
     function startQuiz() {
-        const lernsetId = $('#quiz-lernset-filter')?.value || 'all';
-        const kapitelId = $('#quiz-kapitel-filter')?.value || 'all';
-        const available = getFilteredVocabs(lernsetId, kapitelId);
+        const available = pickedVocabs('quiz');
 
         const requested = parseInt($('#quiz-count').value) || 10;
-        if (requested > available.length) {
-            alert(`Du hast nur ${available.length} Vokabel${available.length === 1 ? '' : 'n'} in der Auswahl, aber ${requested} angefragt. Bitte trage mehr Vokabeln ein oder verringere die Anzahl.`);
-            return;
-        }
-        const count = requested;
+        const count = Math.min(requested, available.length);
         const direction = $('#quiz-direction').value;
         const mode = $('#quiz-mode').value;
 
         const shuffled = weightedSampleVocabs(available, count);
 
         quizState = {
+            pool: available,
             questions: shuffled,
             direction,
             mode,
@@ -4837,6 +5204,7 @@ const App = (() => {
             $('#quiz-choices').classList.add('hidden');
             $('#quiz-typing').classList.remove('hidden');
             const input = $('#quiz-answer-input');
+            updateAccentBar('quiz-answer-input', q, isReverse);
             input.value = '';
             input.disabled = false;
             $('#btn-check-answer').disabled = false;
@@ -4850,7 +5218,8 @@ const App = (() => {
 
         const correctAnswer = isReverse ? correct.word : correct.translation;
 
-        const others = allVocabs
+        const poolBase = (quizState.pool && quizState.pool.length >= 4) ? quizState.pool : allVocabs;
+        const others = poolBase
             .filter(v => v.id !== correct.id)
             .sort(() => Math.random() - 0.5)
             .slice(0, 3)
@@ -4980,6 +5349,51 @@ const App = (() => {
         const container = $('#lernset-list');
         container.innerHTML = '';
 
+        const kapitelRow = k => {
+            const kCount = allVocabs.filter(v => v.setId === k.id).length;
+            return `
+                <div class="kapitel-row">
+                    <span class="kapitel-name">${escapeHtml(k.name)}</span>
+                    <span class="kapitel-count">${kCount} Vokabeln</span>
+                    <div class="kapitel-actions">
+                        <button class="btn btn-secondary btn-xs btn-edit-kapitel" data-id="${k.id}" title="Vokabeln bearbeiten">&#128221;</button>
+                        <button class="btn btn-secondary btn-xs btn-folder-kapitel" data-id="${k.id}" title="In Ordner verschieben">&#8627;</button>
+                        <button class="btn btn-secondary btn-xs btn-move-kapitel" data-id="${k.id}" title="Vokabeln verschieben">&#8644;</button>
+                        <button class="btn btn-secondary btn-xs btn-copy-kapitel" data-id="${k.id}" title="Kopieren">&#9112;</button>
+                        <button class="btn btn-secondary btn-xs btn-rename-kapitel" data-id="${k.id}" title="Umbenennen">&#9998;</button>
+                        <button class="btn btn-secondary btn-xs btn-delete-kapitel" data-id="${k.id}" title="Löschen">&times;</button>
+                    </div>
+                </div>`;
+        };
+        const folderTree = (lsId, parentId) => {
+            const subFolders = childFolders(lsId, parentId).map(f => {
+                const n = vocabsUnderFolder(f.id).length;
+                const open = prefs.open && prefs.open['lf_' + f.id];
+                return `
+                <div class="folder-block">
+                    <div class="folder-row" data-folder-id="${f.id}">
+                        <span class="folder-arrow">${open ? '&#9660;' : '&#9654;'}</span>
+                        <span class="folder-name">${escapeHtml(f.name)}</span>
+                        <span class="kapitel-count">${n} Vokabeln</span>
+                        <div class="kapitel-actions">
+                            <button class="btn btn-secondary btn-xs btn-folder-move" data-id="${f.id}" title="Ordner verschieben">&#8627;</button>
+                            <button class="btn btn-secondary btn-xs btn-folder-rename" data-id="${f.id}" title="Umbenennen">&#9998;</button>
+                            <button class="btn btn-secondary btn-xs btn-folder-delete" data-id="${f.id}" title="Ordner auflösen">&times;</button>
+                        </div>
+                    </div>
+                    <div class="folder-body ${open ? '' : 'hidden'}">
+                        ${folderTree(lsId, f.id)}
+                        <div class="list-add-row">
+                            <button class="btn btn-secondary btn-sm btn-add-kapitel" data-lernset-id="${lsId}" data-folder-id="${f.id}">+ Kapitel</button>
+                            <button class="btn btn-secondary btn-sm btn-add-folder" data-lernset-id="${lsId}" data-folder-id="${f.id}">+ Unterordner</button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+            const kaps = kapitelIn(lsId, parentId).map(kapitelRow).join('');
+            return subFolders + kaps;
+        };
+
         lernsets.forEach(ls => {
             const kapitel = vocabSets.filter(s => s.lernsetId === ls.id);
             const vocabCount = allVocabs.filter(v => kapitel.some(k => k.id === v.setId)).length;
@@ -4999,26 +5413,14 @@ const App = (() => {
                         <button class="btn btn-secondary btn-sm btn-delete-lernset" data-id="${ls.id}" title="Löschen">&times;</button>
                     </div>
                 </div>
-                <div class="lernset-card-body hidden" id="lernset-body-${ls.id}">
+                <div class="lernset-card-body ${(prefs.open && prefs.open['ls_' + ls.id]) ? '' : 'hidden'}" id="lernset-body-${ls.id}">
                     <div class="kapitel-list">
-                        ${kapitel.map(k => {
-                            const kCount = allVocabs.filter(v => v.setId === k.id).length;
-                            return `
-                                <div class="kapitel-row">
-                                    <span class="kapitel-name">${escapeHtml(k.name)}</span>
-                                    <span class="kapitel-count">${kCount} Vokabeln</span>
-                                    <div class="kapitel-actions">
-                                        <button class="btn btn-secondary btn-xs btn-edit-kapitel" data-id="${k.id}" title="Vokabeln bearbeiten">&#128221;</button>
-                                        <button class="btn btn-secondary btn-xs btn-move-kapitel" data-id="${k.id}" title="Verschieben">&#8644;</button>
-                                        <button class="btn btn-secondary btn-xs btn-copy-kapitel" data-id="${k.id}" title="Kopieren">&#9112;</button>
-                                        <button class="btn btn-secondary btn-xs btn-rename-kapitel" data-id="${k.id}" title="Umbenennen">&#9998;</button>
-                                        <button class="btn btn-secondary btn-xs btn-delete-kapitel" data-id="${k.id}" title="Löschen">&times;</button>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('')}
+                        ${folderTree(ls.id, null)}
                     </div>
-                    <button class="btn btn-secondary btn-sm btn-add-kapitel" data-lernset-id="${ls.id}">+ Kapitel</button>
+                    <div class="list-add-row">
+                        <button class="btn btn-secondary btn-sm btn-add-kapitel" data-lernset-id="${ls.id}">+ Kapitel</button>
+                        <button class="btn btn-secondary btn-sm btn-add-folder" data-lernset-id="${ls.id}">+ Ordner</button>
+                    </div>
                 </div>
             `;
             container.appendChild(card);
@@ -5033,6 +5435,9 @@ const App = (() => {
                 const arrow = header.querySelector('.lernset-card-expand');
                 body.classList.toggle('hidden');
                 arrow.classList.toggle('expanded');
+                prefs.open = prefs.open || {};
+                prefs.open['ls_' + id] = !body.classList.contains('hidden');
+                savePrefs();
             });
         });
 
@@ -5064,6 +5469,7 @@ const App = (() => {
                 const kapIds = kapitel.map(k => k.id);
                 allVocabs = allVocabs.filter(v => !kapIds.includes(v.setId));
                 vocabSets = vocabSets.filter(s => s.lernsetId !== ls.id);
+                folders = folders.filter(f => f.lernsetId !== ls.id);
                 lernsets = lernsets.filter(l => l.id !== ls.id);
                 save();
                 refreshList();
@@ -5103,6 +5509,7 @@ const App = (() => {
         container.querySelectorAll('.btn-add-kapitel').forEach(btn => {
             btn.addEventListener('click', () => {
                 const lernsetId = btn.dataset.lernsetId;
+                const folderId = btn.dataset.folderId || null;
                 const name = prompt('Name des neuen Kapitels:');
                 if (!name || !name.trim()) return;
                 const ls = lernsets.find(l => l.id === lernsetId);
@@ -5110,6 +5517,7 @@ const App = (() => {
                     id: Date.now().toString(),
                     name: name.trim(),
                     lernsetId,
+                    folderId,
                     sourceLang: ls?.sourceLang || 'Englisch',
                     targetLang: ls?.targetLang || 'Deutsch',
                     date: new Date().toISOString()
@@ -5140,6 +5548,76 @@ const App = (() => {
                 const vocabCount = allVocabs.filter(v => v.setId === kapId).length;
                 if (vocabCount === 0) { alert('Keine Vokabeln zum Kopieren.'); return; }
                 openMoveCopyModal('copy', kapId, kap.name, vocabCount);
+            });
+        });
+
+        // Ordner auf- und zuklappen
+        container.querySelectorAll('.folder-row').forEach(row => {
+            row.addEventListener('click', e => {
+                if (e.target.closest('.kapitel-actions')) return;
+                const body = row.nextElementSibling;
+                body.classList.toggle('hidden');
+                const open = !body.classList.contains('hidden');
+                row.querySelector('.folder-arrow').innerHTML = open ? '&#9660;' : '&#9654;';
+                prefs.open = prefs.open || {};
+                prefs.open['lf_' + row.dataset.folderId] = open;
+                savePrefs();
+            });
+        });
+        // Ordner anlegen
+        container.querySelectorAll('.btn-add-folder').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const name = prompt('Name des neuen Ordners (z. B. Unité 4):');
+                if (!name || !name.trim()) return;
+                const f = { id: 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), lernsetId: btn.dataset.lernsetId, parentId: btn.dataset.folderId || null, name: name.trim() };
+                folders.push(f);
+                prefs.open = prefs.open || {};
+                prefs.open['lf_' + f.id] = true;
+                if (f.parentId) prefs.open['lf_' + f.parentId] = true;
+                prefs.open['ls_' + f.lernsetId] = true;
+                save(); savePrefs();
+                renderLernsetList();
+            });
+        });
+        // Ordner umbenennen
+        container.querySelectorAll('.btn-folder-rename').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const f = folders.find(x => x.id === btn.dataset.id);
+                if (!f) return;
+                const name = prompt('Neuer Name:', f.name);
+                if (name && name.trim()) { f.name = name.trim(); save(); renderLernsetList(); }
+            });
+        });
+        // Ordner auflösen: Inhalt rutscht eine Ebene nach oben, nichts wird gelöscht
+        container.querySelectorAll('.btn-folder-delete').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const f = folders.find(x => x.id === btn.dataset.id);
+                if (!f) return;
+                if (!confirm(`Ordner "${f.name}" auflösen? Die Kapitel darin bleiben erhalten und rutschen eine Ebene nach oben.`)) return;
+                folders.forEach(x => { if (x.parentId === f.id) x.parentId = f.parentId || null; });
+                vocabSets.forEach(k => { if (k.folderId === f.id) k.folderId = f.parentId || null; });
+                folders = folders.filter(x => x.id !== f.id);
+                save(); renderLernsetList();
+            });
+        });
+        // Kapitel in Ordner verschieben
+        container.querySelectorAll('.btn-folder-kapitel').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const k = vocabSets.find(x => x.id === btn.dataset.id);
+                if (!k) return;
+                openFolderPick(`"${k.name}" verschieben nach`, k.lernsetId, null, target => {
+                    k.folderId = target; save(); renderLernsetList();
+                });
+            });
+        });
+        // Ordner in anderen Ordner verschieben
+        container.querySelectorAll('.btn-folder-move').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const f = folders.find(x => x.id === btn.dataset.id);
+                if (!f) return;
+                openFolderPick(`Ordner "${f.name}" verschieben nach`, f.lernsetId, f.id, target => {
+                    f.parentId = target; save(); renderLernsetList();
+                });
             });
         });
 
@@ -5533,17 +6011,9 @@ const App = (() => {
     let testTimerInterval = null;
 
     function refreshTest() {
-        const lernsetId = $('#test-lernset-filter')?.value || 'all';
-        const kapitelId = $('#test-kapitel-filter')?.value || 'all';
+        renderPicker('test');
 
-        renderFilterDropdowns(
-            $('#test-lernset-filter'),
-            $('#test-kapitel-filter'),
-            lernsetId,
-            kapitelId
-        );
-
-        const available = getFilteredVocabs(lernsetId, kapitelId);
+        const available = pickedVocabs('test');
 
         if (available.length < 4) {
             $('#test-empty').classList.remove('hidden');
@@ -5570,25 +6040,13 @@ const App = (() => {
                 submitTestAnswer();
             }
         });
-
-        $('#test-lernset-filter').addEventListener('change', () => {
-            $('#test-kapitel-filter').value = 'all';
-            refreshTest();
-        });
-        $('#test-kapitel-filter').addEventListener('change', () => refreshTest());
     }
 
     function startTest() {
-        const lernsetId = $('#test-lernset-filter')?.value || 'all';
-        const kapitelId = $('#test-kapitel-filter')?.value || 'all';
-        const available = getFilteredVocabs(lernsetId, kapitelId);
+        const available = pickedVocabs('test');
 
         const requested = parseInt($('#test-count').value) || 20;
-        if (requested > available.length) {
-            alert(`Du hast nur ${available.length} Vokabel${available.length === 1 ? '' : 'n'} in der Auswahl, aber ${requested} angefragt. Bitte trage mehr Vokabeln ein oder verringere die Anzahl.`);
-            return;
-        }
-        const count = requested;
+        const count = Math.min(requested, available.length);
         const direction = $('#test-direction').value;
 
         const shuffled = weightedSampleVocabs(available, count);
@@ -5636,6 +6094,7 @@ const App = (() => {
         $('#test-progress-fill').style.width = `${((testState.current) / total) * 100}%`;
 
         const input = $('#test-input');
+        updateAccentBar('test-input', q, isReverse);
         input.value = '';
         input.disabled = false;
         input.focus();
@@ -5739,17 +6198,9 @@ const App = (() => {
     let writeState = null;
 
     function refreshWrite() {
-        const lernsetId = $('#write-lernset-filter')?.value || 'all';
-        const kapitelId = $('#write-kapitel-filter')?.value || 'all';
+        renderPicker('write');
 
-        renderFilterDropdowns(
-            $('#write-lernset-filter'),
-            $('#write-kapitel-filter'),
-            lernsetId,
-            kapitelId
-        );
-
-        const available = getFilteredVocabs(lernsetId, kapitelId);
+        const available = pickedVocabs('write');
 
         if (available.length === 0) {
             $('#write-empty').classList.remove('hidden');
@@ -5765,10 +6216,7 @@ const App = (() => {
     }
 
     function startWriteMode(available) {
-        const vocabs = available || getFilteredVocabs(
-            $('#write-lernset-filter')?.value || 'all',
-            $('#write-kapitel-filter')?.value || 'all'
-        );
+        const vocabs = available || pickedVocabs('write');
         const shuffled = weightedSampleVocabs(vocabs, Math.min(10, vocabs.length));
         writeState = {
             questions: shuffled,
@@ -5796,6 +6244,7 @@ const App = (() => {
         $('#btn-write-check').textContent = 'Prüfen';
         $('#btn-write-check').disabled = false;
         $('#write-feedback').innerHTML = '';
+        updateAccentBar('write-input', q, direction === 'native-to-foreign');
         $('#write-input').focus();
     }
 
@@ -5940,12 +6389,6 @@ const App = (() => {
             $('#write-results').classList.add('hidden');
             startWriteMode();
         });
-
-        $('#write-lernset-filter').addEventListener('change', () => {
-            $('#write-kapitel-filter').value = 'all';
-            refreshWrite();
-        });
-        $('#write-kapitel-filter').addEventListener('change', () => refreshWrite());
         $('#write-direction').addEventListener('change', () => refreshWrite());
     }
 
