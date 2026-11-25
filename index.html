@@ -3717,6 +3717,12 @@ const App = (() => {
             publishPublicStats();
         } catch (e) {
             console.warn('Cloud-Sync fehlgeschlagen:', e);
+            // Abgelaufener Anmelde-Schlüssel: einmal erneuern und nochmal versuchen
+            if (e && e.code === 'permission-denied' && auth && auth.currentUser && !saveToCloud._retry) {
+                saveToCloud._retry = true;
+                try { await auth.currentUser.getIdToken(true); await saveToCloud(); } catch (e2) {}
+                saveToCloud._retry = false;
+            }
         }
     }
 
@@ -7484,6 +7490,16 @@ const App = (() => {
 
             // Test 2: Angemeldet?
             results.push('Angemeldet: ' + (auth && auth.currentUser ? 'JA' : 'NEIN'));
+            results.push('Benutzername: ' + (currentUser || '(keiner)') + ' / Konto: ' + ((auth && auth.currentUser && auth.currentUser.email) || '(keins)'));
+            // Test 2b: Anmelde-Schlüssel frisch holen (läuft nach einer Stunde ab)
+            if (auth && auth.currentUser) {
+                try {
+                    await withTimeout(auth.currentUser.getIdToken(true), 8000);
+                    results.push('Anmelde-Schlüssel erneuert: OK');
+                } catch (e) {
+                    results.push('Anmelde-Schlüssel erneuert: FEHLER — ' + ((e && e.code) || e.message) + ' (bitte ab- und wieder anmelden)');
+                }
+            }
 
             // Test 3: Lesen
             try {
