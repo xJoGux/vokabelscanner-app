@@ -3583,9 +3583,11 @@ const App = (() => {
 
     try {
         if (typeof firebase !== 'undefined' && firebaseConfig.apiKey !== 'DEIN_API_KEY') {
-            firebase.initializeApp(firebaseConfig);
-            db = firebase.firestore();
-            auth = firebase.auth();
+            // Eigener App-Name: sonst teilt sich MemoryDeck die Anmeldung mit anderen Apps
+            // auf xjogux.github.io (z. B. dem Essensplaner im selben Firebase-Projekt).
+            const fbApp = firebase.initializeApp(firebaseConfig, 'memorydeck');
+            db = fbApp.firestore();
+            auth = fbApp.auth();
             cloudAvailable = true;
         }
     } catch (e) {
@@ -3732,6 +3734,21 @@ const App = (() => {
             const doc = await withTimeout(db.collection('userData').doc(currentUser).get());
             if (doc.exists) {
                 const data = doc.data();
+                // Lokale Daten neuer als die Cloud (z. B. weil die Cloud zeitweise nicht erreichbar war)?
+                // Dann lokal behalten und hochladen, damit nichts verloren geht.
+                try {
+                    const score = (vs) => (vs || []).length * 1000 + (vs || []).reduce((a, v) => a + (v.correctCount || 0) + (v.wrongCount || 0), 0);
+                    const localVocabs = JSON.parse(localStorage.getItem(userKey('allVocabs')) || '[]');
+                    if (score(localVocabs) > score(data.allVocabs)) {
+                        lernsets = JSON.parse(localStorage.getItem(userKey('lernsets')) || '[]');
+                        vocabSets = JSON.parse(localStorage.getItem(userKey('vocabSets')) || '[]');
+                        allVocabs = localVocabs;
+                        folders = data.folders || JSON.parse(localStorage.getItem(userKey('folders')) || '[]');
+                        prefs = data.prefs || {};
+                        saveToCloud();
+                        return true;
+                    }
+                } catch (e) {}
                 lernsets = data.lernsets || [];
                 vocabSets = data.vocabSets || [];
                 allVocabs = data.allVocabs || [];
@@ -3936,6 +3953,12 @@ const App = (() => {
         }
         auth.onAuthStateChanged(user => {
             if (authBusy) return;
+            if (user && !String(user.email || '').toLowerCase().endsWith('@' + AUTH_EMAIL_DOMAIN)) {
+                // Fremdes Konto (andere App): hier nicht benutzen
+                currentUser = null;
+                showAuth();
+                return;
+            }
             if (user) {
                 const name = emailToUsername(user.email);
                 if (currentUser === name && !$('#app').classList.contains('hidden')) return;
